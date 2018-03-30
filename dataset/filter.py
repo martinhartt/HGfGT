@@ -33,9 +33,6 @@ for l in open(sys.argv[1]):
     if any((word == "" for word in article_words)):
         continue
 
-    if not any((word == "." for word in article_words)):
-        continue
-
     # Spurious words to blacklist.
     # First set is words that never appear in input and output
     # Second set is punctuation and non-title words.

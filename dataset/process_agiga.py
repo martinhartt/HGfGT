@@ -26,9 +26,9 @@ except OSError:
     pass
 
 # Strip off .gz ending
-end = "/".join(sys.argv[1].split("/")[-2:])[:-len(".xml.gz")] + ".txt"
+end = "/".join(sys.argv[1].split("/")[-2:])[:-len(".gz")] + ".txt"
 
-out = open(sys.argv[2] + end, "w")
+out = open(sys.argv[2] + "/" + end, "w")
 
 # Parse and print titles and articles
 NONE, HEAD, NEXT, TEXT = 0, 1, 2, 3
@@ -45,13 +45,7 @@ def fix_paren(parse):
     return parse
 
 def get_words(parse):
-    words = []
-    for w in parse.split():
-        if w[-1] == ')':
-            words.append(w.strip(")"))
-            if words[-1] == ".":
-                break
-    return words
+    return parse.split(' ')
 
 def remove_digits(parse):
     return re.sub(r'\d', '#', parse)
@@ -61,7 +55,7 @@ for l in gzip.open(sys.argv[1]):
         title_parse = remove_digits(fix_paren(l.strip()))
         MODE = NEXT
 
-    if MODE == TEXT:
+    if MODE == TEXT and l.strip() != "</P>":
         article_parse.append(remove_digits(fix_paren(l.strip())))
 
     if MODE == NONE and l.strip() == "<HEADLINE>":
@@ -85,6 +79,6 @@ for l in gzip.open(sys.argv[1]):
         # title_parse \t article_parse \t title \t article
         print >>out, "\t".join([title_parse, article_parse,
                                 " ".join(get_words(title_parse)),
-                                " ".join(get_words(article_parse))])
+                                " ".join(articles)])
         article_parse = []
         MODE = NONE
