@@ -103,6 +103,7 @@ class NNLM(object):
     def train(self, data, valid_data):
         self.last_valid_loss = 1e9
 
+        self.save()
         for epoch in range(self.opt.epochs):
             data.reset()
             # self.renorm_tables() TODO
@@ -140,10 +141,13 @@ class NNLM(object):
                     )
                     last_batch = batch
                     loss = 0
-                    torch.save(self.mlp, 'trained_model.model')
+                    self.save()
 
                 batch += 1
                 total += input[0].size(0)
 
             print(string.format("[EPOCH : %d LOSS: %f TOTAL: %d BATCHES: %d]",
                           epoch, epoch_loss / total, total, batch))
+
+    def save():
+        torch.save(self.mlp, self.modelFilename)
