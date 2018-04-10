@@ -149,5 +149,5 @@ class NNLM(object):
             print(string.format("[EPOCH : %d LOSS: %f TOTAL: %d BATCHES: %d]",
                           epoch, epoch_loss / total, total, batch))
 
-    def save():
+    def save(self):
         torch.save(self.mlp, self.modelFilename)
