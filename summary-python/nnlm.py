@@ -150,4 +150,4 @@ class NNLM(object):
                           epoch, epoch_loss / total, total, batch))
 
     def save(self):
-        torch.save(self.mlp, self.modelFilename)
+        torch.save(self.mlp, self.opt.modelFilename)
