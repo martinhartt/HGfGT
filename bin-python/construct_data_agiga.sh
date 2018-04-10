@@ -2,7 +2,7 @@
 
 export ABS=/home/mh905/namas-python
 export AGIGA=data/agiga
-export WORK=working_$agiga
+export WORK=$ABS/working_agiga
 export THREADS=30
 export SCRIPTS=$ABS/dataset
 export SPLITS=$ABS/$AGIGA
