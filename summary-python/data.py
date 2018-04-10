@@ -78,6 +78,7 @@ def apply_cuda(tensor):
     return tensor.cuda() if enable_cuda else tensor
 
 def load_title(dname, shuffle=None, use_dict=None):
+    print('{}ngram.mat.torch'.format(dname))
     ngram = torch.load('{}ngram.mat.torch'.format(dname))
     words = torch.load('{}word.mat.torch'.format(dname))
     dict = use_dict or torch.load('{}dict'.format(dname))

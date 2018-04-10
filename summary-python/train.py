@@ -15,6 +15,7 @@ opt = parser.parse_args()
 data.enable_cuda = opt.cuda
 
 def main():
+    print(opt.titleDir)
     tdata = data.load_title(opt.titleDir, True)
     article_data = data.load_article(opt.articleDir)
 
