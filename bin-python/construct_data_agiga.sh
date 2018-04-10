@@ -1,5 +1,6 @@
 #/bin/bash
 
+export ABS=/home/mh905/namas-python
 export AGIGA=data/agiga
 export WORK=working_agiga
 export THREADS=30
