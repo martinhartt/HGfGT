@@ -1,18 +1,20 @@
 #!/bin/bash
 
+export ABS=/home/mh905/namas-python
+export WORK=$ABS/working_agiga
 export WINDOW=5
-export OUT_DIR=$1/processed
-export MDL_DIR=$1/models
+export OUT_DIR=$WORK/processed
+export MDL_DIR=$WORK/models
 
 # export LUA_PATH="$LUA_PATH;$ABS/?.lua"
 
-#bash $ABS/prep_torch_data.sh $2
+#bash $ABS/prep_torch_data.sh $1
 
 mkdir -p $MDL_DIR
 
 python $ABS/summary-python/train.py -titleDir  $OUT_DIR/train/title/ \
  -articleDir  $OUT_DIR/train/article/ \
- -modelFilename  $MDL_DIR/$2 \
+ -modelFilename  $MDL_DIR/$1 \
  -miniBatchSize  64 \
  -embeddingDim  64 \
  -bowDim  200 \
@@ -25,4 +27,4 @@ python $ABS/summary-python/train.py -titleDir  $OUT_DIR/train/title/ \
  -printEvery   100 \
  -encoderModel  "attenbow" \
  -attenPool  5 \
- # -cuda \
+ -cuda
