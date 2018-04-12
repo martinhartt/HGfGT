@@ -55,7 +55,7 @@ class Data(object):
             target = self.title_data["target"][self.bucket].narrow(0, self.pos, offset)
             self.pos += offset
             # HACK Should I be applying cuda here?
-            return [Variable(apply_cuda(tensor)) for tensor in [aux_rows, positions, context]], target.long()
+            return [Variable(apply_cuda(tensor)) for tensor in [aux_rows, positions, context]], Variable(apply_cuda(target.long()))
         except Exception as e:
             print('T2', '\nself.pos =', self.pos, '\noffset =', offset, '\nmax_size =', max_size, '\nself.bucket_order =', self.bucket_order, '\ndiff =', diff)
             self.done_bucket = True
