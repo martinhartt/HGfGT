@@ -10,9 +10,9 @@
 
 #! sbatch directives begin here ###############################
 #! Name of the job:
-#SBATCH -J gpujob
+#SBATCH -J traingpu
 #! Which project should be charged (NB Wilkes2 projects end in '-GPU'):
-#SBATCH -A CHANGEME-GPU
+#SBATCH -A KOCHMAR-SL3-GPU
 #! How many whole nodes should be allocated?
 #SBATCH --nodes=1
 #! How many (MPI) tasks will there be in total?
@@ -20,11 +20,11 @@
 #SBATCH --ntasks=4
 #! Specify the number of GPUs per node (between 1 and 4; must be 4 if nodes>1).
 #! Note that the job submission script will enforce no more than 3 cpus per GPU.
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:1
 #! How much wallclock time will be required?
 #SBATCH --time=02:00:00
 #! What types of email messages do you wish to receive?
-#SBATCH --mail-type=FAIL
+#SBATCH --mail-type=ALL
 #! Uncomment this to prevent the job from being requeued (e.g. if
 #! interrupted by node failure or system downtime):
 ##SBATCH --no-requeue
@@ -35,14 +35,14 @@
 #! sbatch directives end here (put any additional directives above this line)
 
 #! Notes:
-#! Charging is determined by GPU number*walltime. 
+#! Charging is determined by GPU number*walltime.
 
 #! Number of nodes and tasks per node allocated by SLURM (do not change):
 numnodes=$SLURM_JOB_NUM_NODES
 numtasks=$SLURM_NTASKS
 mpi_tasks_per_node=$(echo "$SLURM_TASKS_PER_NODE" | sed -e  's/^\([0-9][0-9]*\).*$/\1/')
 #! ############################################################
-#! Modify the settings below to specify the application's environment, location 
+#! Modify the settings below to specify the application's environment, location
 #! and launch method:
 
 #! Optionally modify the environment seen by the application
@@ -53,11 +53,11 @@ module load rhel7/default-gpu              # REQUIRED - loads the basic environm
 
 #! Insert additional module load commands after this line if needed:
 
-#! Full path to application executable: 
-application=""
+#! Full path to application executable:
+application="/home/mh905/namas-python/bin-python/train_model_agiga.sh"
 
 #! Run options for the application:
-options=""
+options="testmodel1"
 
 #! Work directory (i.e. where the job will run):
 workdir="$SLURM_SUBMIT_DIR"  # The value of SLURM_SUBMIT_DIR sets workdir to the directory
@@ -104,4 +104,4 @@ echo -e "\nnumtasks=$numtasks, numnodes=$numnodes, mpi_tasks_per_node=$mpi_tasks
 
 echo -e "\nExecuting command:\n==================\n$CMD\n"
 
-eval $CMD 
+eval $CMD
