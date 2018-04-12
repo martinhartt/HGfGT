@@ -60,7 +60,7 @@ application="/home/mh905/namas-python/bin-python/train_model_agiga.sh"
 options="testmodel1"
 
 #! Work directory (i.e. where the job will run):
-workdir="/home/mh905/namas-python/bin-python/jobs/logs"  # The value of SLURM_SUBMIT_DIR sets workdir to the directory
+workdir="$SLURM_SUBMIT_DIR"  # The value of SLURM_SUBMIT_DIR sets workdir to the directory
                              # in which sbatch is run.
 
 #! Are you using OpenMP (NB this is unrelated to OpenMPI)? If so increase this
