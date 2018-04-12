@@ -26,7 +26,7 @@
 #! interrupted by node failure or system downtime):
 ##SBATCH --no-requeue
 
-#! For 6GB per CPU, set "-p skylake"; for 12GB per CPU, set "-p skylake-himem": 
+#! For 6GB per CPU, set "-p skylake"; for 12GB per CPU, set "-p skylake-himem":
 #SBATCH -p skylake
 
 #! sbatch directives end here (put any additional directives above this line)
@@ -45,7 +45,7 @@ numnodes=$SLURM_JOB_NUM_NODES
 numtasks=$SLURM_NTASKS
 mpi_tasks_per_node=$(echo "$SLURM_TASKS_PER_NODE" | sed -e  's/^\([0-9][0-9]*\).*$/\1/')
 #! ############################################################
-#! Modify the settings below to specify the application's environment, location 
+#! Modify the settings below to specify the application's environment, location
 #! and launch method:
 
 #! Optionally modify the environment seen by the application
@@ -56,7 +56,7 @@ module load rhel7/default-peta4            # REQUIRED - loads the basic environm
 
 #! Insert additional module load commands after this line if needed:
 
-#! Full path to application executable: 
+#! Full path to application executable:
 application="/home/mh905/namas-python/bin-python/construct_data_agiga.sh"
 
 
@@ -64,7 +64,7 @@ application="/home/mh905/namas-python/bin-python/construct_data_agiga.sh"
 options=""
 
 #! Work directory (i.e. where the job will run):
-workdir="$SLURM_SUBMIT_DIR"  # The value of SLURM_SUBMIT_DIR sets workdir to the directory
+workdir="/home/mh905/namas-python/bin-python/jobs/logs"  # The value of SLURM_SUBMIT_DIR sets workdir to the directory
                              # in which sbatch is run.
 
 #! Are you using OpenMP (NB this is unrelated to OpenMPI)? If so increase this
@@ -124,4 +124,4 @@ echo -e "\nnumtasks=$numtasks, numnodes=$numnodes, mpi_tasks_per_node=$mpi_tasks
 
 echo -e "\nExecuting command:\n==================\n$CMD\n"
 
-eval $CMD 
+eval $CMD
