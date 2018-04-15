@@ -57,7 +57,6 @@ class Data(object):
             # HACK Should I be applying cuda here?
             return [Variable(apply_cuda(tensor)) for tensor in [aux_rows, positions, context]], Variable(apply_cuda(target.long()))
         except Exception as e:
-            print('T2', '\nself.pos =', self.pos, '\noffset =', offset, '\nmax_size =', max_size, '\nself.bucket_order =', self.bucket_order, '\ndiff =', diff)
             self.done_bucket = True
             return self.next_batch(max_size)
 
@@ -83,7 +82,7 @@ def apply_cuda(tensor):
 def load_title(dname, shuffle=None, use_dict=None):
     ngram = torch.load('{}ngram.mat.torch'.format(dname))
     words = torch.load('{}word.mat.torch'.format(dname))
-    dict = use_dict or torch.load('{}dict'.format(dname))
+    dictionary = use_dict or torch.load('{}dict'.format(dname))
     target_full = {}
     sentences_full = {}
     pos_full = {}
@@ -105,16 +104,16 @@ def load_title(dname, shuffle=None, use_dict=None):
                               "target": target_full,
                               "sentences": sentences_full,
                               "pos": pos_full,
-                              "dict": dict}
+                              "dict": dictionary}
     return title_data
 
 def load_article(dname, use_dict=None):
     input_words = torch.load('{}word.mat.torch'.format(dname))
     # offsets = torch.load('{}offset.mat.torch'.format(dname))
 
-    dict = use_dict or torch.load('{}dict'.format(dname))
+    dictionary = use_dict or torch.load('{}dict'.format(dname))
     for length, mat in input_words.iteritems():
         input_words[length] = mat
         input_words[length] = apply_cuda(input_words[length].float())
-        article_data = {"words": input_words, "dict": dict}
+        article_data = {"words": input_words, "dict": dictionary}
     return article_data

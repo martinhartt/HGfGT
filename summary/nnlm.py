@@ -127,6 +127,8 @@ class NNLM(object):
                 err.backward()
                 self.optimizer.step()
 
+                self.save()
+
                 loss += err
                 epoch_loss += err
 
@@ -151,3 +153,4 @@ class NNLM(object):
 
     def save(self):
         torch.save(self.mlp, self.opt.modelFilename)
+        print('Saving...')

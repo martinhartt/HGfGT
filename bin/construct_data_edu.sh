@@ -43,4 +43,4 @@ python2.7 $SCRIPTS/pull.py src_lc $WORK/train.article.dict < $WORK/test.data.txt
 
 
 echo "Step 6: Constructing torch data files."
-bash $ABS/bin-python/prep_torch_data.sh $WORK/
+bash $ABS/bin/prep_torch_data.sh $WORK/

@@ -1,7 +1,8 @@
 #/bin/bash
 
+export ABS=/Users/martinhartt/uni/project/namas
 export AGIGA=data/agiga
-export WORK=working_agiga
+export WORK=$ABS/working_agiga
 export THREADS=30
 export SCRIPTS=$ABS/dataset
 export SPLITS=$ABS/$AGIGA
@@ -9,7 +10,7 @@ export UNK=5
 
 echo "Step 1: Construct the title-article pairs from gigaword"
 mkdir -p $WORK
-find $AGIGA/**/*.gz | parallel --gnu --progress -j $THREADS python2.7 $SCRIPTS/process_agiga.py \{\} $WORK
+find $ABS/$AGIGA/**/*.gz | parallel --gnu --progress -j $THREADS python2.7 $SCRIPTS/process_agiga.py \{\} $WORK
 
 
 echo "Step 2: Compile the data into train/dev/test."
@@ -43,4 +44,4 @@ python2.7 $SCRIPTS/pull.py src_lc $WORK/train.article.dict < $WORK/test.data.txt
 
 
 echo "Step 6: Constructing torch data files."
-bash $ABS/bin-python/prep_torch_data.sh $WORK/
+bash $ABS/bin/prep_torch_data.sh $WORK/
