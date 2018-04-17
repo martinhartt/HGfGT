@@ -2,6 +2,12 @@ import torch
 import torch.legacy.nn as tnn
 import torch.nn as nn
 
+def add_opts(parser):
+    parser.add_argument('-encoderModel', default='bow',help= "The encoder model to use.")
+    parser.add_argument('-bowDim', type=int,      default=50, help="Article embedding size.")
+    parser.add_argument('-attenPool', type=int,    default=5, help="Attention model pooling size.")
+    parser.add_argument('-hiddenUnits', type=int, default=1000, help="Conv net encoder hidden units.")
+    parser.add_argument('-kernelWidth', type=int, default=5,   help= "Conv net encoder kernel width.")
 
 class AttnBowEncoder(nn.Module):
     """docstring for AttnBowEncoder."""

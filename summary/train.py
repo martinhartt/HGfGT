@@ -11,7 +11,6 @@ encoder.add_opts(parser)
 nnlm.addOpts(parser)
 
 opt = parser.parse_args()
-data.enable_cuda = opt.cuda
 
 def main():
     tdata = data.load_title(opt.titleDir, True)
