@@ -83,7 +83,7 @@ class NNLM(object):
             total += int(target.size(0))
 
         print("[loss: %f total: %d]".format(
-            loss
+            loss,
             total
         ))
         return loss / target
@@ -136,7 +136,7 @@ class NNLM(object):
                 if (batch % self.opt.printEvery) == 0:
                     print(
                         "[Loss: {} Epoch: {} Position: {} Rate: {}]".format(
-                            loss / ((batch - last_batch) * self.opt.miniBatchSize),
+                            loss,
                             epoch,
                             batch * self.opt.miniBatchSize,
                             self.opt.learningRate
