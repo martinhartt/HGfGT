@@ -80,11 +80,10 @@ class NNLM(object):
 
             # Augment counters
             loss += float(err)
-            total += float(target.size(0))
+            total += int(target.size(0))
 
-        print("[perp: %f validation: %f total: %d]".format(
-            math.exp(loss/total),
-            loss/total,
+        print("[loss: %f total: %d]".format(
+            loss
             total
         ))
         return loss / target
