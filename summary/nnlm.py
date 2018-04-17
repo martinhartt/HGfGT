@@ -78,7 +78,7 @@ class NNLM(object):
             err = self.loss(out, target) * target.size(0)
 
             # Augment counters
-            loss += err
+            loss += float(err)
             total += target.size(0)
 
         print("[perp: %f validation: %f total: %d]".format(
@@ -130,8 +130,8 @@ class NNLM(object):
 
                 self.save()
 
-                loss += err
-                epoch_loss += err
+                loss += float(err)
+                epoch_loss += float(err)
 
                 if (batch % self.opt.printEvery) == 0:
                     print(
@@ -147,7 +147,7 @@ class NNLM(object):
                     self.save()
 
                 batch += 1
-                total += input[0].size(0)
+                total += input[0].data.size(0)
 
             print(string.format("[EPOCH : %d LOSS: %f TOTAL: %d BATCHES: %d]",
                           epoch, epoch_loss / total, total, batch))
