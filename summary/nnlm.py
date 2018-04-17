@@ -67,7 +67,7 @@ class NNLM(object):
         self.optimizer = torch.optim.SGD(self.mlp.parameters(), self.opt.learningRate) # Half learning rate
 
     def validation(self, valid_data):
-        offset = 1000
+        offset = self.opt.miniBatchSize
         loss = 0
         total = 0
         valid_data.reset()
