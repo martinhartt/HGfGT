@@ -1,10 +1,14 @@
 import random
+import torch
 
 def string_split(s, c = ' '):
     return s.split(c)
 
 def shuffleTable(arr):
     random.shuffle(arr)
+
+def apply_cuda(obj):
+    return obj.cuda() if torch.cuda.is_available() else obj
 
 def add(tab, keys):
     cur = tab

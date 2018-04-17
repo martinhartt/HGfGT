@@ -2,9 +2,9 @@
 import util
 import torch
 from torch.autograd import Variable
+from util import apply_cuda
 
 
-enable_cuda = True
 
 class Data(object):
     """docstring for Data."""
@@ -46,13 +46,13 @@ class Data(object):
         else:
             offset = max_size
 
-        positions = self.positions.narrow(0, 0, offset)
+        positions = apply_cuda(self.positions.narrow(0, 0, offset))
 
         try:
             temp = self.aux_ptrs.narrow(0, self.pos, offset)
-            aux_rows = torch.index_select(self.article_data["words"][self.bucket], 0, temp)
-            context = self.title_data["ngram"][self.bucket].narrow(0, self.pos, offset)
-            target = self.title_data["target"][self.bucket].narrow(0, self.pos, offset)
+            aux_rows = apply_cuda(torch.index_select(self.article_data["words"][self.bucket], 0, temp))
+            context = apply_cuda(self.title_data["ngram"][self.bucket].narrow(0, self.pos, offset))
+            target = apply_cuda(self.title_data["target"][self.bucket].narrow(0, self.pos, offset))
             self.pos += offset
             # HACK Should I be applying cuda here?
             print([aux_rows, positions, context], target.long())
@@ -76,9 +76,6 @@ def add_opts(parser):
               help='Directory containing title matrices for validation.')
    parser.add_argument('-cuda', default=False, type=bool,
               help='Enable cuda?')
-
-def apply_cuda(tensor):
-    return tensor.cuda() if enable_cuda else tensor
 
 def load_title(dname, shuffle=None, use_dict=None):
     ngram = torch.load('{}ngram.mat.torch'.format(dname))

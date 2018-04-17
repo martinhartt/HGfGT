@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from util import apply_cuda
 
 def addOpts(parser):
     parser.add_argument('-epochs',type=int,         default=5, help="Number of epochs to train.")
@@ -60,7 +61,7 @@ class NNLM(object):
 
     def build_mlp(self, encoder, encoder_size):
         # NOTE Changed title dictionary -> article dictionary
-        self.mlp = LanguageModel(encoder, encoder_size, self.dict, self.opt)
+        self.mlp = apply_cuda(LanguageModel(encoder, encoder_size, self.dict, self.opt))
         self.loss = nn.NLLLoss()
         self.lookup = self.mlp.context_lookup
         self.optimizer = torch.optim.SGD(self.mlp.parameters(), self.opt.learningRate) # Half learning rate

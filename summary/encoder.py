@@ -2,7 +2,7 @@ import torch
 import torch.legacy.nn as tnn
 import torch.nn as nn
 
-enable_cuda = True
+
 
 
 def add_opts(parser):
