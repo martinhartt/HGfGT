@@ -4,7 +4,7 @@ import torch
 from torch.autograd import Variable
 from util import apply_cuda
 
-
+print("Using cuda? {}".format(torch.cuda.is_available()))
 
 class Data(object):
     """docstring for Data."""
@@ -54,8 +54,6 @@ class Data(object):
             context = apply_cuda(self.title_data["ngram"][self.bucket].narrow(0, self.pos, offset))
             target = apply_cuda(self.title_data["target"][self.bucket].narrow(0, self.pos, offset))
             self.pos += offset
-            # HACK Should I be applying cuda here?
-            print([aux_rows, positions, context], target.long())
             return [Variable(tensor) for tensor in [aux_rows, positions, context]], Variable(target.long())
         except Exception as e:
             self.done_bucket = True
@@ -77,6 +75,12 @@ def add_opts(parser):
    parser.add_argument('-cuda', default=False, type=bool,
               help='Enable cuda?')
 
+
+# Returns title dictionary containing
+#
+#   dict:
+#     symbol_to_index: [string: int]
+#     index_to_symbol: [int: string]
 def load_title(dname, shuffle=None, use_dict=None):
     ngram = torch.load('{}ngram.mat.torch'.format(dname))
     words = torch.load('{}word.mat.torch'.format(dname))
@@ -98,13 +102,19 @@ def load_title(dname, shuffle=None, use_dict=None):
         sentences_full[length] = apply_cuda(words[length][:, 1].contiguous().float())
         pos_full[length] = words[length][:, 2]
 
-        title_data = {"ngram": ngram,
-                              "target": target_full,
-                              "sentences": sentences_full,
-                              "pos": pos_full,
-                              "dict": dictionary}
+    title_data = {"ngram": ngram,
+                  "target": target_full,
+                  "sentences": sentences_full,
+                  "pos": pos_full,
+                  "dict": dictionary}
     return title_data
 
+# Returns article dictionary containing
+#   words:
+#     tensor of: line lengths x nth sentence of length x index of word in sentence
+#   dict:
+#     symbol_to_index: [string: int]
+#     index_to_symbol: [int: string]
 def load_article(dname, use_dict=None):
     input_words = torch.load('{}word.mat.torch'.format(dname))
     # offsets = torch.load('{}offset.mat.torch'.format(dname))
@@ -113,5 +123,6 @@ def load_article(dname, use_dict=None):
     for length, mat in input_words.iteritems():
         input_words[length] = mat
         input_words[length] = apply_cuda(input_words[length].float())
-        article_data = {"words": input_words, "dict": dictionary}
+
+    article_data = {"words": input_words, "dict": dictionary}
     return article_data

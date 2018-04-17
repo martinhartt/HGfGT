@@ -6,7 +6,6 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Train a summarization model.')
 
-
 data.add_opts(parser)
 encoder.add_opts(parser)
 nnlm.addOpts(parser)
