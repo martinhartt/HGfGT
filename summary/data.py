@@ -54,7 +54,7 @@ class Data(object):
             context = apply_cuda(self.title_data["ngram"][self.bucket].narrow(0, self.pos, offset))
             target = apply_cuda(self.title_data["target"][self.bucket].narrow(0, self.pos, offset))
             self.pos += offset
-            return [Variable(tensor) for tensor in [aux_rows, positions, context]], target.long()
+            return [Variable(tensor) for tensor in [aux_rows, positions, context]], Variable(target.long())
         except Exception as e:
             self.done_bucket = True
             return self.next_batch(max_size)
