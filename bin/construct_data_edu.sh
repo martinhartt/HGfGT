@@ -1,5 +1,6 @@
 #/bin/bash
 
+export ABS="$(dirname $(dirname $0))"
 export AGIGA=data/edu
 export WORK=working_edu
 export THREADS=30

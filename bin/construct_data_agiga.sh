@@ -1,6 +1,6 @@
 #/bin/bash
 
-export ABS=/Users/martinhartt/uni/project/namas
+export ABS="$(dirname $(dirname $0))"
 export AGIGA=data/agiga
 export WORK=$ABS/working_agiga
 export THREADS=30

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export ABS=/Users/martinhartt/uni/project/namas
+export ABS="$(dirname $(dirname $0))"
 export WORK=$ABS/working_agiga
 export WINDOW=5
 export OUT_DIR=$WORK/processed

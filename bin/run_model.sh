@@ -1,6 +1,6 @@
+#/bin/bash
 
-export ABS=/Users/martinhartt/uni/project/namas
-
+export ABS="$(dirname $(dirname $0))"
 export EXAMPLE=$ABS/working_edu/train.article.txt
 export MODEL=$ABS/working_agiga/models/ok
 export LENGTH=15
