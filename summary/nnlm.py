@@ -86,7 +86,7 @@ class NNLM(object):
             loss,
             total
         ))
-        return float(loss) / float(target)
+        return float(loss) / float(total)
 
     def run_valid(self, valid_data):
         # Run validation
