@@ -23,7 +23,8 @@ class Data(object):
         self.load_next_bucket()
 
     def load_next_bucket(self):
-        self.done_bucket = False
+        self.done_bucket = self.bucket_index >= len(self.bucket_order) - 1
+
         self.bucket = self.bucket_order[self.bucket_index]
         self.bucket_size = self.title_data["target"][self.bucket].size(0)
         self.pos = 0
