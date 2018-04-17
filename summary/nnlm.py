@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from util import apply_cuda
+import math
 
 def addOpts(parser):
     parser.add_argument('-epochs',type=int,         default=5, help="Number of epochs to train.")
