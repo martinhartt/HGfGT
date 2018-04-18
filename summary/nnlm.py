@@ -82,9 +82,9 @@ class NNLM(object):
             loss += float(err)
             total += int(target.size(0))
 
-        print("[loss: %f total: %d]".format(
-            loss,
-            total
+        print("[perp: %f validation: %f total: %d]".format(
+            math.exp(loss/total),
+            loss/total,
         ))
         return float(loss) / float(total)
 
@@ -128,15 +128,13 @@ class NNLM(object):
                 err.backward()
                 self.optimizer.step()
 
-                self.save()
-
                 loss += float(err)
                 epoch_loss += float(err)
 
                 if (batch % self.opt.printEvery) == 0:
                     print(
                         "[Loss: {} Epoch: {} Position: {} Rate: {}]".format(
-                            loss,
+                            loss / ((batch - last_batch) * self.opt.miniBatchSize),
                             epoch,
                             batch * self.opt.miniBatchSize,
                             self.opt.learningRate
@@ -150,7 +148,7 @@ class NNLM(object):
                 total += input[0].data.size(0)
 
             print(string.format("[EPOCH : %d LOSS: %f TOTAL: %d BATCHES: %d]",
-                          epoch, epoch_loss, total, batch))
+                          epoch, epoch_loss / total, total, batch))
 
     def save(self):
         torch.save(self.mlp, self.opt.modelFilename)
