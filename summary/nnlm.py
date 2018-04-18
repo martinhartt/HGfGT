@@ -134,7 +134,7 @@ class NNLM(object):
                 if (batch % self.opt.printEvery) == 0:
                     print(
                         "[Loss: {} Epoch: {} Position: {} Rate: {}]".format(
-                            loss / ((batch - last_batch) * self.opt.miniBatchSize),
+                            loss / ((batch - last_batch + 1) * self.opt.miniBatchSize),
                             epoch,
                             batch * self.opt.miniBatchSize,
                             self.opt.learningRate
