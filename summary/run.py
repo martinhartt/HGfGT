@@ -136,7 +136,7 @@ def main():
             #    log p(y_{i+1} | y_c, x) for all y_c
             input = data.make_input(article, cur_beam, cur_K)
             model_scores = mlp.forward(*input)
-            out = model_scores.clone().double().mul(opt.lmWeight)
+            out = model_scores.data.clone().double().mul(opt.lmWeight)
 
             # If length limit is reached, next word must be end.
             finalized = (i == n-1) and opt.fixedLength
@@ -164,7 +164,7 @@ def main():
 
             # Prob of summary is log p + log p(y_{i+1} | y_c, x)
             for k in range(cur_K):
-                out[k] += scores[i][k]
+                out[k] = out[k] + scores[i][k]
 
             # (2) Retain the K-best words for each hypothesis using GPU.
             # This leaves a KxK matrix which we flatten to a K^2 vector.
