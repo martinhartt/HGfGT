@@ -2,7 +2,7 @@
 
 export ABS="$(dirname $(dirname $0))"
 export EXAMPLE=$ABS/working_edu/train.article.txt
-export MODEL=$ABS/working_agiga/models/ok
+export MODEL=$ABS/working_agiga/models/$1
 export LENGTH=15
 export OUT_DIR=$ABS/working_agiga/processed
 

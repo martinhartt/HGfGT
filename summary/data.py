@@ -29,7 +29,7 @@ class Data(object):
         self.bucket_size = self.title_data["target"][self.bucket].size(0)
         self.pos = 0
         self.aux_ptrs = self.title_data["sentences"][self.bucket].float().long() # ??
-        self.positions = apply_cuda(torch.range(0, self.bucket - 1).view(1, self.bucket)
+        self.positions = apply_cuda(torch.arange(0, self.bucket).view(1, self.bucket)
             .expand(1000, self.bucket).contiguous()) + (200 * self.bucket)
         self.bucket_index += 1
 
@@ -127,3 +127,17 @@ def load_article(dname, use_dict=None):
 
     article_data = {"words": input_words, "dict": dictionary}
     return article_data
+
+def make_input(article, context, K):
+    bucket = article.size(0)
+    aux_sentence = apply_cuda(article.view(bucket, 1)
+        .expand(bucket, K)
+        .t()
+        .contiguous())
+    positions = apply_cuda(torch.arange(0, bucket)
+        .view(bucket, 1)
+        .expand(bucket, K)
+        .t()
+        .contiguous()) + (200 * bucket)
+
+    return (aux_sentence, positions, context)
