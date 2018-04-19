@@ -140,4 +140,4 @@ def make_input(article, context, K):
         .t()
         .contiguous()) + (200 * bucket)
 
-    return (aux_sentence, positions, context)
+    return (aux_sentence, positions, apply_cuda(context))
