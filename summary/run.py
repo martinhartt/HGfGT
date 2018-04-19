@@ -114,8 +114,8 @@ def main():
         # hyps[i][k] contains the words in k'th hyp at
         #          i word (left padded with W <s>) tokens.
         result = []
-        scores = torch.zeros(n+1, K).float()
-        hyps = torch.zeros(n+1, K, W+n+1).long().fill_(START)
+        scores = apply_cuda(torch.zeros(n+1, K).float())
+        hyps = apply_cuda(torch.zeros(n+1, K, W+n+1).long().fill_(START))
 
         # Initilialize used word set.
         # words_used[i][k] is a set of the words used in the i,k hyp.
