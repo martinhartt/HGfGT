@@ -19,7 +19,7 @@ python $ABS/summary/train.py -titleDir  $OUT_DIR/train/title/ \
  -embeddingDim  64 \
  -bowDim  200 \
  -hiddenSize  64 \
- -epochs  20 \
+ -epochs  2 \
  -learningRate 0.1 \
  -validArticleDir  $OUT_DIR/valid.filter/article/ \
  -validTitleDir  $OUT_DIR/valid.filter/title/ \
