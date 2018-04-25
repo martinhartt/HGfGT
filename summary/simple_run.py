@@ -185,11 +185,9 @@ def main():
                         result.append((i + 1, scores[i+1][k], hyps[i+1][k].clone()))
                         scores[i+1][k] = -INF
 
-
-
+        print('------------')
         sorted_results = sorted(result, key=lambda a: a[1])
         for (rank, (_, score, output)) in enumerate(sorted_results[:5]):
-            print("\n")
             final = "{}.".format(rank+1)
             for j in range(W+2, W+length-1):
                 index = int(output[j])
@@ -197,4 +195,5 @@ def main():
                 final += " {}".format(word)
             print(final)
 
+        print("\n")
 main()
