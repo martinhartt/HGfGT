@@ -64,13 +64,31 @@ class NNLM(object):
 
             self.last_valid_loss = cur_valid_loss
 
+
+    def renorm(self, data, th=1):
+        size = data.size(0)
+        for i in range(size):
+            norm = float(data[i].norm())
+            if norm > th:
+                data[i] = data[i].div(norm/th)
+
+    def renorm_tables(self):
+        if self.lookup != None:
+            self.renorm(self.lookup.weight)
+
+        if self.encoder.article_embedding != None:
+            self.renorm(self.encoder.article_embedding.weight)
+
+        if self.encoder.title_embedding != None:
+            self.renorm(self.encoder.title_embedding.weight)
+
     def train(self, data, valid_data):
         self.last_valid_loss = 1e9
 
         self.save()
         for epoch in range(self.opt.epochs):
             data.reset()
-            # self.renorm_tables() TODO
+            self.renorm_tables()
             self.run_valid(valid_data)
 
             # Loss for the epoch
