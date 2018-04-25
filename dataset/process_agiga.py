@@ -46,11 +46,9 @@ def fix_paren(parse):
 
 
 def normalize(sent):
-    print('BEFORE', sent)
     sent = re.sub(r"([.!?])", r" \1", sent)
     sent = re.sub(r"[^a-zA-Z0-9.!?]+", r" ", sent)
     sent = re.sub(r'\d', '#', sent)
-    print('AFTER', sent)
     return sent
 
 for l in gzip.open(sys.argv[1]):
