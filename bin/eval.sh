@@ -7,7 +7,7 @@ export LENGTH=15
 export OUT_DIR=$ABS/working_agiga/processed
 
 
-python $ABS/summary/run.py \
+python $ABS/summary/simple_run.py \
  -modelFilename $MODEL \
  -inputf "$EXAMPLE" \
  -length $LENGTH \
