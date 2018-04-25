@@ -74,13 +74,13 @@ class NNLM(object):
 
     def renorm_tables(self):
         if self.lookup != None:
-            self.renorm(self.lookup.weight)
+            self.renorm(self.lookup.weight.data)
 
         if self.encoder.article_embedding != None:
-            self.renorm(self.encoder.article_embedding.weight)
+            self.renorm(self.encoder.article_embedding.weight.data)
 
         if self.encoder.title_embedding != None:
-            self.renorm(self.encoder.title_embedding.weight)
+            self.renorm(self.encoder.title_embedding.weight.data)
 
     def train(self, data, valid_data):
         self.last_valid_loss = 1e9
