@@ -15,9 +15,9 @@ find $ABS/$AGIGA/**/*.gz | parallel --gnu --progress -j $THREADS python2.7 $SCRI
 
 echo "Step 2: Compile the data into train/dev/test."
 cd $WORK
-cat $SPLITS/train.splits | xargs cat > train.data.txt
-cat $SPLITS/valid.splits | xargs cat > valid.data.txt
-cat $SPLITS/test.splits  | xargs cat > test.data.txt
+cat ".$SPLITS/train.splits" | xargs cat > ".$WORK/train.data.txt"
+cat ".$SPLITS/valid.splits" | xargs cat > ".$WORK/valid.data.txt"
+cat ".$SPLITS/test.splits"  | xargs cat > ".$WORK/test.data.txt"
 cd ..
 
 echo "Step 3: Basic filtering on train/dev."
