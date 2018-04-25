@@ -3,7 +3,6 @@ import torch.nn as nn
 
 import nnlm
 import encoder
-# import beam_search
 import argparse
 import util
 from util import apply_cuda

@@ -5,7 +5,7 @@ WINDOW=5
 
 DATA_DIR=$1
 OUT_DIR=$1/processed
-SCRIPTS=$ABS/summary
+SCRIPTS=$ABS/dataset
 
 
 # export LUA_PATH="$LUA_PATH;$ABS/?.lua"

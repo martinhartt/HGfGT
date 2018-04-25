@@ -22,7 +22,7 @@ for l in open(sys.argv[1]):
     splits = l.strip().split("\t")
     if len(splits) != 4:
         continue
-    title_parse, article_parse, title, article = splits
+    _, _, title, article = splits
     title_words = title.split()
     article_words = article.split()
 

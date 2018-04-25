@@ -44,19 +44,22 @@ def fix_paren(parse):
         return parse[2:-1]
     return parse
 
-def get_words(parse):
-    return parse.split(' ')
 
-def remove_digits(parse):
-    return re.sub(r'\d', '#', parse)
+def normalize(sent):
+    print('BEFORE', sent)
+    sent = re.sub(r"([.!?])", r" \1", sent)
+    sent = re.sub(r"[^a-zA-Z0-9.!?]+", r" ", sent)
+    sent = re.sub(r'\d', '#', sent)
+    print('AFTER', sent)
+    return sent
 
 for l in gzip.open(sys.argv[1]):
     if MODE == HEAD:
-        title_parse = remove_digits(fix_paren(l.strip()))
+        title_parse = normalize(fix_paren(l.strip()))
         MODE = NEXT
 
     if MODE == TEXT and l.strip() != "</P>":
-        article_parse.append(remove_digits(fix_paren(l.strip())))
+        article_parse.append(normalize(fix_paren(l.strip())))
 
     if MODE == NONE and l.strip() == "<HEADLINE>":
         MODE = HEAD
@@ -78,7 +81,7 @@ for l in gzip.open(sys.argv[1]):
 
         # title_parse \t article_parse \t title \t article
         print >>out, "\t".join([title_parse, article_parse,
-                                " ".join(get_words(title_parse)),
+                                title_parse,
                                 " ".join(articles)])
         article_parse = []
         MODE = NONE

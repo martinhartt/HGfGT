@@ -1,7 +1,5 @@
 data/
-working_agiga/
-working_dir/
-working_edu/
+working_*
 *.pyc
 .env
 ssh
