@@ -1,4 +1,3 @@
-import util as utils
 import torch
 import argparse
 from collections import Counter
@@ -34,7 +33,7 @@ def count(file, aligned_lengths, pad):
         if pad:
             true_l = "<s> <s> <s> {} </s> </s> </s>".format(l)
 
-        line = utils.string_split(true_l, " ")
+        line = true_l.split()
 
         counter["line_lengths"][len(line)] += 1
         counter["nsents"] += 1
@@ -71,7 +70,7 @@ def build_article_matrices(dict, file, nsents, line_lengths):
     nsent = 0
     for l in f:
         true_l = "<s> <s> <s> {} </s> </s> </s>".format(l)
-        line = utils.string_split(true_l, " ")
+        line = true_l.split()
         length = len(line)
         nbin = of_length[length]
 
@@ -115,7 +114,7 @@ def build_title_matrices(dict, file, aligned_lengths, bucket_sizes, window):
     for l in f:
         # Add implicit </s>
         true_l = "{} </s>".format(l)
-        line = utils.string_split(true_l, " ")
+        line = true_l.split()
 
         last = []
         # Initialize window as START symbol.
