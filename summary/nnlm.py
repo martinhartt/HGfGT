@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from util import apply_cuda
 import math
+from language_model import LanguageModel
 
 def addOpts(parser):
     parser.add_argument('-epochs',type=int,         default=5, help="Number of epochs to train.")
@@ -12,40 +13,6 @@ def addOpts(parser):
     parser.add_argument('-embeddingDim',type=int,  default=50, help="Size of NNLM embeddings.")
     parser.add_argument('-hiddenSize',type=int,   default=100, help="Size of NNLM hiddent layer.")
     parser.add_argument('-learningRate',type=float, default=0.1, help="SGD learning rate.")
-
-class LanguageModel(nn.Module):
-    """docstring for LanguageModel."""
-    def __init__(self, encoder, encoder_size, dictionary, opt):
-        super(LanguageModel, self).__init__()
-        self.embedding_dim = opt.embeddingDim # D
-        self.window = opt.window # N
-        self.hidden_size = opt.hiddenSize # H
-        self.vocab_size = len(dictionary["index_to_symbol"]) # V
-        self.encoder_size = encoder_size #P
-        self.encoder = encoder
-
-        self.context_lookup = nn.Embedding(self.vocab_size, self.embedding_dim)
-        self.context_linear = nn.Linear(self.embedding_dim * self.window, self.hidden_size)
-        self.context_tanh = nn.Tanh()
-        self.out_linear = nn.Linear(self.hidden_size + self.encoder_size, self.vocab_size)
-        self.soft_max = nn.LogSoftmax()
-
-    def forward(self, encoder_input, position_input, context_input): # context, encoder_input, position_input):
-        context = self.context_lookup(context_input.long())
-        encoder_input = self.encoder(encoder_input, position_input, context_input)
-
-        n = context_input.shape[0]
-        # tanh W (E y)
-        context = context.view(n, self.embedding_dim * self.window)
-        context = self.context_linear(context)
-        context = self.context_tanh(context)
-
-        # Second layer: takes LM and encoder model.
-        out = torch.cat((context, encoder_input), 1)
-        out = out.view(n, self.hidden_size + self.encoder_size)
-        out = self.out_linear(out)
-        out = self.soft_max(out)
-        return out
 
 class NNLM(object):
     """docstring for NNLM."""
@@ -58,14 +25,10 @@ class NNLM(object):
         self.encoder_dict = encoder_dict
 
         if encoder != None:
-            self.build_mlp(encoder, encoder_size)
-
-    def build_mlp(self, encoder, encoder_size):
-        # NOTE Changed title dictionary -> article dictionary
-        self.mlp = apply_cuda(LanguageModel(encoder, encoder_size, self.dict, self.opt))
-        self.loss = nn.NLLLoss()
-        self.lookup = self.mlp.context_lookup
-        self.optimizer = torch.optim.SGD(self.mlp.parameters(), self.opt.learningRate) # Half learning rate
+            self.mlp = apply_cuda(LanguageModel(encoder, encoder_size, self.dict, self.opt))
+            self.loss = nn.NLLLoss()
+            self.lookup = self.mlp.context_lookup
+            self.optimizer = torch.optim.SGD(self.mlp.parameters(), self.opt.learningRate) # Half learning rate
 
     def validation(self, valid_data):
         offset = self.opt.miniBatchSize

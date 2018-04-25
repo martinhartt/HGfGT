@@ -4,7 +4,17 @@ import torch
 from torch.autograd import Variable
 from util import apply_cuda
 
-print("Using cuda? {}".format(torch.cuda.is_available()))
+def add_opts(parser):
+   parser.add_argument('-articleDir', default='',
+              help='Directory containing article training matrices.')
+   parser.add_argument('-titleDir', default='',
+              help='Directory containing title training matrices.')
+   parser.add_argument('-validArticleDir', default='',
+              help='Directory containing article matricess for validation.')
+   parser.add_argument('-validTitleDir', default='',
+              help='Directory containing title matrices for validation.')
+   parser.add_argument('-cuda', default=False, type=bool,
+              help='Enable cuda?')
 
 class Data(object):
     """docstring for Data."""
@@ -59,22 +69,6 @@ class Data(object):
         except Exception as e:
             self.done_bucket = True
             return self.next_batch(max_size)
-
-
-def init(title_data, article_data):
-    return Data(title_data, article_data)
-
-def add_opts(parser):
-   parser.add_argument('-articleDir', default='',
-              help='Directory containing article training matrices.')
-   parser.add_argument('-titleDir', default='',
-              help='Directory containing title training matrices.')
-   parser.add_argument('-validArticleDir', default='',
-              help='Directory containing article matricess for validation.')
-   parser.add_argument('-validTitleDir', default='',
-              help='Directory containing title matrices for validation.')
-   parser.add_argument('-cuda', default=False, type=bool,
-              help='Enable cuda?')
 
 
 # Returns title dictionary containing

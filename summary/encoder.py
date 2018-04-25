@@ -36,12 +36,9 @@ class AttnBowEncoder(nn.Module):
 
         n = article.shape[0]
 
-        # test = torch.matmul(article, title.t())
         title = title.view(n, self.window_size * self.bow_dim)
-        # torch.save(title, 'TEST.pt')
         title = self.title_context(title)
         title = title.view(n, self.bow_dim, 1)
-
 
         dot_article_context = torch.matmul(article, title)
 

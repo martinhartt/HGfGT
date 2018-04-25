@@ -1,6 +1,8 @@
 import random
 import torch
 
+print("Using cuda? {}".format(torch.cuda.is_available()))
+
 def string_split(s, c = ' '):
     return s.split(c)
 
