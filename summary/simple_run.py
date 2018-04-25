@@ -26,6 +26,7 @@ parser.add_argument('-beamSize', type=int,            default=100, help="Size of
 parser.add_argument('-extractive', type=bool,        default=False, help="Force fully extractive summary.")
 parser.add_argument('-abstractive', type=bool,       default=False, help="Force fully abstractive summary.")
 parser.add_argument('-recombine', type=bool,         default=False, help="Used hypothesis recombination.")
+parser.add_argument('-showCandidates', type=bool, default=False, help="If true, shows next most likely summaries.")
 
 
 data.add_opts(parser)
@@ -80,7 +81,8 @@ def main():
 
     sent_num = 0
     for line in sent_file:
-        print(line)
+        if opt.showCandidates:
+            print("\n{}\n============".format(line))
 
         sent_num += 1
 
@@ -93,7 +95,6 @@ def main():
             word = process_word(words[j])
             try:
                 article[j] = a_s2i[word] or a_s2i["<unk>"]
-                # print
             except Exception as e:
                 article[j] = a_s2i["<unk>"]
 
@@ -184,15 +185,19 @@ def main():
                         result.append((i + 1, scores[i+1][k], hyps[i+1][k].clone()))
                         scores[i+1][k] = -INF
 
-        print('------------')
         sorted_results = sorted(result, key=lambda a: a[1])
-        for (rank, (_, score, output)) in enumerate(sorted_results[:5]):
-            final = "{}.".format(rank+1)
+
+        numOfCandidates = 5 if opt.showCandidates else 1
+
+        for (rank, (_, score, output)) in enumerate(sorted_results[:numOfCandidates]):
+
+            final = "\n{}.".format(rank+1) if opt.showCandidates else ""
+
             for j in range(W+2, W+length-1):
                 index = int(output[j])
                 word = t_i2s[index]
                 final += " {}".format(word)
+
             print(final)
 
-        print("\n")
 main()

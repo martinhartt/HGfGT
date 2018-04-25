@@ -1,5 +1,6 @@
 data/
 working_*
 *.pyc
-.env
+env
 ssh
+out/
