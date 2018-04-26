@@ -48,16 +48,19 @@ def fix_paren(parse):
 def get_words(parse):
     return parse.split(' ')
 
-def remove_digits(parse):
-    return re.sub(r'\d', '#', parse)
+def normalize(sent):
+    sent = re.sub(r"([.!?])", r" \1", sent)
+    sent = re.sub(r"[^a-zA-Z0-9.!?]+", r" ", sent)
+    sent = re.sub(r'\d', '#', sent)
+    return sent
 
 raw = open(sys.argv[1]).read()
 
 title_raw, article_raw = raw.split('\n\n')[:2]
 
 # Remove TITLE and TEXT labels and process
-title = title_raw[6:].strip().replace('\n', ' ')
-article = article_raw[5:].strip().replace('\n', ' ').split('.')[0]
+title = normalize(title_raw[6:].strip().replace('\n', ' '))
+article = normalize(article_raw[5:].strip().replace('\n', ' ').split('.')[0])
 
 # title_parse \t article_parse \t title \t article
 print >>out, "\t".join([title, "(TOP {})".format(article),
