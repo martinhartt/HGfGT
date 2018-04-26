@@ -198,6 +198,6 @@ def main():
                 word = t_i2s[index]
                 final += " {}".format(word)
 
-            print(final)
+            print(final.strip())
 
 main()

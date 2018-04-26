@@ -16,12 +16,8 @@ opt = parser.parse_args()
 
 def calculateRouge(predictedSents, actualSents):
     rouge = Rouge()
-    scores = []
 
-    for i in range(len(predictedSents)):
-        scores.append(rouge.get_scores(predictedSents, actualSents))
-
-    return scores
+    return rouge.get_scores(predictedSents, actualSents)
 
 def calculateSemanticSimilarity(predictedSents, actualSents):
     scores = []
@@ -37,19 +33,33 @@ def extractSents(fileName):
     return open(fileName).read().strip().split('\n')
 
 def main():
+    print('Calculating Word2Vec similarity...')
     actualSents = extractSents(opt.actualSentsFile)
     predictedSents = extractSents(opt.predictedSentsFile)
 
-    print(actualSents, predictedSents)
-
-    print('Calculating Word2Vec similarity')
     semantic_scores, semantic_mean, semantic_median = calculateSemanticSimilarity(predictedSents, actualSents)
-    print(semantic_scores, semantic_mean, semantic_median)
-    print()
 
-    print('Calculating ROUGE Score')
+    print('Calculating ROUGE Score...')
     rouge_scores = calculateRouge(predictedSents, actualSents)
-    print(rouge_scores)
-    print()
+
+    pad = 10
+    delim = ' | '
+
+    print(delim.join([
+        str("#").ljust(3),
+        str("Rouge 1").ljust(pad),
+        str("Rouge 2").ljust(pad),
+        str("Rouge L").ljust(pad),
+        str("Semantic sim.").ljust(pad)]))
+
+    print('='*(3+(pad+3)*4))
+
+    for i in range(len(predictedSents)):
+        print(delim.join([
+            str(i).ljust(3),
+            str(rouge_scores[i]['rouge-1']['f']).ljust(pad)[:pad],
+            str(rouge_scores[i]['rouge-2']['f']).ljust(pad)[:pad],
+            str(rouge_scores[i]['rouge-l']['f']).ljust(pad)[:pad],
+            str(semantic_scores[i]).ljust(pad)[:pad]]))
 
 main()
