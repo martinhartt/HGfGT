@@ -2,7 +2,7 @@
 
 export ABS="$(dirname $(dirname $0))"
 export AGIGA=data/edu
-export WORK=working_edu
+export WORK=$ABS/working_edu
 export THREADS=30
 export SCRIPTS=$ABS/dataset
 export SPLITS=$ABS/$AGIGA
@@ -10,19 +10,19 @@ export UNK=1
 
 echo "Step 1: Construct the title-article pairs from gigaword"
 mkdir -p $WORK
-# find $AGIGA/**/*.txt | parallel --gnu --progress -j $THREADS python2.7 $SCRIPTS/process_edu.py \{\} $WORK
+find $ABS/$AGIGA/**/*.gz | parallel --gnu --progress -j $THREADS python2.7 $SCRIPTS/process_edu.py \{\} $WORK
 
 
 echo "Step 2: Compile the data into train/dev/test."
 cd $WORK
-cat $SPLITS/train.splits | xargs cat > train.data.filter.txt
-cat $SPLITS/valid.splits | xargs cat > valid.data.filter.txt
-cat $SPLITS/test.splits  | xargs cat > test.data.filter.txt
+cat ".$SPLITS/train.splits" | xargs cat > ".$WORK/train.data.txt"
+cat ".$SPLITS/valid.splits" | xargs cat > ".$WORK/valid.data.txt"
+cat ".$SPLITS/test.splits"  | xargs cat > ".$WORK/test.data.txt"
 cd ..
 
 echo "Step 3: Basic filtering on train/dev."
-# python2.7 $SCRIPTS/filter.py $WORK/train.data.txt > $WORK/train.data.filter.txt
-# python2.7 $SCRIPTS/filter.py $WORK/valid.data.txt > $WORK/valid.data.filter.txt
+python2.7 $SCRIPTS/filter.py $WORK/train.data.txt > $WORK/train.data.filter.txt
+python2.7 $SCRIPTS/filter.py $WORK/valid.data.txt > $WORK/valid.data.filter.txt
 
 
 echo "Step 4: Compile dictionary."
