@@ -147,4 +147,4 @@ class NNLM(object):
         torch.save(self.mlp, self.opt.modelFilename)
         # Save current epoch for evaluation purposes
         if self.mlp.epoch is not None:
-            torch.save(self.mlp, "{}__{}".format(self.opt.modelFilename, epoch))
+            torch.save(self.mlp, "{}__{}".format(self.opt.modelFilename, self.mlp.epoch))
