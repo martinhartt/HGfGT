@@ -138,7 +138,7 @@ class NNLM(object):
                 batch += 1
                 total += input[0].data.size(0)
 
-            self.save(epoch)
+            self.save()
             print("[EPOCH : {} LOSS: {} TOTAL: {} BATCHES: {}]".format(
                         epoch, epoch_loss / total, total, batch))
 
