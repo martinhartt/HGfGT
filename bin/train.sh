@@ -27,4 +27,5 @@ python $ABS/summary/train.py -titleDir  $OUT_DIR/train/title/ \
  -printEvery   100 \
  -encoderModel  "attenbow" \
  -attenPool  5 \
+ -restore 1
  # -cuda 1

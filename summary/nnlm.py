@@ -5,7 +5,7 @@ import math
 from language_model import LanguageModel
 
 def addOpts(parser):
-    parser.add_argument('-epochs',type=int,         default=5, help="Number of epochs to train.")
+    parser.add_argument('-epochs',type=int,         default=15, help="Number of epochs to train.")
     parser.add_argument('-miniBatchSize', type=int, default=64, help="Size of training minibatch.")
     parser.add_argument('-printEvery',type=int, default=10000,  help="How often to print during training.")
     parser.add_argument('-modelFilename', default='', help="File for saving loading/model.")
@@ -13,6 +13,7 @@ def addOpts(parser):
     parser.add_argument('-embeddingDim',type=int,  default=50, help="Size of NNLM embeddings.")
     parser.add_argument('-hiddenSize',type=int,   default=100, help="Size of NNLM hiddent layer.")
     parser.add_argument('-learningRate',type=float, default=0.1, help="SGD learning rate.")
+    parser.add_argument('-restore',type=bool, default=False, help="Should a previous model be restored?")
 
 class NNLM(object):
     """docstring for NNLM."""
@@ -25,7 +26,13 @@ class NNLM(object):
         self.encoder_dict = encoder_dict
 
         if encoder != None:
-            self.mlp = apply_cuda(LanguageModel(encoder, encoder_size, self.dict, self.opt))
+            if opt.restore:
+                self.mlp = torch.load(self.opt.modelFilename)
+                print("Restoring MLP {} with epoch {}".format(self.opt.modelFilename, self.mlp.epoch))
+            else:
+                self.mlp = apply_cuda(LanguageModel(encoder, encoder_size, self.dict, self.opt))
+                self.mlp.epoch = 0
+
             self.loss = nn.NLLLoss()
             self.lookup = self.mlp.context_lookup
             self.optimizer = torch.optim.SGD(self.mlp.parameters(), self.opt.learningRate) # Half learning rate
@@ -87,11 +94,12 @@ class NNLM(object):
 
         self.last_valid_loss = 1e9
 
-        self.save()
-        for epoch in range(self.opt.epochs):
+
+        for epoch in range(self.mlp.epoch, self.opt.epochs):
             data.reset()
             self.renorm_tables()
             self.run_valid(valid_data)
+            self.mlp.epoch = epoch
 
             # Loss for the epoch
             epoch_loss = 0
@@ -130,10 +138,13 @@ class NNLM(object):
                 batch += 1
                 total += input[0].data.size(0)
 
-            self.save()
+            self.save(epoch)
             print("[EPOCH : {} LOSS: {} TOTAL: {} BATCHES: {}]".format(
                         epoch, epoch_loss / total, total, batch))
 
     def save(self):
-        torch.save(self.mlp, self.opt.modelFilename)
         print('Saving...')
+        torch.save(self.mlp, self.opt.modelFilename)
+        # Save current epoch for evaluation purposes
+        if self.mlp.epoch is not None:
+            torch.save(self.mlp, "{}__{}".format(self.opt.modelFilename, epoch))

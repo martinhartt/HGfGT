@@ -22,6 +22,7 @@ class Data(object):
         super(Data, self).__init__()
         self.title_data = title_data
         self.article_data = article_data
+        self.reset()
 
     def reset(self):
         self.bucket_order = []
