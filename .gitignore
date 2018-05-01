@@ -2,5 +2,5 @@ data/
 working_*
 *.pyc
 env
-ssh
+connect.sh
 out/
