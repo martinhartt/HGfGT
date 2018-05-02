@@ -3,7 +3,7 @@ import numpy
 import argparse
 import spacy
 
-nlp = spacy.load('en_core_web_md')
+nlp = spacy.load('en')
 
 parser = argparse.ArgumentParser(description='Evaluate the results of a model.')
 
@@ -30,7 +30,7 @@ def calculateSemanticSimilarity(predictedSents, actualSents):
     return scores, numpy.mean(scores), numpy.median(scores)
 
 def extractSents(fileName):
-    return open(fileName).read().strip().split('\n')
+    return unicode(open(fileName).read(), 'utf8').strip().split('\n')
 
 def main():
     print('Calculating Word2Vec similarity...')
