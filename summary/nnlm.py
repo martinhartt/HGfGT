@@ -28,6 +28,7 @@ class NNLM(object):
         if encoder != None:
             if opt.restore:
                 self.mlp = torch.load(self.opt.modelFilename)
+                self.mlp.epoch += 1
                 print("Restoring MLP {} with epoch {}".format(self.opt.modelFilename, self.mlp.epoch))
             else:
                 self.mlp = apply_cuda(LanguageModel(encoder, encoder_size, self.dict, self.opt))
@@ -141,6 +142,7 @@ class NNLM(object):
             self.save()
             print("[EPOCH : {} LOSS: {} TOTAL: {} BATCHES: {}]".format(
                         epoch, epoch_loss / total, total, batch))
+            exit(1)
 
     def save(self):
         print('Saving...')

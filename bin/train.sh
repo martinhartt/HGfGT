@@ -12,6 +12,7 @@ export MDL_DIR=$WORK/models
 
 mkdir -p $MDL_DIR
 
+date
 python $ABS/summary/train.py -titleDir  $OUT_DIR/train/title/ \
  -articleDir  $OUT_DIR/train/article/ \
  -modelFilename  $MDL_DIR/$1 \
@@ -19,7 +20,7 @@ python $ABS/summary/train.py -titleDir  $OUT_DIR/train/title/ \
  -embeddingDim  64 \
  -bowDim  200 \
  -hiddenSize  64 \
- -epochs  2 \
+ -epochs  15 \
  -learningRate 0.1 \
  -validArticleDir  $OUT_DIR/valid.filter/article/ \
  -validTitleDir  $OUT_DIR/valid.filter/title/ \
@@ -29,3 +30,4 @@ python $ABS/summary/train.py -titleDir  $OUT_DIR/train/title/ \
  -attenPool  5 \
  -restore 1
  # -cuda 1
+date
