@@ -12,6 +12,7 @@ export MDL_DIR=$WORK/models
 
 mkdir -p $MDL_DIR
 
+date
 python $ABS/summary/train.py -titleDir  $OUT_DIR/train/title/ \
  -articleDir  $OUT_DIR/train/article/ \
  -modelFilename  $MDL_DIR/$1 \
@@ -29,3 +30,4 @@ python $ABS/summary/train.py -titleDir  $OUT_DIR/train/title/ \
  -attenPool  5 \
  -restore 1
  # -cuda 1
+date
