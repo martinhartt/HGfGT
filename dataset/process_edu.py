@@ -22,37 +22,29 @@ import gzip
 # Make directory for output if it doesn't exist
 
 try:
-    os.mkdir(sys.argv[2] + "/" + sys.argv[1].split("/")[-2])
+    os.mkdir(sys.argv[2] + "/raw/" + sys.argv[1].split("/")[-2])
 except OSError:
     pass
 
+# Strip off .gz ending
 end = "/".join(sys.argv[1].split("/")[-2:])
 
-
-out = open(sys.argv[2] + "/" + end, "w")
+out = open(sys.argv[2] + "/raw/" + end, "w")
 
 # Parse and print titles and articles
 NONE, HEAD, NEXT, TEXT = 0, 1, 2, 3
 MODE = NONE
-title_parse = ""
-article_parse = []
-
-# FIX: Some parses are mis-parenthesized.
-def fix_paren(parse):
-    if len(parse) < 2:
-        return parse
-    if parse[0] == "(" and parse[1] == " ":
-        return parse[2:-1]
-    return parse
-
-def get_words(parse):
-    return parse.split(' ')
 
 def normalize(sent):
+    sent = sent.lower()
     sent = re.sub(r"([.!?])", r" \1", sent)
     sent = re.sub(r"[^a-zA-Z0-9.!?]+", r" ", sent)
     sent = re.sub(r'\d', '#', sent)
+    sent += " "
     return sent
+
+title = ""
+article = ""
 
 raw = open(sys.argv[1]).read()
 
@@ -60,9 +52,7 @@ title_raw, article_raw = raw.split('\n\n')[:2]
 
 # Remove TITLE and TEXT labels and process
 title = normalize(title_raw[6:].strip().replace('\n', ' '))
-article = normalize(article_raw[5:].strip().replace('\n', ' ').split('.')[0])
+article = normalize(article_raw[5:].strip().replace('\n', ' '))
 
-# title_parse \t article_parse \t title \t article
-print >>out, "\t".join([title, "(TOP {})".format(article),
-                        title,
-                        article])
+# title \t article
+out.write("{}\t{}\n".format(title, article))

@@ -16,70 +16,56 @@ import sys
 import os
 import re
 import gzip
-#@lint-avoid-python-3-compatibility-imports
 
 # Make directory for output if it doesn't exist
 
 try:
-    os.mkdir(sys.argv[2] + "/" + sys.argv[1].split("/")[-2])
+    os.mkdir(sys.argv[2] + "/raw/" + sys.argv[1].split("/")[-2])
 except OSError:
     pass
 
 # Strip off .gz ending
 end = "/".join(sys.argv[1].split("/")[-2:])[:-len(".gz")] + ".txt"
 
-out = open(sys.argv[2] + "/" + end, "w")
+out = open(sys.argv[2] + "/raw/" + end, "w")
 
 # Parse and print titles and articles
 NONE, HEAD, NEXT, TEXT = 0, 1, 2, 3
 MODE = NONE
-title_parse = ""
-article_parse = []
-
-# FIX: Some parses are mis-parenthesized.
-def fix_paren(parse):
-    if len(parse) < 2:
-        return parse
-    if parse[0] == "(" and parse[1] == " ":
-        return parse[2:-1]
-    return parse
-
 
 def normalize(sent):
+    sent = sent.lower()
     sent = re.sub(r"([.!?])", r" \1", sent)
     sent = re.sub(r"[^a-zA-Z0-9.!?]+", r" ", sent)
     sent = re.sub(r'\d', '#', sent)
+    sent += " "
     return sent
 
+title = ""
+article = ""
+
 for l in gzip.open(sys.argv[1]):
+    line = l.strip()
     if MODE == HEAD:
-        title_parse = normalize(fix_paren(l.strip()))
+        title += normalize(line)
         MODE = NEXT
 
-    if MODE == TEXT and l.strip() != "</P>":
-        article_parse.append(normalize(fix_paren(l.strip())))
+    if MODE == TEXT and len(line) > 0 and line[0] != "<":
+        article += normalize(line)
 
-    if MODE == NONE and l.strip() == "<HEADLINE>":
+    if MODE == NONE and line == "<HEADLINE>":
         MODE = HEAD
 
-    if MODE == NEXT and l.strip() == "<P>":
+    if MODE == NEXT and line == "<P>":
         MODE = TEXT
 
-    if MODE == TEXT and l.strip() == "</P>":
-        articles = []
-        # Annotated gigaword has a poor sentence segmenter.
-        # Ensure there is a least a period.
+    if MODE == TEXT and line == "</TEXT>":
+        title = re.sub(r'\s\s', ' ', title).strip()
+        article = re.sub(r'\s\s', ' ', article).strip()
 
-        for i in range(len(article_parse)):
-            articles.append(article_parse[i])
-            if "(. .)" in article_parse[i]:
-                break
+        out.write("{}\t{}\n\n".format(title, article))
 
-        article_parse = "(TOP " + " ".join(articles) + ")"
+        title = ""
+        article = ""
 
-        # title_parse \t article_parse \t title \t article
-        print >>out, "\t".join([title_parse, article_parse,
-                                title_parse,
-                                " ".join(articles)])
-        article_parse = []
         MODE = NONE

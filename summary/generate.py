@@ -12,8 +12,6 @@ import math
 
 parser = argparse.ArgumentParser(description='Train a summarization model.')
 
-# beam.addOpts(parser)
-
 parser.add_argument('-modelFilename',  default='', help='Model to test.')
 parser.add_argument('-inputf',         default='', help='Input article files. ')
 parser.add_argument('-nbest',type=bool,       default=False, help='Write out the nbest list in ZMert format.')

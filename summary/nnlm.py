@@ -25,18 +25,17 @@ class NNLM(object):
         self.encoder_size = encoder_size
         self.encoder_dict = encoder_dict
 
-        if encoder != None:
-            if opt.restore:
-                self.mlp = torch.load(self.opt.modelFilename)
-                self.mlp.epoch += 1
-                print("Restoring MLP {} with epoch {}".format(self.opt.modelFilename, self.mlp.epoch))
-            else:
-                self.mlp = apply_cuda(LanguageModel(encoder, encoder_size, self.dict, self.opt))
-                self.mlp.epoch = 0
+        if opt.restore:
+            self.mlp = torch.load(self.opt.modelFilename)
+            self.mlp.epoch += 1
+            print("Restoring MLP {} with epoch {}".format(self.opt.modelFilename, self.mlp.epoch))
+        else:
+            self.mlp = apply_cuda(LanguageModel(encoder, encoder_size, self.dict, self.opt))
+            self.mlp.epoch = 0
 
-            self.loss = nn.NLLLoss()
-            self.lookup = self.mlp.context_lookup
-            self.optimizer = torch.optim.SGD(self.mlp.parameters(), self.opt.learningRate) # Half learning rate
+        self.loss = nn.NLLLoss()
+        self.lookup = self.mlp.context_lookup
+        self.optimizer = torch.optim.SGD(self.mlp.parameters(), self.opt.learningRate) # Half learning rate
 
     def validation(self, valid_data):
         offset = self.opt.miniBatchSize

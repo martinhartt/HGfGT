@@ -20,26 +20,27 @@ limit = int(sys.argv[3])
 
 for l in open(sys.argv[1]):
     splits = l.strip().split("\t")
-    if len(splits) != 4:
+    if len(splits) != 2:
         continue
-    _, _, title, article = l.strip().split("\t")
+    title, article = l.strip().split("\t")
     title_words.update(title.lower().split())
     article_words.update(article.lower().split())
 
 with open(sys.argv[2] + ".article.dict", "w") as f:
-    print >>f, "<unk>", 1e5
-    print >>f, "<s>", 1e5
-    print >>f, "</s>", 1e5
+    f.write("<unk> {}\n".format(1e5))
+    f.write("<s> {}\n".format(1e5))
+    f.write("</s> {}\n".format(1e5))
+
     for word, count in article_words.most_common():
         if count < limit:
             break
-        print >>f, word, count
+        f.write("{} {}\n".format(word, count))
 
 with open(sys.argv[2] + ".title.dict", "w") as f:
-    print >>f, "<unk>", 1e5
-    print >>f, "<s>", 1e5
-    print >>f, "</s>", 1e5
+    f.write("<unk> {}\n".format(1e5))
+    f.write("<s> {}\n".format(1e5))
+    f.write("</s> {}\n".format(1e5))
     for word, count in title_words.most_common():
         if count < limit:
             break
-        print >>f, word, count
+        f.write("{} {}\n".format(word, count))

@@ -19,18 +19,18 @@ class LanguageModel(nn.Module):
         self.out_linear = nn.Linear(self.hidden_size + self.encoder_size, self.vocab_size)
         self.soft_max = nn.LogSoftmax()
 
-    def forward(self, encoder_input, position_input, context_input): # context, encoder_input, position_input):
-        context = self.context_lookup(context_input.long())
-        encoder_input = self.encoder(encoder_input, position_input, context_input)
+    def forward(self, article, position_input, title_context):
+        article = self.encoder(article, position_input, title_context)
+        context = self.context_lookup(title_context.long())
 
-        n = context_input.shape[0]
+        n = title_context.shape[0]
         # tanh W (E y)
         context = context.view(n, self.embedding_dim * self.window)
         context = self.context_linear(context)
         context = self.context_tanh(context)
 
         # Second layer: takes LM and encoder model.
-        out = torch.cat((context, encoder_input), 1)
+        out = torch.cat((context, article), 1)
         out = out.view(n, self.hidden_size + self.encoder_size)
         out = self.out_linear(out)
         out = self.soft_max(out)

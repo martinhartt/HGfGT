@@ -21,7 +21,6 @@ def count(file, aligned_lengths, pad):
 
     counter = {
         "nsents": 0,
-        "max_length": 0,
         "aligned_lengths": Counter(),
         "line_lengths": Counter(),
         "bucket_words": Counter()
@@ -124,29 +123,25 @@ def build_title_matrices(dict, file, aligned_lengths, bucket_sizes, window):
         aligned_length = aligned_lengths[nline]
 
         for j in range(0, len(line)):
-            nword = words_of_length[aligned_length]
+            nwords = words_of_length[aligned_length]
 
             index = dict["symbol_to_index"].get(line[j], 0)
 
-            mat[aligned_length][nword][0] = index
-            mat[aligned_length][nword][1] = sent_of_length[aligned_length]
-            mat[aligned_length][nword][2] = j
+            mat[aligned_length][nwords][0] = index
+            mat[aligned_length][nwords][1] = sent_of_length[aligned_length]
+            mat[aligned_length][nwords][2] = j
 
             # Move the window forward
             for w in range(0, window - 1):
-                ngram[aligned_length][nword][w] = last[w]
+                ngram[aligned_length][nwords][w] = last[w]
                 last[w] = last[w+1]
 
-            ngram[aligned_length][nword][window-1] = last[window-1]
+            ngram[aligned_length][nwords][window-1] = last[window-1]
             last[window-1] = index
             words_of_length[aligned_length] = words_of_length[aligned_length] + 1
 
         sent_of_length[aligned_length] += 1
         nsent += 1
-
-        # Debug logging
-        if nsent % 100000 == 1:
-            print(nsent)
 
         nline += 1
 

@@ -12,8 +12,8 @@ SCRIPTS=$ABS/dataset
 
 mkdir -p $OUT_DIR
 
-python $SCRIPTS/build_dict.py $DATA_DIR/train.article.dict $OUT_DIR/train.article.dict.torch
-python $SCRIPTS/build_dict.py $DATA_DIR/train.title.dict $OUT_DIR/train.title.dict.torch
+python $SCRIPTS/build_dict.py $DATA_DIR/train.filter.article.dict $OUT_DIR/train.article.dict.torch
+python $SCRIPTS/build_dict.py $DATA_DIR/train.filter.title.dict $OUT_DIR/train.title.dict.torch
 
 echo "-- Creating data directories."
 mkdir -p $OUT_DIR/train/title

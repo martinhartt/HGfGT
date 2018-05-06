@@ -29,6 +29,7 @@ class AttnBowEncoder(nn.Module):
         self.non_linearity = nn.Softmax()
 
         self.mout_linear = nn.Linear(bow_dim, bow_dim)
+        self.pool_layer = nn.AvgPool2d((5,1), stride=(1,1))
 
     def forward(self, article, size, title):
         article = self.article_embedding(article.long())
@@ -48,7 +49,7 @@ class AttnBowEncoder(nn.Module):
 
         process_article = article.view(n, 1, -1, self.bow_dim)
         process_article = nn.ZeroPad2d((0, 0, self.pad, self.pad)).forward(process_article)
-        process_article = nn.AvgPool2d((5,1), stride=(1,1)).forward(process_article) # HACK: should be tnn.SpatialSubSampling(1, 1, self.opt.attenPool).forward(process_article)
+        process_article = self.pool_layer.forward(process_article) # HACK: should be tnn.SpatialSubSampling(1, 1, self.opt.attenPool).forward(process_article)
         process_article = torch.sum(process_article, 1)
 
         attention = attention.view(n, -1, 1)
