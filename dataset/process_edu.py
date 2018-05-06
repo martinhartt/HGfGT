@@ -48,11 +48,11 @@ article = ""
 
 raw = open(sys.argv[1]).read()
 
-title_raw, article_raw = raw.split('\n\n')[:2]
+title_raw, article_raw = raw.split('\nTEXT:')[:2]
 
 # Remove TITLE and TEXT labels and process
 title = normalize(title_raw[6:].strip().replace('\n', ' '))
-article = normalize(article_raw[5:].strip().replace('\n', ' '))
+article = normalize(article_raw.strip().replace('\n', ' '))
 
 # title \t article
 out.write("{}\t{}\n".format(title, article))
