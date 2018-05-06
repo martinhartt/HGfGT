@@ -3,7 +3,7 @@ import numpy
 import argparse
 import spacy
 
-nlp = spacy.load('en')
+nlp = spacy.load('en_core_web_lg')
 
 parser = argparse.ArgumentParser(description='Evaluate the results of a model.')
 
