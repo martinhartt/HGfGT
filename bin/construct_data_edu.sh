@@ -27,3 +27,6 @@ echo "Step 3: Construct title-article files."
 python $SCRIPTS/pull.py $WORK/train.data.txt $AGIGA_WORK/train.title.dict $AGIGA_WORK/train.article.dict
 python $SCRIPTS/pull.py $WORK/valid.data.txt $AGIGA_WORK/train.title.dict $AGIGA_WORK/train.article.dict
 python $SCRIPTS/pull.py $WORK/test.data.txt $AGIGA_WORK/train.title.dict $AGIGA_WORK/train.article.dict
+
+
+rm -r $WORK/raw
