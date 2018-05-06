@@ -1,6 +1,7 @@
 # Load data for summary experiments.
 import util
 import torch
+import random
 from torch.autograd import Variable
 from util import apply_cuda
 
@@ -29,7 +30,7 @@ class Data(object):
         for length, _ in self.title_data["target"].iteritems():
             self.bucket_order.append(length)
 
-        util.shuffleTable(self.bucket_order) # Shuffle array
+        random.shuffle(self.bucket_order) # Shuffle array
         self.bucket_index = 0
         self.load_next_bucket()
 
