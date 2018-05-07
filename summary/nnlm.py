@@ -6,7 +6,6 @@ from language_model import LanguageModel
 
 def addOpts(parser):
     parser.add_argument('-epochs',type=int,         default=15, help="Number of epochs to train.")
-    parser.add_argument('-miniBatchSize', type=int, default=64, help="Size of training minibatch.")
     parser.add_argument('-printEvery',type=int, default=10000,  help="How often to print during training.")
     parser.add_argument('-modelFilename', default='', help="File for saving loading/model.")
     parser.add_argument('-window',type=int,         default=5, help="Size of NNLM window.")
@@ -17,20 +16,18 @@ def addOpts(parser):
 
 class NNLM(object):
     """docstring for NNLM."""
-    def __init__(self, opt, dictionary, encoder, encoder_size, encoder_dict):
+    def __init__(self, opt, dictionary, encoder, encoder_size):
         super(NNLM, self).__init__()
         self.opt = opt
         self.dict = dictionary
         self.encoder = encoder
-        self.encoder_size = encoder_size
-        self.encoder_dict = encoder_dict
 
         if opt.restore:
-            self.mlp = torch.load(self.opt.modelFilename)
+            self.mlp = torch.load(opt.modelFilename)
             self.mlp.epoch += 1
-            print("Restoring MLP {} with epoch {}".format(self.opt.modelFilename, self.mlp.epoch))
+            print("Restoring MLP {} with epoch {}".format(opt.modelFilename, self.mlp.epoch))
         else:
-            self.mlp = apply_cuda(LanguageModel(encoder, encoder_size, self.dict, self.opt))
+            self.mlp = apply_cuda(LanguageModel(encoder, encoder_size, self.dict, opt))
             self.mlp.epoch = 0
 
         self.loss = nn.NLLLoss()
@@ -102,20 +99,21 @@ class NNLM(object):
             self.mlp.epoch = epoch
 
             # Loss for the epoch
-            epoch_loss = 0
-            batch = 0
-            last_batch = 0
-            total = 0
-            loss = 0
+            # epoch_loss = 0
+            # batch = 0
+            # last_batch = 0
+            # total = 0
+            # loss = 0
 
-            while not data.is_done():
-                input, target = data.next_batch(self.opt.miniBatchSize)
-                if data.is_done():
-                    break
-
+            for batch in data.next_batch():
                 self.optimizer.zero_grad()
-                out = self.mlp.forward(*input)
-                err = self.loss(out, target)
+
+                losses = []
+                for input, target in batch:
+                    out = self.mlp.forward(input)
+                    err = self.loss(out, target)
+
+                
                 err.backward()
                 self.optimizer.step()
 

@@ -13,19 +13,21 @@ nnlm.addOpts(parser)
 opt = parser.parse_args()
 
 def main():
-    tdata = data.load_title(opt.titleDir, True)
-    article_data = data.load_article(opt.articleDir)
+    dict = data.load(opt.workingDir, 'dict', opt.filter)
 
-    valid_data = data.load_title(opt.validTitleDir, None, tdata["dict"])
-    valid_article_data = data.load_article(opt.validArticleDir, article_data["dict"])
+    train_title = data.load(opt.workingDir, train=True, type="title", filter=opt.filter)
+    train_article = data.load(opt.workingDir, train=True, type="article", filter=opt.filter)
+
+    valid_title = data.load(opt.workingDir, train=False, type="title", filter=opt.filter)
+    valid_article = data.load(opt.workingDir, train=False, type="article", filter=opt.filter)
 
     # Make main LM
-    train_data = data.Data(tdata, article_data)
-    valid = data.Data(valid_data, valid_article_data)
+    train_data = data.Data(train_title, train_article, dict, opt.batchSize)
+    valid_data = data.Data(valid_title, valid_article, dict, opt.batchSize)
 
-    encoder_mlp = encoder.AttnBowEncoder(opt.bowDim, opt.window, len(train_data.title_data["dict"]["index_to_symbol"]), len(train_data.article_data["dict"]["index_to_symbol"]), opt)
+    encoder = encoder.AttnBowEncoder(opt.bowDim, opt.window, len(dict["index_to_symbol"])))
 
-    mlp = nnlm.NNLM(opt, tdata["dict"], encoder_mlp, opt.bowDim, article_data["dict"])
-    mlp.train(train_data, valid)
+    mlp = nnlm.NNLM(opt, dict, encoder, opt.bowDim)
+    mlp.train(train_data, valid_data)
 
 main()

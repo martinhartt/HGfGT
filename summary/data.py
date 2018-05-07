@@ -6,134 +6,31 @@ from torch.autograd import Variable
 from util import apply_cuda
 
 def add_opts(parser):
-   parser.add_argument('-articleDir', default='',
-              help='Directory containing article training matrices.')
-   parser.add_argument('-titleDir', default='',
-              help='Directory containing title training matrices.')
-   parser.add_argument('-validArticleDir', default='',
-              help='Directory containing article matricess for validation.')
-   parser.add_argument('-validTitleDir', default='',
-              help='Directory containing title matrices for validation.')
-   parser.add_argument('-cuda', default=False, type=bool,
-              help='Enable cuda?')
+   parser.add_argument('-workingDir', default='')
+   parser.add_argument('-filter', type=bool, default=True)
+   parser.add_argument('-cuda', default=False, type=bool, help='Enable cuda?')
+    parser.add_argument('-batchSize', type=int, default=64, help="Size of training minibatch.")
 
 class Data(object):
     """docstring for Data."""
-    def __init__(self, title_data, article_data):
+    def __init__(self, title_data, article_data, data, batch_size):
         super(Data, self).__init__()
-        self.title_data = title_data
-        self.article_data = article_data
+        self.dict = dict
+        self.pairs = zip(article_data, title_data)
+        self.numOfBatches = len(self.pairs) / batch_size
         self.reset()
 
     def reset(self):
-        self.bucket_order = []
-        for length, _ in self.title_data["target"].iteritems():
-            self.bucket_order.append(length)
+        random.shuffle(self.pairs)
 
-        random.shuffle(self.bucket_order) # Shuffle array
-        self.bucket_index = 0
-        self.load_next_bucket()
+    def next_batch(self, batch_size):
+        for i in self.numOfBatches:
+            start = i * batch_size
+            end = math.min(len(self.pairs), start + batch_size)
 
-    def load_next_bucket(self):
-        self.done_bucket = self.bucket_index >= len(self.bucket_order) - 1
+            yield self.pairs[start:end]
 
-        self.bucket = self.bucket_order[self.bucket_index]
-        self.bucket_size = self.title_data["target"][self.bucket].size(0)
-        self.pos = 0
-        self.aux_ptrs = self.title_data["sentences"][self.bucket].float().long() # ??
-        self.positions = apply_cuda(torch.arange(0, self.bucket).view(1, self.bucket)
-            .expand(1000, self.bucket).contiguous()) + (200 * self.bucket)
-        self.bucket_index += 1
-
-    def is_done(self):
-        return self.bucket_index >= len(self.bucket_order) and self.done_bucket
-
-    def next_batch(self, max_size):
-        diff = self.bucket_size - self.pos
-        if self.done_bucket or diff == 0 or diff == 1:
-            self.load_next_bucket()
-
-        if self.pos + max_size > self.bucket_order:
-            offset = self.bucket_size - self.pos
-            self.done_bucket = true
-        else:
-            offset = max_size
-
-        positions = apply_cuda(self.positions.narrow(0, 0, offset))
-
-        try:
-            temp = self.aux_ptrs.narrow(0, self.pos, offset)
-            aux_rows = apply_cuda(torch.index_select(self.article_data["words"][self.bucket], 0, temp))
-            context = apply_cuda(self.title_data["ngram"][self.bucket].narrow(0, self.pos, offset))
-            target = apply_cuda(self.title_data["target"][self.bucket].narrow(0, self.pos, offset))
-            self.pos += offset
-            return [Variable(tensor) for tensor in [aux_rows, positions, context]], Variable(target.long())
-        except Exception as e:
-            self.done_bucket = True
-            return self.next_batch(max_size)
-
-
-# Returns title dictionary containing
-#
-#   dict:
-#     symbol_to_index: [string: int]
-#     index_to_symbol: [int: string]
-def load_title(dname, shuffle=None, use_dict=None):
-    ngram = torch.load('{}ngram.mat.torch'.format(dname))
-    words = torch.load('{}word.mat.torch'.format(dname))
-    dictionary = use_dict or torch.load('{}dict'.format(dname))
-    target_full = {}
-    sentences_full = {}
-    pos_full = {}
-
-    for length, mat in ngram.iteritems():
-        if shuffle != None:
-            perm = torch.randperm(ngram[length].size(0))
-            ngram[length] = apply_cuda(torch.index_select(ngram[length], 0, perm).float())
-            words[length] = torch.index_select(words[length], 0, perm)
-        else:
-            ngram[length] = apply_cuda(ngram[length].float())
-            assert(ngram[length].size(0) == words[length].size(0))
-
-        target_full[length] = apply_cuda(words[length][:, 0].contiguous().float())
-        sentences_full[length] = apply_cuda(words[length][:, 1].contiguous().float())
-        pos_full[length] = words[length][:, 2]
-
-    title_data = {"ngram": ngram,
-                  "target": target_full,
-                  "sentences": sentences_full,
-                  "pos": pos_full,
-                  "dict": dictionary}
-    return title_data
-
-# Returns article dictionary containing
-#   words:
-#     tensor of: line lengths x nth sentence of length x index of word in sentence
-#   dict:
-#     symbol_to_index: [string: int]
-#     index_to_symbol: [int: string]
-def load_article(dname, use_dict=None):
-    input_words = torch.load('{}word.mat.torch'.format(dname))
-    # offsets = torch.load('{}offset.mat.torch'.format(dname))
-
-    dictionary = use_dict or torch.load('{}dict'.format(dname))
-    for length, mat in input_words.iteritems():
-        input_words[length] = mat
-        input_words[length] = apply_cuda(input_words[length].float())
-
-    article_data = {"words": input_words, "dict": dictionary}
-    return article_data
-
-def make_input(article, context, K):
-    bucket = article.size(0)
-    aux_sentence = apply_cuda(article.view(bucket, 1)
-        .expand(bucket, K)
-        .t()
-        .contiguous())
-    positions = apply_cuda(torch.arange(0, bucket)
-        .view(bucket, 1)
-        .expand(bucket, K)
-        .t()
-        .contiguous()) + (200 * bucket)
-
-    return [Variable(tensor) for tensor in [aux_sentence, positions, context]]
+def load(dname, train=True, type="dict", filter=True):
+    prefix = ".filter" if filter else ".all"
+    prefix += ".train" if train else ".valid"
+    return torch.load('{}{}.{}.torch'.format(dname, prefix, type))
