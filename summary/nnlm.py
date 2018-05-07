@@ -53,7 +53,7 @@ class NNLM(object):
             self.mlp.epoch = 0
 
         self.loss = nn.NLLLoss()
-        self.lookup = self.mlp.context_lookup
+        self.embedding = self.mlp.context_embedding
         self.optimizer = torch.optim.SGD(
             self.mlp.parameters(), self.opt.learningRate)  # Half learning rate
 
@@ -65,7 +65,7 @@ class NNLM(object):
 
         while not valid_data.is_done():
             input, target = valid_data.next_batch(offset)
-            out = self.mlp.forward(*input)
+            out = self.mlp(*input)
             err = self.loss(out, target) * target.size(0)
 
             # Augment counters
@@ -99,8 +99,8 @@ class NNLM(object):
                 data[i] = data[i].div(norm / th)
 
     def renorm_tables(self):
-        if self.lookup != None:
-            self.renorm(self.lookup.weight.data)
+        if self.embedding != None:
+            self.renorm(self.embedding.weight.data)
 
         if self.encoder.article_embedding != None:
             self.renorm(self.encoder.article_embedding.weight.data)
@@ -131,7 +131,7 @@ class NNLM(object):
 
                 losses = []
                 for input, target in batch:
-                    out = self.mlp.forward(input)
+                    out = self.mlp(input)
                     err = self.loss(out, target)
 
                 err.backward()

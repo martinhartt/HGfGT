@@ -147,7 +147,7 @@ def main():
             # (1) Score all next words for each context in the beam.
             #    log p(y_{i+1} | y_c, x) for all y_c
             input = data.make_input(article, cur_beam, cur_K)
-            model_scores = mlp.forward(*input)
+            model_scores = mlp(*input)
             out_scores = model_scores.data.clone().double().mul(opt.lmWeight)
 
             # If length limit is reached, next word must be end.
