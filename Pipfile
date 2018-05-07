@@ -10,6 +10,7 @@ torchvision = "*"
 spacy = "*"
 rouge = "*"
 sumy = "*"
+yapf = "*"
 
 [dev-packages]
 

@@ -9,7 +9,6 @@
 #  Author: Alexander M Rush <srush@seas.harvard.edu>
 #          Sumit Chopra <spchopra@fb.com>
 #          Jason Weston <jase@fb.com>
-
 """
 Pull out elements of the title-article file.
 """
@@ -34,7 +33,9 @@ for l in open(INPUT_FILENAME):
 
     title, article = splits
 
-    article_words = [w if w in article_dict else "<unk>" for w in article.split()]
+    article_words = [
+        w if w in article_dict else "<unk>" for w in article.split()
+    ]
     article_out.write(" ".join(article_words))
     article_out.write("\n")
 

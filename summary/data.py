@@ -5,14 +5,18 @@ import random
 from torch.autograd import Variable
 from util import apply_cuda
 
+
 def add_opts(parser):
-   parser.add_argument('-workingDir', default='')
-   parser.add_argument('-filter', type=bool, default=True)
-   parser.add_argument('-cuda', default=False, type=bool, help='Enable cuda?')
-    parser.add_argument('-batchSize', type=int, default=64, help="Size of training minibatch.")
+    parser.add_argument('-workingDir', default='')
+    parser.add_argument('-filter', type=bool, default=True)
+    parser.add_argument('-cuda', default=False, type=bool, help='Enable cuda?')
+    parser.add_argument(
+        '-batchSize', type=int, default=64, help="Size of training minibatch.")
+
 
 class Data(object):
     """docstring for Data."""
+
     def __init__(self, title_data, article_data, data, batch_size):
         super(Data, self).__init__()
         self.dict = dict
@@ -29,6 +33,7 @@ class Data(object):
             end = math.min(len(self.pairs), start + batch_size)
 
             yield self.pairs[start:end]
+
 
 def load(dname, train=True, type="dict", filter=True):
     prefix = ".filter" if filter else ".all"

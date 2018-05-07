@@ -2,20 +2,29 @@ import torch
 import torch.legacy.nn as tnn
 import torch.nn as nn
 
+
 def add_opts(parser):
-    parser.add_argument('-encoderModel', default='bow',help= "The encoder model to use.")
-    parser.add_argument('-bowDim', type=int,      default=50, help="Article embedding size.")
-    parser.add_argument('-attenPool', type=int,    default=5, help="Attention model pooling size.")
+    parser.add_argument(
+        '-encoderModel', default='bow', help="The encoder model to use.")
+    parser.add_argument(
+        '-bowDim', type=int, default=50, help="Article embedding size.")
+    parser.add_argument(
+        '-attenPool',
+        type=int,
+        default=5,
+        help="Attention model pooling size.")
+
 
 class AttnBowEncoder(nn.Module):
     """docstring for AttnBowEncoder."""
+
     def __init__(self, bow_dim, window_size, vocab_size):
         super(AttnBowEncoder, self).__init__()
 
-        self.bow_dim = bow_dim # D2
-        self.window_size = window_size # N
-        self.title_vocab_size = title_vocab_size # V
-        self.article_vocab_size = article_vocab_size # V2
+        self.bow_dim = bow_dim  # D2
+        self.window_size = window_size  # N
+        self.title_vocab_size = title_vocab_size  # V
+        self.article_vocab_size = article_vocab_size  # V2
 
         self.article_embedding = nn.Embedding(article_vocab_size, bow_dim)
         self.title_embedding = nn.Embedding(title_vocab_size, bow_dim)
@@ -26,7 +35,7 @@ class AttnBowEncoder(nn.Module):
         self.non_linearity = nn.Softmax()
 
         self.mout_linear = nn.Linear(bow_dim, bow_dim)
-        self.pool_layer = nn.AvgPool2d((5,1), stride=(1,1))
+        self.pool_layer = nn.AvgPool2d((5, 1), stride=(1, 1))
 
     def forward(self, article, size, title):
         article = self.article_embedding(article.long())
@@ -43,9 +52,9 @@ class AttnBowEncoder(nn.Module):
         attention = torch.sum(dot_article_context, 2)
         attention = self.non_linearity(attention)
 
-
         process_article = article.view(n, 1, -1, self.bow_dim)
-        process_article = nn.ZeroPad2d((0, 0, self.pad, self.pad)).forward(process_article)
+        process_article = nn.ZeroPad2d((0, 0, self.pad,
+                                        self.pad)).forward(process_article)
         process_article = self.pool_layer.forward(process_article)
 
         process_article = torch.sum(process_article, 1)

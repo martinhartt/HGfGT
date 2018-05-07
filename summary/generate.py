@@ -12,25 +12,57 @@ import math
 
 parser = argparse.ArgumentParser(description='Train a summarization model.')
 
-parser.add_argument('-modelFilename',  default='', help='Model to test.')
-parser.add_argument('-inputf',         default='', help='Input article files. ')
-parser.add_argument('-nbest',type=bool,       default=False, help='Write out the nbest list in ZMert format.')
-parser.add_argument('-length',type=int,          default=15, help='Maximum length of summary.')
-parser.add_argument('-allowUNK', type=bool,          default=False, help="Allow generating <unk>.")
-parser.add_argument('-fixedLength', type=bool,       default=True,  help="Produce exactly -length words.")
-parser.add_argument('-blockRepeatWords', type=bool,  default=False, help="Disallow generating a word twice.")
-parser.add_argument('-lmWeight', type=float,            default=1.0, help="Weight for main model.")
-parser.add_argument('-beamSize', type=int,            default=100, help="Size of the beam.")
-parser.add_argument('-extractive', type=bool,        default=False, help="Force fully extractive summary.")
-parser.add_argument('-abstractive', type=bool,       default=False, help="Force fully abstractive summary.")
-parser.add_argument('-recombine', type=bool,         default=False, help="Used hypothesis recombination.")
-parser.add_argument('-showCandidates', type=bool, default=False, help="If true, shows next most likely summaries.")
-
+parser.add_argument('-modelFilename', default='', help='Model to test.')
+parser.add_argument('-inputf', default='', help='Input article files. ')
+parser.add_argument(
+    '-nbest',
+    type=bool,
+    default=False,
+    help='Write out the nbest list in ZMert format.')
+parser.add_argument(
+    '-length', type=int, default=15, help='Maximum length of summary.')
+parser.add_argument(
+    '-allowUNK', type=bool, default=False, help="Allow generating <unk>.")
+parser.add_argument(
+    '-fixedLength',
+    type=bool,
+    default=True,
+    help="Produce exactly -length words.")
+parser.add_argument(
+    '-blockRepeatWords',
+    type=bool,
+    default=False,
+    help="Disallow generating a word twice.")
+parser.add_argument(
+    '-lmWeight', type=float, default=1.0, help="Weight for main model.")
+parser.add_argument(
+    '-beamSize', type=int, default=100, help="Size of the beam.")
+parser.add_argument(
+    '-extractive',
+    type=bool,
+    default=False,
+    help="Force fully extractive summary.")
+parser.add_argument(
+    '-abstractive',
+    type=bool,
+    default=False,
+    help="Force fully abstractive summary.")
+parser.add_argument(
+    '-recombine',
+    type=bool,
+    default=False,
+    help="Used hypothesis recombination.")
+parser.add_argument(
+    '-showCandidates',
+    type=bool,
+    default=False,
+    help="If true, shows next most likely summaries.")
 
 data.add_opts(parser)
 
 opt = parser.parse_args()
 data.enable_cuda = opt.cuda
+
 
 # Map the words from one dictionary to another.
 def sync_dicts(dict1, dict2):
@@ -45,8 +77,10 @@ def sync_dicts(dict1, dict2):
 
     return dict_map
 
+
 def process_word(input_word):
     return re.sub(r'\d', '#', input_word.lower())
+
 
 def main():
     mlp = torch.load(opt.modelFilename)
@@ -96,7 +130,6 @@ def main():
             except Exception as e:
                 article[j] = a_s2i["<unk>"]
 
-
         n = opt.length
 
         # Initilize the charts.
@@ -104,11 +137,11 @@ def main():
         # hyps[i][k] contains the words in k'th hyp at
         #          i word (left padded with W <s>) tokens.
         result = []
-        scores = apply_cuda(torch.zeros(n+1, K).float())
-        hyps = apply_cuda(torch.zeros(n+1, K, W+n+1).long().fill_(START))
+        scores = apply_cuda(torch.zeros(n + 1, K).float())
+        hyps = apply_cuda(torch.zeros(n + 1, K, W + n + 1).long().fill_(START))
 
         for i in range(n):
-            cur_beam = hyps[i].narrow(1, i+1, W)
+            cur_beam = hyps[i].narrow(1, i + 1, W)
             cur_K = K
 
             # (1) Score all next words for each context in the beam.
@@ -118,7 +151,7 @@ def main():
             out_scores = model_scores.data.clone().double().mul(opt.lmWeight)
 
             # If length limit is reached, next word must be end.
-            finalized = (i == n-1) and opt.fixedLength
+            finalized = (i == n - 1) and opt.fixedLength
 
             if finalized:
                 out_scores[:, END] += FINAL_VAL
@@ -144,7 +177,8 @@ def main():
             # (2) Retain the K-best words for each hypothesis using GPU.
             # This leaves a KxK matrix which we flatten to a K^2 vector.
             max_scores, mat_indices = torch.topk(apply_cuda(out_scores), K)
-            flat = max_scores.view(max_scores.size(0) * max_scores.size(1)).float()
+            flat = max_scores.view(
+                max_scores.size(0) * max_scores.size(1)).float()
 
             # 3) Construct the next hypotheses by taking the next k-best.
             for k in range(K):
@@ -158,7 +192,7 @@ def main():
                     if finalized:
                         score -= FINAL_VAL
 
-                    scores[i+1][k] = score
+                    scores[i + 1][k] = score
 
                     def flat_to_rc(v, indices, flat_index):
                         row = int(math.floor((flat_index) / v.size(1)))
@@ -172,30 +206,32 @@ def main():
                     # (3c) Add the word, its score, and its features to the
                     # beam.
                     # Update tables with new hypothesis
-                    for j in range(i+W):
-                        hyps[i+1][k][j] = hyps[i][prev_k][j]
+                    for j in range(i + W):
+                        hyps[i + 1][k][j] = hyps[i][prev_k][j]
 
-                    hyps[i+1][k][i+W] = y_i1
-
+                    hyps[i + 1][k][i + W] = y_i1
 
                     # If we have produced an END symbol, push to stack
                     if y_i1 == END:
-                        result.append((i + 1, scores[i+1][k], hyps[i+1][k].clone()))
-                        scores[i+1][k] = -INF
+                        result.append((i + 1, scores[i + 1][k],
+                                       hyps[i + 1][k].clone()))
+                        scores[i + 1][k] = -INF
 
         sorted_results = sorted(result, key=lambda a: a[1])
 
         numOfCandidates = 5 if opt.showCandidates else 1
 
-        for (rank, (_, score, output)) in enumerate(sorted_results[:numOfCandidates]):
+        for (rank, (_, score,
+                    output)) in enumerate(sorted_results[:numOfCandidates]):
 
-            final = "\n{}.".format(rank+1) if opt.showCandidates else ""
+            final = "\n{}.".format(rank + 1) if opt.showCandidates else ""
 
-            for j in range(W+2, W+length-1):
+            for j in range(W + 2, W + length - 1):
                 index = int(output[j])
                 word = t_i2s[index]
                 final += " {}".format(word)
 
             print(final.strip())
+
 
 main()

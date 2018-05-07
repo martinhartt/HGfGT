@@ -5,10 +5,7 @@ inputDict = sys.argv[1]
 outputFile = sys.argv[2]
 
 word_id = 0
-dict = {
-    "symbol_to_index": {},
-    "index_to_symbol": {}
-}
+dict = {"symbol_to_index": {}, "index_to_symbol": {}}
 
 for l in open(inputDict):
     word = l.split()[0]
