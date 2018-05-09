@@ -15,9 +15,6 @@
 import sys
 import os
 import re
-import gzip
-#@lint-avoid-python-3-compatibility-imports
-
 
 # Make directory for output if it doesn't exist
 
@@ -35,6 +32,7 @@ out = open(sys.argv[2] + "/raw/" + end, "w")
 NONE, HEAD, NEXT, TEXT = 0, 1, 2, 3
 MODE = NONE
 
+
 def normalize(sent):
     sent = sent.lower()
     sent = re.sub(r"([.!?])", r" \1", sent)
@@ -42,6 +40,7 @@ def normalize(sent):
     sent = re.sub(r'\d', '#', sent)
     sent += " "
     return sent
+
 
 title = ""
 article = ""

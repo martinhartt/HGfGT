@@ -17,6 +17,7 @@ import os
 import re
 import gzip
 
+
 # Make directory for output if it doesn't exist
 
 try:
@@ -33,6 +34,7 @@ out = open(sys.argv[2] + "/raw/" + end, "w")
 NONE, HEAD, NEXT, TEXT = 0, 1, 2, 3
 MODE = NONE
 
+
 def normalize(sent):
     sent = sent.lower()
     sent = re.sub(r"([.!?])", r" \1", sent)
@@ -40,6 +42,7 @@ def normalize(sent):
     sent = re.sub(r'\d', '#', sent)
     sent += " "
     return sent
+
 
 title = ""
 article = ""
@@ -49,6 +52,9 @@ for l in gzip.open(sys.argv[1]):
     if MODE == HEAD:
         title += normalize(line)
         MODE = NEXT
+
+    if MODE == TEXT and line == "</P>":
+        article += "<sb> "
 
     if MODE == TEXT and len(line) > 0 and line[0] != "<":
         article += normalize(line)

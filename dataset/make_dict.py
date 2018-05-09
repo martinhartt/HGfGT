@@ -12,35 +12,27 @@
 
 import sys
 from collections import Counter
-#@lint-avoid-python-3-compatibility-imports
 
-title_words = Counter()
-article_words = Counter()
+words = Counter()
 limit = int(sys.argv[3])
 
 for l in open(sys.argv[1]):
     splits = l.strip().split("\t")
     if len(splits) != 2:
         continue
+
     title, article = l.strip().split("\t")
-    title_words.update(title.lower().split())
-    article_words.update(article.lower().split())
 
-with open(sys.argv[2] + ".article.dict", "w") as f:
+    words.update(title.lower().split())
+    words.update(article.lower().split())
+
+with open(sys.argv[2] + ".dict", "w") as f:
     f.write("<unk> {}\n".format(1e5))
     f.write("<s> {}\n".format(1e5))
     f.write("</s> {}\n".format(1e5))
+    f.write("<sb> {}\n".format(1e5))
 
-    for word, count in article_words.most_common():
-        if count < limit:
-            break
-        f.write("{} {}\n".format(word, count))
-
-with open(sys.argv[2] + ".title.dict", "w") as f:
-    f.write("<unk> {}\n".format(1e5))
-    f.write("<s> {}\n".format(1e5))
-    f.write("</s> {}\n".format(1e5))
-    for word, count in title_words.most_common():
+    for word, count in words.most_common():
         if count < limit:
             break
         f.write("{} {}\n".format(word, count))

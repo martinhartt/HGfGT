@@ -3,13 +3,12 @@ import os
 
 dataset = sys.argv[1]
 
-proportions = {
-    "train": 0.9,
-    "test": 0.05,
-    "valid": 0.05
-}
+proportions = {"train": 0.9, "test": 0.05, "valid": 0.05}
 
-dirs = [name for name in os.listdir(dataset) if os.path.isdir(os.path.join(dataset, name))]
+dirs = [
+    name for name in os.listdir(dataset)
+    if os.path.isdir(os.path.join(dataset, name))
+]
 
 outs = {
     "train": open(os.path.join(dataset, 'train.splits'), 'w'),
@@ -19,7 +18,11 @@ outs = {
 }
 
 for dir_name in dirs:
-    files = [os.path.join(dir_name, name) for name in os.listdir(os.path.join(dataset, dir_name)) if os.path.isfile(os.path.join(dataset, dir_name, name))]
+    files = [
+        os.path.join(dir_name, name)
+        for name in os.listdir(os.path.join(dataset, dir_name))
+        if os.path.isfile(os.path.join(dataset, dir_name, name))
+    ]
     num_files = len(files)
     last_index = 0
 
@@ -31,5 +34,5 @@ for dir_name in dirs:
         outs[key].write('\n')
         last_index = upper
 
-    outs["small_train"].write('\n'.join(files[0:int(num_files*0.1)]))
+    outs["small_train"].write('\n'.join(files[0:int(num_files * 0.1)]))
     outs["small_train"].write('\n')

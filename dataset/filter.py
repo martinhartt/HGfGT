@@ -11,7 +11,6 @@
 #          Jason Weston <jase@fb.com>
 
 import sys
-import spacy
 
 for l in open(sys.argv[1]):
     splits = l.strip().split("\t")
@@ -21,7 +20,7 @@ for l in open(sys.argv[1]):
 
     # Get only first sentence
     try:
-        sent_boundary = article.index('. ')
+        sent_boundary = article.index('<sb> ')
         article = article[0:sent_boundary]
     except Exception as e:
         pass
@@ -34,13 +33,13 @@ for l in open(sys.argv[1]):
     article_words = article.split()
 
     # Reasonable lengths
-    if not (10 < len(article_words) < 100 and
-            3 < len(title_words) < 50):
+    if not (10 < len(article_words) < 100 and 3 < len(title_words) < 50):
         continue
 
     # Some word match.
-    matches = len(set([w.lower() for w in title_words if len(w) > 3]) &
-                  set([w.lower() for w in article_words if len(w) > 3]))
+    matches = len(
+        set([w.lower() for w in title_words if len(w) > 3]) & set(
+            [w.lower() for w in article_words if len(w) > 3]))
     if matches < 1:
         continue
 
