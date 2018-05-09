@@ -7,7 +7,7 @@ export WORK=$ABS/working_agiga
 export THREADS=30
 export SCRIPTS=$ABS/dataset
 export SPLITS=$ABS/$AGIGA
-export UNK=2
+export UNK=5
 export OUT_DIR=$WORK/processed
 
 
