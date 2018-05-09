@@ -3,7 +3,7 @@ set -e
 
 export ABS="$(dirname $(dirname $0))"
 export AGIGA=data/agiga
-export WORK=$ABS/working_agiga_temp
+export WORK=$ABS/working_agiga
 export THREADS=30
 export SCRIPTS=$ABS/dataset
 export SPLITS=$ABS/$AGIGA
@@ -18,10 +18,10 @@ if [[ $* == *--extract* ]]
 then
   mkdir -p $WORK/raw
   find $ABS/$AGIGA/**/*.gz | wc -l | xargs echo "Total files to process:"
-  find $ABS/$AGIGA/**/*.gz | parallel --gnu --progress -j $THREADS python2.7 $SCRIPTS/process_agiga.py \{\} $WORK
+  # find $ABS/$AGIGA/**/*.gz | parallel --gnu --progress -j $THREADS python2.7 $SCRIPTS/process_agiga.py \{\} $WORK
 
   # Compile the data into train/dev/test.
-  cat "$SPLITS/small_train.splits" | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/train.data.txt"
+  cat "$SPLITS/train.splits" | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/train.data.txt"
   cat "$SPLITS/valid.splits" | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/valid.data.txt"
   cat "$SPLITS/test.splits"  | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/test.data.txt"
 fi

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export ABS="$(dirname $(dirname $0))"
-export WORK=$ABS/working_agiga_temp
+export WORK=$ABS/working_agiga
 export WINDOW=5
 export OUT_DIR=$WORK/processed
 export MDL_DIR=$WORK/models
