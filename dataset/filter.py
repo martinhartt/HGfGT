@@ -11,7 +11,6 @@
 #          Jason Weston <jase@fb.com>
 
 import sys
-import spacy
 
 for l in open(sys.argv[1]):
     splits = l.strip().split("\t")

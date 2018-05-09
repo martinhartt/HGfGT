@@ -68,14 +68,14 @@ class NNLM(object):
         total = 0
         valid_data.reset()
 
-        while not valid_data.is_done():
-            input, target = valid_data.next_batch(offset)
-            out = self.mlp(*input)
-            err = self.loss(out, target) * target.size(0)
+        for inputs, targets in valid_data.next_batch(offset):
+            article, context = inputs
+            out = self.mlp(article, context)
+            err = self.loss(out, targets) * targets.size(0)
 
             # Augment counters
             loss += float(err)
-            total += int(target.size(0))
+            total += int(targets.size(0))
 
         print("[perp: %f validation: %f total: %d]".format(
             math.exp(loss / total),
@@ -91,7 +91,7 @@ class NNLM(object):
             if cur_valid_loss > self.last_valid_loss:
                 self.opt.learningRate = self.opt.learningRate / 2
 
-                for param_group in optimizer.param_groups:
+                for param_group in self.optimizer.param_groups:
                     param_group['lr'] = self.opt.learningRate
 
             self.last_valid_loss = cur_valid_loss
@@ -131,10 +131,10 @@ class NNLM(object):
             total = 0
             loss = 0
 
-            for input, target in data.next_batch(miniBatchSize):
+            for inputs, targets in data.next_batch(self.opt.miniBatchSize):
                 self.optimizer.zero_grad()
-                out = self.mlp(*input)
-                err = self.loss(out, target)
+                out = self.mlp(*inputs)
+                err = self.loss(out, targets)
 
                 err.backward()
                 self.optimizer.step()

@@ -1,5 +1,4 @@
 import torch
-import torch.legacy.nn as tnn
 import torch.nn as nn
 
 
@@ -18,7 +17,7 @@ def add_opts(parser):
 class AttnBowEncoder(nn.Module):
     """docstring for AttnBowEncoder."""
 
-    def __init__(self, bow_dim, window_size, vocab_size):
+    def __init__(self, bow_dim, window_size, vocab_size, opt):
         super(AttnBowEncoder, self).__init__()
 
         self.bow_dim = bow_dim  # D2
@@ -39,8 +38,8 @@ class AttnBowEncoder(nn.Module):
     def forward(self, article, title_ctx):
         batch_size = article.shape[0]
 
-        article = self.article_embedding(article.long())
-        title_ctx = self.title_embedding(title_ctx.long())
+        article = self.article_embedding(article)
+        title_ctx = self.title_embedding(title_ctx)
 
         title_ctx = title_ctx.view(batch_size, self.window_size * self.bow_dim)
         title_ctx = self.title_linear(title_ctx)

@@ -2,9 +2,7 @@ import torch
 import torch.nn as nn
 
 import nnlm
-import encoder
 import argparse
-import util
 from util import apply_cuda
 import data
 import re
@@ -127,7 +125,7 @@ def main():
             word = process_word(words[j])
             try:
                 article[j] = a_w2i[word] or a_w2i["<unk>"]
-            except Exception as e:
+            except Exception:
                 article[j] = a_w2i["<unk>"]
 
         n = opt.length

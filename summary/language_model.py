@@ -28,7 +28,7 @@ class LanguageModel(nn.Module):
         batch_size = article.shape[0]
 
         article = self.encoder(article, title_context)
-        context = self.context_embedding(title_context.long())
+        context = self.context_embedding(title_context)
 
         # tanh W (E y)
         context = context.view(batch_size, self.embedding_dim * self.window)

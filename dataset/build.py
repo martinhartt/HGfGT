@@ -1,6 +1,5 @@
 import torch
 import argparse
-from collections import Counter
 
 parser = argparse.ArgumentParser(
     description='Build torch serialized version of a summarization problem.')
@@ -14,8 +13,7 @@ opt = parser.parse_args()
 
 
 def encode(sentence, w2i):
-    return torch.tensor([w2i[word] for word in sentence.split()])
-
+    return torch.tensor([w2i.get(word, w2i['<unk>']) for word in sentence.split()])
 
 def main():
     dict = torch.load(opt.inDictionary)
@@ -23,12 +21,13 @@ def main():
     titleTensors = []
     articleTensors = []
 
-    for l in open(inputFile):
+    for l in open(opt.inputFile):
         title, article = l.strip().split('\t')
 
-        titleTensors.append(encode(title))
-        articleTensors.append(encode(article))
+        titleTensors.append(encode(title, dict["w2i"]))
+        articleTensors.append(encode(article, dict["w2i"]))
 
+    print("Saving inputs...")
     torch.save(titleTensors, '{}/{}.article.torch'.format(
         opt.outDirectory, opt.outPrefix))
     torch.save(articleTensors, '{}/{}.title.torch'.format(

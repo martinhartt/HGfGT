@@ -15,8 +15,6 @@
 import sys
 import os
 import re
-import gzip
-#@lint-avoid-python-3-compatibility-imports
 
 # Make directory for output if it doesn't exist
 
