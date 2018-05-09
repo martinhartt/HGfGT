@@ -18,8 +18,10 @@ if [[ $* == *--extract* ]]
 then
   mkdir -p $WORK/raw
   find $ABS/$AGIGA/**/*.gz | wc -l | xargs echo "Total files to process:"
-  # find $ABS/$AGIGA/**/*.gz | parallel --gnu --progress -j $THREADS python2.7 $SCRIPTS/process_agiga.py \{\} $WORK
+  find $ABS/$AGIGA/**/*.gz | parallel --gnu --progress -j $THREADS python2.7 $SCRIPTS/process_agiga.py \{\} $WORK
+fi
 
+if [[ $* == *--splits* ]]
   # Compile the data into train/dev/test.
   cat "$SPLITS/train.splits" | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/train.data.txt"
   cat "$SPLITS/valid.splits" | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/valid.data.txt"
