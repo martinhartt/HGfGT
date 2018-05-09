@@ -66,11 +66,11 @@ data.enable_cuda = opt.cuda
 
 # Map the words from one dictionary to another.
 def sync_dicts(dict1, dict2):
-    dict_map = torch.ones(len(dict1["index_to_symbol"])).long()
-    for i in range(len(dict1["index_to_symbol"])):
-        temp = dict1["index_to_symbol"][i]
+    dict_map = torch.ones(len(dict1["i2w"])).long()
+    for i in range(len(dict1["i2w"])):
+        temp = dict1["i2w"][i]
         try:
-            res = dict2["symbol_to_index"][temp]
+            res = dict2["w2i"][temp]
             dict_map[i] = res or 0
         except Exception as e:
             dict_map[i] = 0
@@ -95,18 +95,18 @@ def main():
     sent_file = open(opt.inputf).read().split("\n")
     length = opt.length
     W = mlp.window
-    a_s2i = adict["symbol_to_index"]
-    a_i2s = adict["index_to_symbol"]
-    t_s2i = tdict["symbol_to_index"]
-    t_i2s = tdict["index_to_symbol"]
+    a_w2i = adict["w2i"]
+    a_i2w = adict["i2w"]
+    t_w2i = tdict["w2i"]
+    t_i2w = tdict["i2w"]
 
     K = opt.beamSize
     FINAL_VAL = 1000
     INF = float('inf')
 
-    UNK = t_s2i["<unk>"]
-    START = t_s2i["<s>"]
-    END = t_s2i["</s>"]
+    UNK = t_w2i["<unk>"]
+    START = t_w2i["<s>"]
+    END = t_w2i["</s>"]
 
     W = mlp.window
     opt.window = mlp.window
@@ -126,9 +126,9 @@ def main():
         for j in range(0, len(words)):
             word = process_word(words[j])
             try:
-                article[j] = a_s2i[word] or a_s2i["<unk>"]
+                article[j] = a_w2i[word] or a_w2i["<unk>"]
             except Exception as e:
-                article[j] = a_s2i["<unk>"]
+                article[j] = a_w2i["<unk>"]
 
         n = opt.length
 
@@ -228,7 +228,7 @@ def main():
 
             for j in range(W + 2, W + length - 1):
                 index = int(output[j])
-                word = t_i2s[index]
+                word = t_i2w[index]
                 final += " {}".format(word)
 
             print(final.strip())

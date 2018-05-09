@@ -31,6 +31,11 @@ def addOpts(parser):
         type=bool,
         default=False,
         help="Should a previous model be restored?")
+    parser.add_argument(
+        '-miniBatchSize',
+        type=int,
+        default=64,
+        help="Size of training minibatch.")
 
 
 class NNLM(object):
@@ -120,19 +125,16 @@ class NNLM(object):
             self.mlp.epoch = epoch
 
             # Loss for the epoch
-            # epoch_loss = 0
-            # batch = 0
-            # last_batch = 0
-            # total = 0
-            # loss = 0
+            epoch_loss = 0
+            batch = 0
+            last_batch = 0
+            total = 0
+            loss = 0
 
-            for batch in data.next_batch():
+            for input, target in data.next_batch(miniBatchSize):
                 self.optimizer.zero_grad()
-
-                losses = []
-                for input, target in batch:
-                    out = self.mlp(input)
-                    err = self.loss(out, target)
+                out = self.mlp(*input)
+                err = self.loss(out, target)
 
                 err.backward()
                 self.optimizer.step()

@@ -17,6 +17,7 @@ import os
 import re
 import gzip
 
+
 # Make directory for output if it doesn't exist
 
 try:
@@ -51,6 +52,9 @@ for l in gzip.open(sys.argv[1]):
     if MODE == HEAD:
         title += normalize(line)
         MODE = NEXT
+
+    if MODE == TEXT and line == "</P>":
+        article += "<sb> "
 
     if MODE == TEXT and len(line) > 0 and line[0] != "<":
         article += normalize(line)

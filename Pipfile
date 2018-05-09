@@ -11,6 +11,7 @@ spacy = "*"
 rouge = "*"
 sumy = "*"
 yapf = "*"
+tqdm = "*"
 
 [dev-packages]
 

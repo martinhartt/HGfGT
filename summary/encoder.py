@@ -23,11 +23,10 @@ class AttnBowEncoder(nn.Module):
 
         self.bow_dim = bow_dim  # D2
         self.window_size = window_size  # N
-        self.title_vocab_size = title_vocab_size  # V
-        self.article_vocab_size = article_vocab_size  # V2
+        self.vocab_size = vocab_size  # V
 
-        self.article_embedding = nn.Embedding(article_vocab_size, bow_dim)
-        self.title_embedding = nn.Embedding(title_vocab_size, bow_dim)
+        self.article_embedding = nn.Embedding(vocab_size, bow_dim)
+        self.title_embedding = nn.Embedding(vocab_size, bow_dim)
 
         self.pad = (opt.attenPool - 1) / 2
         self.title_linear = nn.Linear(window_size * bow_dim, bow_dim)
@@ -37,17 +36,17 @@ class AttnBowEncoder(nn.Module):
         self.mout_linear = nn.Linear(bow_dim, bow_dim)
         self.pool_layer = nn.AvgPool2d((5, 1), stride=(1, 1))
 
-    def forward(self, article, title):
+    def forward(self, article, title_ctx):
         batch_size = article.shape[0]
 
         article = self.article_embedding(article.long())
-        title = self.title_embedding(title.long())
+        title_ctx = self.title_embedding(title_ctx.long())
 
-        title = title.view(batch_size, self.window_size * self.bow_dim)
-        title = self.title_linear(title)
-        title = title.view(batch_size, self.bow_dim, 1)
+        title_ctx = title_ctx.view(batch_size, self.window_size * self.bow_dim)
+        title_ctx = self.title_linear(title_ctx)
+        title_ctx = title_ctx.view(batch_size, self.bow_dim, 1)
 
-        dot_article_context = torch.matmul(article, title)
+        dot_article_context = torch.matmul(article, title_ctx)
 
         attention = torch.sum(dot_article_context, 2)  # ?
         attention = self.non_linearity(attention)

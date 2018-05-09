@@ -12,7 +12,6 @@
 
 import sys
 from collections import Counter
-#@lint-avoid-python-3-compatibility-imports
 
 words = Counter()
 limit = int(sys.argv[3])
@@ -27,10 +26,11 @@ for l in open(sys.argv[1]):
     words.update(title.lower().split())
     words.update(article.lower().split())
 
-with open(sys.argv[2] + ".article.dict", "w") as f:
+with open(sys.argv[2] + ".dict", "w") as f:
     f.write("<unk> {}\n".format(1e5))
     f.write("<s> {}\n".format(1e5))
     f.write("</s> {}\n".format(1e5))
+    f.write("<sb> {}\n".format(1e5))
 
     for word, count in words.most_common():
         if count < limit:

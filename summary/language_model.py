@@ -11,7 +11,7 @@ class LanguageModel(nn.Module):
         self.embedding_dim = opt.embeddingDim  # D
         self.window = opt.window  # N
         self.hidden_size = opt.hiddenSize  # H
-        self.vocab_size = len(dictionary["index_to_symbol"])  # V
+        self.vocab_size = len(dictionary["i2w"])  # V
         self.encoder_size = encoder_size  #P
         self.encoder = encoder
 
