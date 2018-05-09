@@ -4,39 +4,63 @@ from util import apply_cuda
 import math
 from language_model import LanguageModel
 
+
 def addOpts(parser):
-    parser.add_argument('-epochs',type=int,         default=15, help="Number of epochs to train.")
-    parser.add_argument('-miniBatchSize', type=int, default=64, help="Size of training minibatch.")
-    parser.add_argument('-printEvery',type=int, default=10000,  help="How often to print during training.")
-    parser.add_argument('-modelFilename', default='', help="File for saving loading/model.")
-    parser.add_argument('-window',type=int,         default=5, help="Size of NNLM window.")
-    parser.add_argument('-embeddingDim',type=int,  default=50, help="Size of NNLM embeddings.")
-    parser.add_argument('-hiddenSize',type=int,   default=100, help="Size of NNLM hiddent layer.")
-    parser.add_argument('-learningRate',type=float, default=0.1, help="SGD learning rate.")
-    parser.add_argument('-restore',type=bool, default=False, help="Should a previous model be restored?")
+    parser.add_argument(
+        '-epochs', type=int, default=15, help="Number of epochs to train.")
+    parser.add_argument(
+        '-printEvery',
+        type=int,
+        default=10000,
+        help="How often to print during training.")
+    parser.add_argument(
+        '-modelFilename', default='', help="File for saving loading/model.")
+    parser.add_argument(
+        '-window', type=int, default=5, help="Size of NNLM window.")
+    parser.add_argument(
+        '-embeddingDim', type=int, default=50, help="Size of NNLM embeddings.")
+    parser.add_argument(
+        '-hiddenSize',
+        type=int,
+        default=100,
+        help="Size of NNLM hiddent layer.")
+    parser.add_argument(
+        '-learningRate', type=float, default=0.1, help="SGD learning rate.")
+    parser.add_argument(
+        '-restore',
+        type=bool,
+        default=False,
+        help="Should a previous model be restored?")
+    parser.add_argument(
+        '-miniBatchSize',
+        type=int,
+        default=64,
+        help="Size of training minibatch.")
+
 
 class NNLM(object):
     """docstring for NNLM."""
-    def __init__(self, opt, dictionary, encoder, encoder_size, encoder_dict):
+
+    def __init__(self, opt, dictionary, encoder, encoder_size):
         super(NNLM, self).__init__()
         self.opt = opt
         self.dict = dictionary
         self.encoder = encoder
-        self.encoder_size = encoder_size
-        self.encoder_dict = encoder_dict
 
-        if encoder != None:
-            if opt.restore:
-                self.mlp = torch.load(self.opt.modelFilename)
-                self.mlp.epoch += 1
-                print("Restoring MLP {} with epoch {}".format(self.opt.modelFilename, self.mlp.epoch))
-            else:
-                self.mlp = apply_cuda(LanguageModel(encoder, encoder_size, self.dict, self.opt))
-                self.mlp.epoch = 0
+        if opt.restore:
+            self.mlp = torch.load(opt.modelFilename)
+            self.mlp.epoch += 1
+            print("Restoring MLP {} with epoch {}".format(
+                opt.modelFilename, self.mlp.epoch))
+        else:
+            self.mlp = apply_cuda(
+                LanguageModel(encoder, encoder_size, self.dict, opt))
+            self.mlp.epoch = 0
 
-            self.loss = nn.NLLLoss()
-            self.lookup = self.mlp.context_lookup
-            self.optimizer = torch.optim.SGD(self.mlp.parameters(), self.opt.learningRate) # Half learning rate
+        self.loss = nn.NLLLoss()
+        self.embedding = self.mlp.context_embedding
+        self.optimizer = torch.optim.SGD(
+            self.mlp.parameters(), self.opt.learningRate)  # Half learning rate
 
     def validation(self, valid_data):
         offset = self.opt.miniBatchSize
@@ -44,18 +68,18 @@ class NNLM(object):
         total = 0
         valid_data.reset()
 
-        while not valid_data.is_done():
-            input, target = valid_data.next_batch(offset)
-            out = self.mlp.forward(*input)
-            err = self.loss(out, target) * target.size(0)
+        for inputs, targets in valid_data.next_batch(offset):
+            article, context = inputs
+            out = self.mlp(article, context)
+            err = self.loss(out, targets) * targets.size(0)
 
             # Augment counters
             loss += float(err)
-            total += int(target.size(0))
+            total += int(targets.size(0))
 
         print("[perp: %f validation: %f total: %d]".format(
-            math.exp(loss/total),
-            loss/total,
+            math.exp(loss / total),
+            loss / total,
         ))
         return float(loss) / float(total)
 
@@ -67,22 +91,21 @@ class NNLM(object):
             if cur_valid_loss > self.last_valid_loss:
                 self.opt.learningRate = self.opt.learningRate / 2
 
-                for param_group in optimizer.param_groups:
+                for param_group in self.optimizer.param_groups:
                     param_group['lr'] = self.opt.learningRate
 
             self.last_valid_loss = cur_valid_loss
-
 
     def renorm(self, data, th=1):
         size = data.size(0)
         for i in range(size):
             norm = float(data[i].norm())
             if norm > th:
-                data[i] = data[i].div(norm/th)
+                data[i] = data[i].div(norm / th)
 
     def renorm_tables(self):
-        if self.lookup != None:
-            self.renorm(self.lookup.weight.data)
+        if self.embedding != None:
+            self.renorm(self.embedding.weight.data)
 
         if self.encoder.article_embedding != None:
             self.renorm(self.encoder.article_embedding.weight.data)
@@ -94,7 +117,6 @@ class NNLM(object):
         print("Using cuda? {}".format(torch.cuda.is_available()))
 
         self.last_valid_loss = 1e9
-
 
         for epoch in range(self.mlp.epoch, self.opt.epochs):
             data.reset()
@@ -109,14 +131,11 @@ class NNLM(object):
             total = 0
             loss = 0
 
-            while not data.is_done():
-                input, target = data.next_batch(self.opt.miniBatchSize)
-                if data.is_done():
-                    break
-
+            for inputs, targets in data.next_batch(self.opt.miniBatchSize):
                 self.optimizer.zero_grad()
-                out = self.mlp.forward(*input)
-                err = self.loss(out, target)
+                out = self.mlp(*inputs)
+                err = self.loss(out, targets)
+
                 err.backward()
                 self.optimizer.step()
 
@@ -125,28 +144,25 @@ class NNLM(object):
 
                 if (batch % self.opt.printEvery) == 0:
                     print(
-                        "[Loss: {} Loss2: {} Epoch: {} Position: {} Rate: {}]".format(
-                            loss / ((batch - last_batch + 1) * self.opt.miniBatchSize),
-                            loss / (self.opt.printEvery * self.opt.miniBatchSize),
+                        "[Loss: {} Epoch: {} Position: {} Rate: {}]".format(
+                            loss / (batch - last_batch + 1),
                             epoch,
                             batch * self.opt.miniBatchSize,
-                            self.opt.learningRate
-                        )
-                    )
+                            self.opt.learningRate))
                     last_batch = batch
                     loss = 0
 
                 batch += 1
-                total += input[0].data.size(0)
+                total += 1
 
             self.save()
             print("[EPOCH : {} LOSS: {} TOTAL: {} BATCHES: {}]".format(
-                        epoch, epoch_loss / total, total, batch))
-            exit(1)
+                epoch, epoch_loss / total, total, batch))
 
     def save(self):
         print('Saving...')
         torch.save(self.mlp, self.opt.modelFilename)
         # Save current epoch for evaluation purposes
         if self.mlp.epoch is not None:
-            torch.save(self.mlp, "{}__{}".format(self.opt.modelFilename, self.mlp.epoch))
+            torch.save(self.mlp, "{}__{}".format(self.opt.modelFilename,
+                                                 self.mlp.epoch))

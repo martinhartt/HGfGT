@@ -1,138 +1,76 @@
 # Load data for summary experiments.
-import util
 import torch
+import random
 from torch.autograd import Variable
 from util import apply_cuda
+from itertools import groupby
+from tqdm import tqdm
+
 
 def add_opts(parser):
-   parser.add_argument('-articleDir', default='',
-              help='Directory containing article training matrices.')
-   parser.add_argument('-titleDir', default='',
-              help='Directory containing title training matrices.')
-   parser.add_argument('-validArticleDir', default='',
-              help='Directory containing article matricess for validation.')
-   parser.add_argument('-validTitleDir', default='',
-              help='Directory containing title matrices for validation.')
-   parser.add_argument('-cuda', default=False, type=bool,
-              help='Enable cuda?')
+    parser.add_argument('-workingDir', default='')
+    parser.add_argument('-filter', type=bool, default=True)
+    parser.add_argument('-cuda', default=False, type=bool, help='Enable cuda?')
+    parser.add_argument(
+        '-batchSize', type=int, default=64, help="Size of training minibatch.")
+
 
 class Data(object):
     """docstring for Data."""
-    def __init__(self, title_data, article_data):
+
+    def __init__(self, title_data, article_data, dict, window=5):
         super(Data, self).__init__()
-        self.title_data = title_data
-        self.article_data = article_data
-        self.reset()
+        pairs = zip(article_data, title_data)
+
+        self.inputs = [] # Expanded pairs
+
+        for pair in tqdm(pairs):
+            expanded = list(expand(pair, dict["w2i"], window))
+            self.inputs.extend(expanded)
+
+        # Shuffle?
+        # self.reset()
 
     def reset(self):
-        self.bucket_order = []
-        for length, _ in self.title_data["target"].iteritems():
-            self.bucket_order.append(length)
+        random.shuffle(self.inputs)
 
-        util.shuffleTable(self.bucket_order) # Shuffle array
-        self.bucket_index = 0
-        self.load_next_bucket()
+    def next_batch(self, max_batch_size):
+        for key, group_iter in groupby(self.inputs, lambda x: len(x[0][0])):
+            group = list(group_iter)
+            num_of_batches = 1 + len(group) / max_batch_size
 
-    def load_next_bucket(self):
-        self.done_bucket = self.bucket_index >= len(self.bucket_order) - 1
+            for i in range(num_of_batches):
+                start = i * max_batch_size
+                end = min(len(group), start + max_batch_size)
 
-        self.bucket = self.bucket_order[self.bucket_index]
-        self.bucket_size = self.title_data["target"][self.bucket].size(0)
-        self.pos = 0
-        self.aux_ptrs = self.title_data["sentences"][self.bucket].float().long() # ??
-        self.positions = apply_cuda(torch.arange(0, self.bucket).view(1, self.bucket)
-            .expand(1000, self.bucket).contiguous()) + (200 * self.bucket)
-        self.bucket_index += 1
+                inputs, targets = zip(*group[start:end])
+                articles, contexts = zip(*inputs)
+                # TODO Wrap in variable
 
-    def is_done(self):
-        return self.bucket_index >= len(self.bucket_order) and self.done_bucket
+                input = (torchify(articles), torchify(contexts))
+                yield input, torchify(targets)
 
-    def next_batch(self, max_size):
-        diff = self.bucket_size - self.pos
-        if self.done_bucket or diff == 0 or diff == 1:
-            self.load_next_bucket()
+def torchify(arr):
+    return apply_cuda(Variable(torch.tensor(list(arr)).long()))
 
-        if self.pos + max_size > self.bucket_order:
-            offset = self.bucket_size - self.pos
-            self.done_bucket = true
-        else:
-            offset = max_size
+def expand(pair, w2i, window):
+    # Padding
+    article, title = pair
 
-        positions = apply_cuda(self.positions.narrow(0, 0, offset))
+    title = [w2i["<s>"]] * window + [int(x) for x in title] + [
+        w2i["</s>"]
+    ]  # Append end of string
+    article = [w2i["<s>"]] * 3 + [int(x) for x in article
+                                       ] + [w2i["</s>"]] * 3
 
-        try:
-            temp = self.aux_ptrs.narrow(0, self.pos, offset)
-            aux_rows = apply_cuda(torch.index_select(self.article_data["words"][self.bucket], 0, temp))
-            context = apply_cuda(self.title_data["ngram"][self.bucket].narrow(0, self.pos, offset))
-            target = apply_cuda(self.title_data["target"][self.bucket].narrow(0, self.pos, offset))
-            self.pos += offset
-            return [Variable(tensor) for tensor in [aux_rows, positions, context]], Variable(target.long())
-        except Exception as e:
-            self.done_bucket = True
-            return self.next_batch(max_size)
+    for i in range(len(title) - window):
+        article_tensor = article
+        context_tensor = title[i:i + window]
+        target_tensor = title[i + window]
 
+        yield (article_tensor, context_tensor), target_tensor
 
-# Returns title dictionary containing
-#
-#   dict:
-#     symbol_to_index: [string: int]
-#     index_to_symbol: [int: string]
-def load_title(dname, shuffle=None, use_dict=None):
-    ngram = torch.load('{}ngram.mat.torch'.format(dname))
-    words = torch.load('{}word.mat.torch'.format(dname))
-    dictionary = use_dict or torch.load('{}dict'.format(dname))
-    target_full = {}
-    sentences_full = {}
-    pos_full = {}
-
-    for length, mat in ngram.iteritems():
-        if shuffle != None:
-            perm = torch.randperm(ngram[length].size(0))
-            ngram[length] = apply_cuda(torch.index_select(ngram[length], 0, perm).float())
-            words[length] = torch.index_select(words[length], 0, perm)
-        else:
-            ngram[length] = apply_cuda(ngram[length].float())
-            assert(ngram[length].size(0) == words[length].size(0))
-
-        target_full[length] = apply_cuda(words[length][:, 0].contiguous().float())
-        sentences_full[length] = apply_cuda(words[length][:, 1].contiguous().float())
-        pos_full[length] = words[length][:, 2]
-
-    title_data = {"ngram": ngram,
-                  "target": target_full,
-                  "sentences": sentences_full,
-                  "pos": pos_full,
-                  "dict": dictionary}
-    return title_data
-
-# Returns article dictionary containing
-#   words:
-#     tensor of: line lengths x nth sentence of length x index of word in sentence
-#   dict:
-#     symbol_to_index: [string: int]
-#     index_to_symbol: [int: string]
-def load_article(dname, use_dict=None):
-    input_words = torch.load('{}word.mat.torch'.format(dname))
-    # offsets = torch.load('{}offset.mat.torch'.format(dname))
-
-    dictionary = use_dict or torch.load('{}dict'.format(dname))
-    for length, mat in input_words.iteritems():
-        input_words[length] = mat
-        input_words[length] = apply_cuda(input_words[length].float())
-
-    article_data = {"words": input_words, "dict": dictionary}
-    return article_data
-
-def make_input(article, context, K):
-    bucket = article.size(0)
-    aux_sentence = apply_cuda(article.view(bucket, 1)
-        .expand(bucket, K)
-        .t()
-        .contiguous())
-    positions = apply_cuda(torch.arange(0, bucket)
-        .view(bucket, 1)
-        .expand(bucket, K)
-        .t()
-        .contiguous()) + (200 * bucket)
-
-    return [Variable(tensor) for tensor in [aux_sentence, positions, context]]
+def load(dname, train=True, type="dict", filter=True):
+    prefix = "/filter" if filter else "/all"
+    prefix += ".train" if train else ".valid"
+    return torch.load('{}{}.{}.torch'.format(dname, prefix, type))
