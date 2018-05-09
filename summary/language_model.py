@@ -1,7 +1,5 @@
 import torch
 import torch.nn as nn
-from util import apply_cuda
-
 
 class LanguageModel(nn.Module):
     """docstring for LanguageModel."""

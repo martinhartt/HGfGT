@@ -1,5 +1,4 @@
 # Load data for summary experiments.
-import util
 import torch
 import random
 from torch.autograd import Variable
