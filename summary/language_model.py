@@ -22,19 +22,20 @@ class LanguageModel(nn.Module):
                                     self.vocab_size)
         self.soft_max = nn.LogSoftmax()
 
-    def forward(self, article, title_context):
+    def forward(self, article, title_ctx):
         batch_size = article.shape[0]
 
-        article = self.encoder(article, title_context)
-        context = self.context_embedding(title_context)
+        article = self.encoder(article, title_ctx)
+
+        title_ctx = self.context_embedding(title_ctx)
 
         # tanh W (E y)
-        context = context.view(batch_size, self.embedding_dim * self.window)
-        context = self.context_linear(context)
-        context = self.context_tanh(context)
+        title_ctx = title_ctx.view(batch_size, self.embedding_dim * self.window)
+        title_ctx = self.context_linear(title_ctx)
+        title_ctx = self.context_tanh(title_ctx)
 
         # Second layer: takes LM and encoder model.
-        out = torch.cat((context, article), 1)
+        out = torch.cat((title_ctx, article), 1)
         out = out.view(batch_size, self.hidden_size + self.encoder_size)
         out = self.out_linear(out)
         out = self.soft_max(out)

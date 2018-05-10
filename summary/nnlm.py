@@ -110,14 +110,15 @@ class NNLM(object):
         if self.encoder.article_embedding != None:
             self.renorm(self.encoder.article_embedding.weight.data)
 
-        if self.encoder.title_embedding != None:
-            self.renorm(self.encoder.title_embedding.weight.data)
+        if self.encoder.context_embedding != None:
+            self.renorm(self.encoder.context_embedding.weight.data)
 
     def train(self, data, valid_data):
         print("Using cuda? {}".format(torch.cuda.is_available()))
 
         self.last_valid_loss = 1e9
 
+        self.save()
         for epoch in range(self.mlp.epoch, self.opt.epochs):
             data.reset()
             self.renorm_tables()
