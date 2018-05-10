@@ -4,8 +4,6 @@ import random
 from torch.autograd import Variable
 from util import apply_cuda
 from itertools import groupby
-from tqdm import tqdm
-
 
 def add_opts(parser):
     parser.add_argument('-workingDir', default='')
@@ -20,35 +18,44 @@ class Data(object):
 
     def __init__(self, title_data, article_data, dict, window=5):
         super(Data, self).__init__()
-        pairs = zip(article_data, title_data)
-
-        self.inputs = [] # Expanded pairs
-
-        for pair in tqdm(pairs):
-            expanded = list(expand(pair, dict["w2i"], window))
-            self.inputs.extend(expanded)
+        self.pairs = zip(article_data, title_data)
+        self.dict = dict
+        self.window = window
 
         # Shuffle?
         # self.reset()
 
     def reset(self):
-        random.shuffle(self.inputs)
+        random.shuffle(self.pairs)
 
     def next_batch(self, max_batch_size):
-        for key, group_iter in groupby(self.inputs, lambda x: len(x[0][0])):
-            group = list(group_iter)
-            num_of_batches = 1 + len(group) / max_batch_size
+        for key, group_iter in groupby(self.pairs, lambda x: len(x[0])):
+            expanded_group_iter = expandIter(group_iter, self.dict["w2i"], self.window)
 
-            for i in range(num_of_batches):
-                start = i * max_batch_size
-                end = min(len(group), start + max_batch_size)
-
-                inputs, targets = zip(*group[start:end])
+            for batch in getEvery(expanded_group_iter, max_batch_size):
+                inputs, targets = zip(*batch)
                 articles, contexts = zip(*inputs)
-                # TODO Wrap in variable
 
                 input = (torchify(articles), torchify(contexts))
                 yield input, torchify(targets)
+
+def expandIter(iter, w2i, window):
+    for pair in iter:
+        for expanded in expand(pair, w2i, window):
+            yield expanded
+
+def getEvery(iter, n):
+    i = 0
+    arr = []
+    for item in iter:
+        arr.append(item)
+        i += 1
+        if i % n == 0:
+            yield arr
+            arr = []
+    if len(arr) > 0:
+        yield arr
+
 
 def torchify(arr):
     return apply_cuda(Variable(torch.tensor(list(arr)).long()))
@@ -74,3 +81,12 @@ def load(dname, train=True, type="dict", filter=True):
     prefix = "/filter" if filter else "/all"
     prefix += ".train" if train else ".valid"
     return torch.load('{}{}.{}.torch'.format(dname, prefix, type))
+
+def make_input(article, context, K):
+    bucket = article.size(0)
+    article_tensor = apply_cuda(article.view(bucket, 1)
+        .expand(bucket, K)
+        .t()
+        .contiguous())
+
+    return [Variable(tensor.long()) for tensor in [article_tensor, context]]
