@@ -17,18 +17,18 @@ def add_opts(parser):
 class AttnBowEncoder(nn.Module):
     """docstring for AttnBowEncoder."""
 
-    def __init__(self, bow_dim, window_size, vocab_size, opt):
+    def __init__(self, bow_dim, window, vocab_size, opt):
         super(AttnBowEncoder, self).__init__()
 
         self.bow_dim = bow_dim  # D2
-        self.window_size = window_size  # N
+        self.window = window  # N
         self.vocab_size = vocab_size  # V
 
         self.article_embedding = nn.Embedding(vocab_size, bow_dim)
-        self.title_embedding = nn.Embedding(vocab_size, bow_dim)
+        self.context_embedding = nn.Embedding(vocab_size, bow_dim)
 
         self.pad = (opt.attenPool - 1) / 2
-        self.title_linear = nn.Linear(window_size * bow_dim, bow_dim)
+        self.context_linear = nn.Linear(window * bow_dim, bow_dim)
 
         self.non_linearity = nn.Softmax()
 
@@ -39,14 +39,14 @@ class AttnBowEncoder(nn.Module):
         batch_size = article.shape[0]
 
         article = self.article_embedding(article)
-        title_ctx = self.title_embedding(title_ctx)
 
-        title_ctx = title_ctx.view(batch_size, self.window_size * self.bow_dim)
-        title_ctx = self.title_linear(title_ctx)
+        title_ctx = self.context_embedding(title_ctx)
+
+        title_ctx = title_ctx.view(batch_size, self.window * self.bow_dim)
+        title_ctx = self.context_linear(title_ctx)
         title_ctx = title_ctx.view(batch_size, self.bow_dim, 1)
 
         dot_article_context = torch.matmul(article, title_ctx)
-
         attention = torch.sum(dot_article_context, 2)  # ?
         attention = self.non_linearity(attention)
         attention = attention.view(batch_size, -1, 1)
