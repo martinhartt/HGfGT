@@ -26,14 +26,14 @@ title_out = open(re.sub(r"data", r"title", INPUT_FILENAME), "w")
 for l in open(INPUT_FILENAME):
     splits = l.strip().split("\t")
 
-    if len(splits) != 2:
-        continue
+    title = splits[0]
+    article_components = splits[1:]
 
-    title, article = splits
-
-    article_words = [w if w in dict else "<unk>" for w in article.split()]
-    article_out.write(" ".join(article_words))
-    article_out.write("\n")
+    article_result = ""
+    for article in article_components:
+        article_words = [w if w in dict else "<unk>" for w in article.split()]
+        article_result += " ".join(article_words)
+    article_out.write("{}\n".format(article_result))
 
     title_words = [w if w in dict else "<unk>" for w in title.split()]
     title_out.write(" ".join(title_words))

@@ -3,7 +3,7 @@ import torch.nn as nn
 from util import apply_cuda
 import math
 from language_model import LanguageModel
-
+from heir_attn import HeirAttnDecoder, HeirAttnEncoder
 
 def addOpts(parser):
     parser.add_argument(
@@ -41,24 +41,38 @@ def addOpts(parser):
 class NNLM(object):
     """docstring for NNLM."""
 
-    def __init__(self, opt, dictionary, encoder, encoder_size):
+    def __init__(self, opt, dict):
         super(NNLM, self).__init__()
         self.opt = opt
-        self.dict = dictionary
-        self.encoder = encoder
+        self.dict = dict
+        self.heir = opt.heir
 
         if opt.restore:
-            self.mlp = torch.load(opt.modelFilename)
+            if opt.heir:
+                self.mlp, self.encoder = torch.load(opt.modelFilename)
+            else:
+                self.mlp = torch.load(opt.modelFilename)
+
             self.mlp.epoch += 1
             print("Restoring MLP {} with epoch {}".format(
                 opt.modelFilename, self.mlp.epoch))
         else:
-            self.mlp = apply_cuda(
-                LanguageModel(encoder, encoder_size, self.dict, opt))
+            if opt.heir:
+                self.encoder = apply_cuda(HeirAttnEncoder(len(dict["i2w"]), opt.bowDim, opt.hiddenSize))
+                self.mlp = apply_cuda(HeirAttnDecoder(len(dict["i2w"]), opt.bowDim, opt.hiddenSize))
+            else:
+                self.mlp = apply_cuda(LanguageModel(self.dict, opt))
+                self.encoder = self.mlp.encoder
+
             self.mlp.epoch = 0
 
         self.loss = nn.NLLLoss()
-        self.embedding = self.mlp.context_embedding
+        self.decoder_embedding = self.mlp.context_embedding
+
+        if opt.heir:
+            self.encoder_optimizer = torch.optim.SGD(
+                self.encoder.parameters(), self.opt.learningRate)
+
         self.optimizer = torch.optim.SGD(
             self.mlp.parameters(), self.opt.learningRate)  # Half learning rate
 
@@ -68,9 +82,13 @@ class NNLM(object):
         total = 0
         valid_data.reset()
 
-        for inputs, targets in valid_data.next_batch(offset):
-            article, context = inputs
-            out = self.mlp(article, context)
+        for (article, context), targets in valid_data.next_batch(offset):
+            if self.heir:
+                encoder_out = self.encoder(article)
+                out = self.mlp(encoder_out, context)
+            else:
+                out = self.mlp(article, context)
+
             err = self.loss(out, targets) * targets.size(0)
 
             # Augment counters
@@ -89,10 +107,15 @@ class NNLM(object):
             cur_valid_loss = self.validation(valid_data)
             # If valid loss does not improve drop learning rate
             if cur_valid_loss > self.last_valid_loss:
-                self.opt.learningRate = self.opt.learningRate / 2
+                if self.heir:
+                    self.save()
+                    print("Learning rate is no longer improving - stopping training...")
+                    exit(1)
+                else:
+                    self.opt.learningRate = self.opt.learningRate / 2
 
-                for param_group in self.optimizer.param_groups:
-                    param_group['lr'] = self.opt.learningRate
+                    for param_group in self.optimizer.param_groups:
+                        param_group['lr'] = self.opt.learningRate
 
             self.last_valid_loss = cur_valid_loss
 
@@ -104,14 +127,20 @@ class NNLM(object):
                 data[i] = data[i].div(norm / th)
 
     def renorm_tables(self):
-        if self.embedding != None:
-            self.renorm(self.embedding.weight.data)
+        if self.decoder_embedding != None:
+            self.renorm(self.decoder_embedding.weight.data)
 
-        if self.encoder.article_embedding != None:
-            self.renorm(self.encoder.article_embedding.weight.data)
+        if self.heir:
+            if self.encoder.summary_embedding != None:
+                self.renorm(self.encoder.summary_embedding.weight.data)
+        else:
+            if self.encoder.article_embedding != None:
+                self.renorm(self.encoder.article_embedding.weight.data)
 
-        if self.encoder.context_embedding != None:
-            self.renorm(self.encoder.context_embedding.weight.data)
+            if self.encoder.context_embedding != None:
+                self.renorm(self.encoder.context_embedding.weight.data)
+
+
 
     def train(self, data, valid_data):
         print("Using cuda? {}".format(torch.cuda.is_available()))
@@ -132,13 +161,23 @@ class NNLM(object):
             total = 0
             loss = 0
 
-            for inputs, targets in data.next_batch(self.opt.miniBatchSize):
+            for (article, context), targets in data.next_batch(self.opt.miniBatchSize):
                 self.optimizer.zero_grad()
-                out = self.mlp(*inputs)
+                if self.heir:
+                    self.encoder_optimizer.zero_grad()
+
+                if self.heir:
+                    encoder_out = self.encoder(article)
+                    out = self.mlp(encoder_out, context)
+                else:
+                    out = self.mlp(article, context)
+
                 err = self.loss(out, targets)
 
                 err.backward()
                 self.optimizer.step()
+                if self.heir:
+                    self.encoder_optimizer.step()
 
                 loss += float(err)
                 epoch_loss += float(err)

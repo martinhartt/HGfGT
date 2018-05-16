@@ -13,6 +13,11 @@ export OUT_DIR=$WORK/processed
 
 # Construct the title-article pairs from gigaword
 
+export SMALL=""
+if [[ $* == *--small* ]]
+then
+  export SMALL="small_"
+fi
 
 if [[ $* == *--extract* ]]
 then
@@ -25,9 +30,9 @@ fi
 if [[ $* == *--splits* ]]
 then
   # Compile the data into train/dev/test.
-  cat "$SPLITS/train.splits" | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/train.data.txt"
-  cat "$SPLITS/valid.splits" | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/valid.data.txt"
-  cat "$SPLITS/test.splits"  | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/test.data.txt"
+  cat "$SPLITS/${SMALL}train.splits" | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/${SMALL}train.data.txt"
+  cat "$SPLITS/${SMALL}valid.splits" | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/${SMALL}valid.data.txt"
+  cat "$SPLITS/${SMALL}test.splits"  | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/${SMALL}test.data.txt"
 fi
 
 set -x
@@ -37,54 +42,64 @@ mkdir -p $OUT_DIR
 if [[ $* == *--filter* ]]
 then
   # Basic filtering on train/dev.
-  python $SCRIPTS/filter.py $WORK/train.data.txt > $WORK/train.data.filter.txt
-  python $SCRIPTS/filter.py $WORK/valid.data.txt > $WORK/valid.data.filter.txt
-  python $SCRIPTS/filter.py $WORK/test.data.txt > $WORK/test.data.filter.txt
+  python $SCRIPTS/filter.py $WORK/${SMALL}train.data.txt > $WORK/${SMALL}train.data.filter.txt
+  python $SCRIPTS/filter.py $WORK/${SMALL}valid.data.txt > $WORK/${SMALL}valid.data.filter.txt
+  python $SCRIPTS/filter.py $WORK/${SMALL}test.data.txt > $WORK/${SMALL}test.data.filter.txt
 
   # Compile dictionary.
-  python $SCRIPTS/make_dict.py $WORK/train.data.filter.txt  $WORK/train.filter $UNK
+  python $SCRIPTS/make_dict.py $WORK/${SMALL}train.data.filter.txt  $WORK/${SMALL}train.filter $UNK
 
   # Split into title/article files.
-  python $SCRIPTS/pull.py $WORK/test.data.filter.txt $WORK/train.filter.dict
+  python $SCRIPTS/pull.py $WORK/${SMALL}test.data.filter.txt $WORK/${SMALL}train.filter.dict
 
   # Constructing torch data files.
-  python $SCRIPTS/build_dict.py $WORK/train.filter.dict $OUT_DIR/filter.train.dict.torch
+  python $SCRIPTS/build_dict.py $WORK/${SMALL}train.filter.dict $OUT_DIR/${SMALL}filter.train.dict.torch
 
   python $SCRIPTS/build.py \
-    -inputFile $WORK/train.data.filter.txt \
-    -inDictionary $OUT_DIR/filter.train.dict.torch \
+    -inputFile $WORK/${SMALL}train.data.filter.txt \
+    -inDictionary $OUT_DIR/filter.${SMALL}train.dict.torch \
     -outDirectory $OUT_DIR \
-    -outPrefix "filter.train"
+    -outPrefix "filter.${SMALL}train"
 
   python $SCRIPTS/build.py \
-    -inputFile $WORK/valid.data.filter.txt \
-    -inDictionary $OUT_DIR/filter.train.dict.torch \
+    -inputFile $WORK/${SMALL}valid.data.filter.txt \
+    -inDictionary $OUT_DIR/filter.${SMALL}train.dict.torch \
     -outDirectory $OUT_DIR \
-    -outPrefix "filter.valid"
+    -outPrefix "filter.${SMALL}valid"
 
 fi
 
 if [[ $* == *--all* ]]
 then
+  # Basic filtering on train/dev.
+  python $SCRIPTS/filter_lengths.py $WORK/${SMALL}train.data.txt > $WORK/${SMALL}train.data.temp.txt
+  python $SCRIPTS/filter_lengths.py $WORK/${SMALL}valid.data.txt > $WORK/${SMALL}valid.data.temp.txt
+  python $SCRIPTS/filter_lengths.py $WORK/${SMALL}test.data.txt > $WORK/${SMALL}test.data.temp.txt
+
+  # HACK Reduced the dataset size as it is too large
+  head -n 1000000 $WORK/${SMALL}train.data.temp.txt | tqdm --unit_scale --total 1000000 | python $SCRIPTS/extractive.py > $WORK/${SMALL}train.all.data.txt
+  head -n 2000 $WORK/${SMALL}test.data.temp.txt | tqdm --unit_scale --total 2000 | python $SCRIPTS/extractive.py > $WORK/${SMALL}test.all.data.txt
+  head -n 2000 $WORK/${SMALL}valid.data.temp.txt | tqdm --unit_scale --total 2000 | python $SCRIPTS/extractive.py > $WORK/${SMALL}valid.all.data.txt
+
   # Compile dictionary.
-  python $SCRIPTS/make_dict.py $WORK/train.data.txt  $WORK/train.all $UNK
+  python $SCRIPTS/make_dict.py $WORK/${SMALL}train.all.data.txt  $WORK/${SMALL}train.all $UNK
 
   # Split into title/article files.
-  python $SCRIPTS/pull.py $WORK/test.data.txt $WORK/train.all.dict
+  python $SCRIPTS/pull.py $WORK/${SMALL}test.all.data.txt $WORK/${SMALL}train.all.dict
 
   # Constructing torch data files.
-  python $SCRIPTS/build_dict.py $WORK/train.all.dict $OUT_DIR/all.train.dict.torch
+  python $SCRIPTS/build_dict.py $WORK/${SMALL}train.all.dict $OUT_DIR/all.${SMALL}train.dict.torch
 
   python $SCRIPTS/build.py \
-    -inputFile $WORK/train.data.txt \
-    -inDictionary $OUT_DIR/all.train.dict.torch \
+    -inputFile $WORK/${SMALL}train.all.data.txt \
+    -inDictionary $OUT_DIR/all.${SMALL}train.dict.torch \
     -outDirectory $OUT_DIR \
-    -outPrefix "all.train" \
+    -outPrefix "all.${SMALL}train" \
 
   python $SCRIPTS/build.py \
-    -inputFile $WORK/valid.data.txt \
-    -inDictionary $OUT_DIR/all.train.dict.torch \
+    -inputFile $WORK/${SMALL}valid.all.data.txt \
+    -inDictionary $OUT_DIR/all.${SMALL}train.dict.torch \
     -outDirectory $OUT_DIR \
-    -outPrefix "all.valid" \
+    -outPrefix "all.${SMALL}valid" \
 
 fi

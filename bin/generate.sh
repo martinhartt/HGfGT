@@ -12,5 +12,5 @@ python $ABS/summary/generate.py \
  -inputf "$EXAMPLE" \
  -length $LENGTH \
  -workingDir  $OUT_DIR \
- -filter 1 \
+ -heir 1 \
  # -blockRepeatWords
