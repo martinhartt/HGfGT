@@ -28,8 +28,6 @@ summarisers = {
 
 tokenizer = Tokenizer("english")
 
-out = open(sys.argv[1], 'w')
-
 for line in sys.stdin:
     if line.strip() == "":
         continue
@@ -51,4 +49,4 @@ for line in sys.stdin:
                 break
 
         result += "\t"
-    out.write("{}\t{}\n".format(title, result.strip()))
+    print("{}\t{}".format(title, result.strip()))
