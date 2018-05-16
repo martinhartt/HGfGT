@@ -77,9 +77,9 @@ then
   python $SCRIPTS/filter_lengths.py $WORK/${SMALL}test.data.txt > $WORK/${SMALL}test.data.temp.txt
 
   # HACK Reduced the dataset size as it is too large
-  head -n 1000000 $WORK/${SMALL}train.data.temp.txt | tqdm --unit_scale --total 1000000 | python $SCRIPTS/extractive.py > $WORK/${SMALL}train.all.data.txt
-  head -n 2000 $WORK/${SMALL}test.data.temp.txt | tqdm --unit_scale --total 2000 | python $SCRIPTS/extractive.py > $WORK/${SMALL}test.all.data.txt
-  head -n 2000 $WORK/${SMALL}valid.data.temp.txt | tqdm --unit_scale --total 2000 | python $SCRIPTS/extractive.py > $WORK/${SMALL}valid.all.data.txt
+  head -n 1000000 $WORK/${SMALL}train.data.temp.txt | python $SCRIPTS/extractive.py > $WORK/${SMALL}train.all.data.txt
+  head -n 2000 $WORK/${SMALL}test.data.temp.txt | python $SCRIPTS/extractive.py > $WORK/${SMALL}test.all.data.txt
+  head -n 2000 $WORK/${SMALL}valid.data.temp.txt | python $SCRIPTS/extractive.py > $WORK/${SMALL}valid.all.data.txt
 
   # Compile dictionary.
   python $SCRIPTS/make_dict.py $WORK/${SMALL}train.all.data.txt  $WORK/${SMALL}train.all $UNK
