@@ -27,6 +27,11 @@ python $ABS/summary/train.py \
   -printEvery   100 \
   -encoderModel  "attenbow" \
   -attenPool  5 \
-  # -restore 1
+  -restore 1
   # -cuda 1
 date
+
+curl "https://maker.ifttt.com/trigger/ping/with/key/bZk7rWKnuJhYlSHus2DL5L"
+
+cd $ABS/jobs
+sbatch train
