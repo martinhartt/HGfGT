@@ -198,6 +198,7 @@ class NNLM(object):
             self.save()
             print("[EPOCH : {} LOSS: {} TOTAL: {} BATCHES: {}]".format(
                 epoch, epoch_loss / total, total, batch))
+            exit(0)
 
     def save(self):
         print('Saving...')
