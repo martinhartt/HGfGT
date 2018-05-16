@@ -18,19 +18,26 @@ def encode(sentence, w2i):
 def main():
     dict = torch.load(opt.inDictionary)
 
-    titleTensors = []
-    articleTensors = []
+    titleList = []
+    articleList = []
 
     for l in open(opt.inputFile):
-        title, article = l.strip().split('\t')
+        components = l.strip().split('\t')
 
-        titleTensors.append(encode(title, dict["w2i"]))
-        articleTensors.append(encode(article, dict["w2i"]))
+        title = components[0]
+        articles = components[1:]
+
+        titleList.append(encode(title, dict["w2i"]))
+
+        if len(articles) > 1:
+            articleList.append([encode(article, dict["w2i"]) for article in articles])
+        elif len(articles) > 0:
+            articleList.append(encode(articles[0], dict["w2i"]))
 
     print("Saving inputs...")
-    torch.save(titleTensors, '{}/{}.article.torch'.format(
+    torch.save(articleList, '{}/{}.article.torch'.format(
         opt.outDirectory, opt.outPrefix))
-    torch.save(articleTensors, '{}/{}.title.torch'.format(
+    torch.save(titleList, '{}/{}.title.torch'.format(
         opt.outDirectory, opt.outPrefix))
 
 

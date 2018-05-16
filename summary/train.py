@@ -15,33 +15,33 @@ opt = parser.parse_args()
 
 def main():
     print("Loading dictionary...")
-    dict = data.load(opt.workingDir, train=True, type='dict', filter=opt.filter)
+    dict = data.load(opt.workingDir, train=True, type='dict', heir=opt.heir, small=opt.small)
 
     print("Loading training data...")
     train_title = data.load(
-        opt.workingDir, train=True, type="title", filter=opt.filter)
+        opt.workingDir, train=True, type="title", heir=opt.heir, small=opt.small)
+
+
     train_article = data.load(
-        opt.workingDir, train=True, type="article", filter=opt.filter)
+        opt.workingDir, train=True, type="article", heir=opt.heir, small=opt.small)
 
     print("Loading validation data...")
     valid_title = data.load(
-        opt.workingDir, train=False, type="title", filter=opt.filter)
+        opt.workingDir, train=False, type="title", heir=opt.heir, small=opt.small)
     valid_article = data.load(
-        opt.workingDir, train=False, type="article", filter=opt.filter)
+        opt.workingDir, train=False, type="article", heir=opt.heir, small=opt.small)
 
     # Make main LM
     print("Constructing train tensors...")
-    train_data = data.Data(train_title, train_article, dict, opt.window)
+    DataLoader = data.HeirDataLoader if opt.heir else data.AbsDataLoader
+
+    train_data = DataLoader(train_title, train_article, dict, window=opt.window)
 
     print("Constructing validation tensors...")
-    valid_data = data.Data(valid_title, valid_article, dict, opt.window)
-
-
-    print("Building encoder...")
-    attn_encoder = encoder.AttnBowEncoder(opt.bowDim, opt.window, len(dict["i2w"]), opt)
+    valid_data = DataLoader(valid_title, valid_article, dict, window=opt.window)
 
     print("Setting up language model and training parameters...")
-    mlp = nnlm.NNLM(opt, dict, attn_encoder, opt.bowDim)
+    mlp = nnlm.NNLM(opt, dict)
 
     print("Training...")
     mlp.train(train_data, valid_data)

@@ -51,7 +51,7 @@ def process_word(input_word):
 def main():
     mlp = torch.load(opt.modelFilename)
 
-    dict = data.load(opt.workingDir, train=True, type='dict', filter=opt.filter)
+    dict = data.load(opt.workingDir, train=True, type='dict', heir=opt.heir)
 
     sent_file = open(opt.inputf).read().split("\n")
     length = opt.length

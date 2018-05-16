@@ -15,19 +15,19 @@ mkdir -p $MDL_DIR
 date
 python $ABS/summary/train.py \
   -workingDir  $OUT_DIR \
-  -filter 1 \
   -modelFilename  $MDL_DIR/$1 \
   -miniBatchSize  64 \
   -embeddingDim  64 \
   -bowDim  200 \
   -hiddenSize  64 \
   -epochs  15 \
-  -learningRate 0.1 \
+  -learningRate 0.01 \
   -window  $WINDOW \
   -printEvery   100 \
   -encoderModel  "attenbow" \
   -attenPool  5 \
-  -restore 1
+  -heir 1
+  # -restore 1
   # -cuda 1
 date
 
