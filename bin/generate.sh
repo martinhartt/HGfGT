@@ -1,7 +1,7 @@
 #/bin/bash
 
 export ABS="$(dirname $(dirname $0))"
-export EXAMPLE=$ABS/working_agiga/test.article.filter.txt
+export EXAMPLE=$ABS/working_edu/CAE.article.filter.txt 
 export MODEL=$ABS/working_agiga/models/$1
 export LENGTH=15
 export OUT_DIR=$ABS/working_agiga/processed
