@@ -15,12 +15,10 @@ mkdir -p $WORK/raw
 find $ABS/$EDU/**/*.txt | wc -l | xargs echo "Total files to process:"
 find $ABS/$EDU/**/*.txt | parallel --gnu --progress -j $THREADS python2.7 $SCRIPTS/process_edu.py \{\} $WORK
 
-GROUPS="$(find $WORK/raw/** -type d -print)"
-
-for g in $GROUPS
+for g in CAE CPE FCE KET PET
 do
   echo $g
-  BASE=$(basename $g)
+  BASE=$(basename $WORK/raw/$g)
   cat $WORK/raw/$BASE/* > $WORK/$BASE.data.txt
 
   if [[ $* == *--filter* ]]
