@@ -18,6 +18,14 @@ for l in open(sys.argv[1]):
         continue
     title, article = splits
 
+    # Get only first sentence
+    try:
+        sent_boundary = article.index('<sb> ')
+        article = article[0:sent_boundary]
+    except Exception as e:
+        pass
+
+
     # No blanks.
     if title.strip() == "" or article.strip() == "":
         continue

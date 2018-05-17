@@ -15,18 +15,18 @@ mkdir -p $WORK/raw
 find $ABS/$EDU/**/*.txt | wc -l | xargs echo "Total files to process:"
 find $ABS/$EDU/**/*.txt | parallel --gnu --progress -j $THREADS python2.7 $SCRIPTS/process_edu.py \{\} $WORK
 
-GROUPS=find $WORK/raw/** -type d
+GROUPS="$(find $WORK/raw/** -type d -print)"
 
-# cat "$SPLITS/valid.splits" | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/valid.data.txt"
-
-for g in GROUPS
+for g in $GROUPS
 do
+  echo $g
   BASE=$(basename $g)
   cat $WORK/raw/$BASE/* > $WORK/$BASE.data.txt
 
   if [[ $* == *--filter* ]]
   then
-    python $SCRIPTS/pull.py $WORK/$BASE.data.txt $AGIGA_WORK/train.filter.dict
+    python $SCRIPTS/filter_lengths.py $WORK/$BASE.data.txt > $WORK/$BASE.data.filter.txt
+    python $SCRIPTS/pull.py $WORK/$BASE.data.filter.txt $AGIGA_WORK/train.filter.dict
   fi
 
   if [[ $* == *--all* ]]
@@ -36,5 +36,5 @@ do
 done
 
 
-
+rm $WORK/*data*
 rm -r $WORK/raw

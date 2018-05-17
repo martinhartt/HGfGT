@@ -52,6 +52,7 @@ title_raw, article_raw = raw.split('\nTEXT:')[:2]
 # Remove TITLE and TEXT labels and process
 title = normalize(title_raw[6:].strip().replace('\n', ' '))
 article = normalize(article_raw.strip().replace('\n', ' '))
+article = article.replace(" . ", " . <sb> ")
 
 # title \t article
 out.write("{}\t{}\n".format(title, article))
