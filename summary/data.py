@@ -151,7 +151,7 @@ def load(dname, train=True, type="dict", heir=True, small=True):
     prefix = "/all." if heir else "/filter."
     prefix += "small_" if small else ""
     prefix += "train" if train else "valid"
-    print("Loading {}{}.{}.torch".format(dname, prefix, type))
+
     return torch.load('{}{}.{}.torch'.format(dname, prefix, type))
 
 def make_input(article, context, K):

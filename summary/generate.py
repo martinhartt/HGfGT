@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser(description='Train a summarization model.')
 
 parser.add_argument('-modelFilename', default='', help='Model to test.')
 parser.add_argument('-inputf', default='', help='Input article files. ')
+parser.add_argument('-outputf', default='', help='Actual title files. ')
 parser.add_argument(
     '-length', type=int, default=15, help='Maximum length of summary.')
 parser.add_argument(
@@ -71,10 +72,10 @@ def main():
     W = mlp.window
     opt.window = mlp.window
 
+    actual = open(opt.outputf).read().split('\n')
+
     sent_num = 0
     for line in sent_file:
-        sent_num += 1
-
         # Add padding
         true_line = "<s> <s> <s> {} </s> </s> </s>".format(normalize(line))
 
@@ -181,9 +182,14 @@ def main():
                 word = i2w[index]
                 final += " {}".format(word)
 
-            print("INPUT: {}".format(line))
-            print("OUTPUT: {}".format(final.strip()))
-            print("\n")
+            print("")
+            print("> {}".format(line))
+            print("= {}".format(actual[sent_num]))
+            print("< {}".format(final.strip()))
+            print("")
+
+        sent_num += 1
+
 
 
 main()
