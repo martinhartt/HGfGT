@@ -12,6 +12,13 @@ export MDL_DIR=$WORK/models
 
 mkdir -p $MDL_DIR
 
+if [[ $* == *--rush* ]]
+then
+  HEIR=0
+else
+  HEIR=1
+fi
+
 date
 python $ABS/summary/train.py \
   -workingDir  $OUT_DIR \
@@ -26,10 +33,9 @@ python $ABS/summary/train.py \
   -printEvery   100 \
   -encoderModel  "attenbow" \
   -attenPool  5 \
-  -heir 1
-  # -restore 1
-  # -cuda 1
+  -heir $HEIR
 date
+
 
 curl "https://maker.ifttt.com/trigger/ping/with/key/bZk7rWKnuJhYlSHus2DL5L"
 
