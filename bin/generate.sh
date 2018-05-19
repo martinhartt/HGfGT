@@ -24,6 +24,7 @@ then
     INPUT=$ABS/working_edu/$g.article.filter.txt
     OUTPUT=$ABS/working_edu/$g.title.filter.txt
     echo "# Evaluating $g"
+    echo -e "\n\n"
 
     python $ABS/summary/generate.py \
       -modelFilename $MODEL \
@@ -41,6 +42,8 @@ then
   OUTPUT=$ABS/working_agiga/test.title.filter.txt
 
   echo "# Evaluating Gigaword"
+  echo -e "\n\n"
+
   python $ABS/summary/generate.py \
     -modelFilename $MODEL \
     -inputf "$INPUT" \
