@@ -5,6 +5,10 @@ import data
 import re
 import math
 
+from extractive import extractive
+
+from data import BaseDataLoader, HeirDataLoader
+
 parser = argparse.ArgumentParser(description='Train a summarization model.')
 
 parser.add_argument('-modelFilename', default='', help='Model to test.')
@@ -49,14 +53,25 @@ def normalize(sent):
 def process_word(input_word):
     return re.sub(r'\d', '#', input_word.lower())
 
+def encode(sent, w2i):
+    return [w2i.get(word, w2i["<unk>"]) for word in sent.split()]
+
 def main():
-    mlp = torch.load(opt.modelFilename)
+    state = torch.load(opt.modelFilename)
+    if opt.heir:
+        mlp, encoder = state
+    else:
+        mlp = state
 
     dict = data.load(opt.workingDir, train=True, type='dict', heir=opt.heir, small=opt.small)
 
     sent_file = open(opt.inputf).read().split("\n")
     length = opt.length
-    W = mlp.window
+    if not opt.heir:
+        W = mlp.window
+        opt.window = mlp.window
+    else:
+        W = 1
 
     w2i = dict["w2i"]
     i2w = dict["i2w"]
@@ -69,17 +84,20 @@ def main():
     START = w2i["<s>"]
     END = w2i["</s>"]
 
-    W = mlp.window
-    opt.window = mlp.window
 
     actual = open(opt.outputf).read().split('\n')
 
     sent_num = 0
     for line in sent_file:
         # Add padding
-        true_line = "<s> <s> <s> {} </s> </s> </s>".format(normalize(line))
+        if opt.heir:
+            summaries = extractive(line).split("\t")
+            encoded_summaries = [encode(normalize(summary), w2i) for summary in summaries]
+            article = HeirDataLoader.torchify(encoded_summaries, variable=True, revsort=True)
+        else:
+            true_line = "<s> <s> <s> {} </s> </s> </s>".format(normalize(line))
 
-        article = torch.tensor([w2i.get(word, w2i["<unk>"]) for word in true_line.split()])
+            article = torch.tensor(encode(true_line, w2i))
 
         n = opt.length
 
@@ -93,14 +111,19 @@ def main():
 
         for i in range(n):
             # For each output word
-            context = hyps[i].narrow(1, i + 1, W)
+            context = hyps[i].narrow(1, 0 if opt.heir else i + 1, i+1 if opt.heir else W)
             cur_K = K
-
 
             # (1) Score all next words for each context in the beam.
             #    log p(y_{i+1} | y_c, x) for all y_c
-            input = data.make_input(article, context, cur_K)
-            model_scores = mlp(*input)
+
+            if opt.heir:
+                encoder_out = encoder(article)
+                model_scores = mlp(encoder_out, (context, [i+1] * K))
+            else:
+                input = DataLoader.make_input(article, context, cur_K)
+                model_scores = mlp(*input)
+
             out_scores = model_scores.data.clone().mul(opt.lmWeight)
 
             # If length limit is reached, next word must be end.

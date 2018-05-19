@@ -9,6 +9,14 @@ export LENGTH=15
 export OUT_DIR=$ABS/working_agiga/processed
 
 
+if [[ $* == *--rush* ]]
+then
+  HEIR=0
+else
+  HEIR=1
+fi
+
+
 if [[ $* == *--edu* ]]
 then
   for g in CAE CPE FCE KET PET
@@ -22,7 +30,8 @@ then
       -inputf "$INPUT" \
       -outputf "$OUTPUT" \
       -length $LENGTH \
-      -workingDir  $OUT_DIR 2> /dev/null
+      -heir $HEIR \
+      -workingDir  $OUT_DIR
   done
 fi
 
@@ -37,5 +46,6 @@ then
     -inputf "$INPUT" \
     -outputf "$OUTPUT" \
     -length $LENGTH \
-    -workingDir  $OUT_DIR 2> /dev/null
+    -heir $HEIR \
+    -workingDir  $OUT_DIR
 fi

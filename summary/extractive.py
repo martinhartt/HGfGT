@@ -15,7 +15,6 @@ def leadSummariser(document, no_of_sents):
     for sent in document.sentences[:no_of_sents]:
         yield str(sent)
 
-
 summarisers = {
     "lead": leadSummariser,
     "luhn": LuhnSummarizer(),
@@ -28,14 +27,7 @@ summarisers = {
 
 tokenizer = Tokenizer("english")
 
-for line in sys.stdin:
-    if line.strip() == "":
-        continue
-
-    if len(line.split('\t')) > 2:
-        continue
-
-    title, article = line.split('\t')
+def extractive(article, title=None):
 
     raw = article.replace(' <sb>', '').strip()
 
@@ -49,4 +41,21 @@ for line in sys.stdin:
                 break
 
         result += "\t"
-    print("{}\t{}".format(title, result.strip()))
+
+    if title is not None:
+        return "{}\t{}".format(title, result.strip())
+    else:
+        return result.strip()
+
+
+if __name__ == '__main__':
+    for line in sys.stdin:
+        if line.strip() == "":
+            print("")
+
+        if len(line.split('\t')) > 2:
+            print("")
+
+        title, article = line.split('\t')
+
+        print(extractive(article, title))

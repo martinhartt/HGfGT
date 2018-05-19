@@ -201,8 +201,11 @@ class NNLM(object):
 
     def save(self):
         print('Saving...')
-        torch.save(self.mlp, self.opt.modelFilename)
+
+        state = (self.mlp, self.encoder) if self.heir else self.mlp
+
+        torch.save(state, self.opt.modelFilename)
         # Save current epoch for evaluation purposes
         if self.mlp.epoch is not None:
-            torch.save(self.mlp, "{}__{}".format(self.opt.modelFilename,
+            torch.save(state, "{}__{}".format(self.opt.modelFilename,
                                                  self.mlp.epoch))

@@ -6,6 +6,7 @@ export AGIGA=data/agiga
 export WORK=$ABS/working_agiga
 export THREADS=30
 export SCRIPTS=$ABS/dataset
+export SCRIPTS_SUMMARY=$ABS/summary
 export SPLITS=$ABS/$AGIGA
 export UNK=5
 export OUT_DIR=$WORK/processed

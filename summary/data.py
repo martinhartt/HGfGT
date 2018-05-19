@@ -47,11 +47,12 @@ class BaseDataLoader(object):
         if len(arr) > 0:
             yield arr
 
-
-    def torchify(self, arr, variable=False):
+    @staticmethod
+    def torchify(arr, variable=False):
         raise NotImplementedError()
 
-    def expand(self, pair, w2i, window):
+    @staticmethod
+    def expand(pair, w2i, window):
         raise NotImplementedError()
 
 class HeirDataLoader(BaseDataLoader):
@@ -81,7 +82,8 @@ class HeirDataLoader(BaseDataLoader):
     def sortInputs(self, input): # Sort in descending order
         return sorted(input, key=lambda a: len(a[0][1]))[::-1]
 
-    def torchify(self, arr, variable=False, revsort=False):
+    @staticmethod
+    def torchify(arr, variable=False, revsort=False):
         if variable:
             batch_size = len(arr)
 
@@ -103,8 +105,8 @@ class HeirDataLoader(BaseDataLoader):
         else:
             return apply_cuda(Variable(torch.tensor(list(arr)).long()))
 
-
-    def expand(self, pair, w2i, window):
+    @staticmethod
+    def expand(pair, w2i, window):
         # Padding
         article, title = pair
 
@@ -123,6 +125,19 @@ class HeirDataLoader(BaseDataLoader):
 
             yield (article, context), target
 
+    @staticmethod
+    def make_input(article, context, K):
+        a_tensors, a_lengths = article
+        print(a_tensors)
+        bucket = article.size(0)
+        article_tensor = apply_cuda(article.view(bucket, 1)
+            .expand(bucket, K)
+            .t()
+            .contiguous())
+
+        return [Variable(tensor.long()) for tensor in [article_tensor, context]]
+
+
 
 class AbsDataLoader(BaseDataLoader):
     """docstring for AbsDataLoader."""
@@ -137,11 +152,12 @@ class AbsDataLoader(BaseDataLoader):
                 input = (self.torchify(articles), self.torchify(contexts))
                 yield input, self.torchify(targets)
 
-
-    def torchify(self, arr, variable=False):
+    @staticmethod
+    def torchify(arr, variable=False):
         return apply_cuda(Variable(torch.tensor(list(arr)).long()))
 
-    def expand(self, pair, w2i, window):
+    @staticmethod
+    def expand(pair, w2i, window):
         # Padding
         article, title = pair
 
@@ -156,6 +172,16 @@ class AbsDataLoader(BaseDataLoader):
 
             yield (article, context), target
 
+    @staticmethod
+    def make_input(article, context, K):
+        bucket = article.size(0)
+        article_tensor = apply_cuda(article.view(bucket, 1)
+            .expand(bucket, K)
+            .t()
+            .contiguous())
+
+        return [Variable(tensor.long()) for tensor in [article_tensor, context]]
+
 
 def load(dname, train=True, type="dict", heir=True, small=True):
     prefix = "/all." if heir else "/filter."
@@ -163,12 +189,3 @@ def load(dname, train=True, type="dict", heir=True, small=True):
     prefix += "train" if train else "valid"
 
     return torch.load('{}{}.{}.torch'.format(dname, prefix, type))
-
-def make_input(article, context, K):
-    bucket = article.size(0)
-    article_tensor = apply_cuda(article.view(bucket, 1)
-        .expand(bucket, K)
-        .t()
-        .contiguous())
-
-    return [Variable(tensor.long()) for tensor in [article_tensor, context]]
