@@ -14,9 +14,9 @@ mkdir -p $MDL_DIR
 
 if [[ $* == *--rush* ]]
 then
-  HEIR=0
+  HEIR=""
 else
-  HEIR=1
+  HEIR="-heir"
 fi
 
 date
@@ -33,7 +33,7 @@ python $ABS/summary/train.py \
   -printEvery   100 \
   -encoderModel  "attenbow" \
   -attenPool  5 \
-  -heir $HEIR
+  $HEIR
 date
 
 

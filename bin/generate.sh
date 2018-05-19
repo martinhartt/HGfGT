@@ -12,9 +12,9 @@ export OUT_DIR=$ABS/working_agiga/processed
 
 if [[ $* == *--rush* ]]
 then
-  HEIR=0
+  HEIR=""
 else
-  HEIR=1
+  HEIR="-heir"
 fi
 
 
@@ -50,6 +50,6 @@ then
     -inputf "$INPUT" \
     -outputf "$OUTPUT" \
     -length $LENGTH \
-    -heir $HEIR \
+    $HEIR \
     -workingDir  $OUT_DIR
 fi
