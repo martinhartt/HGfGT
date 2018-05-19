@@ -66,7 +66,7 @@ class NNLM(object):
 
             self.mlp.epoch = 0
 
-        self.loss = nn.NLLLoss()
+        self.loss = apply_cuda(nn.NLLLoss(ignore_index=0))
         self.decoder_embedding = self.mlp.context_embedding
 
         if opt.heir:
