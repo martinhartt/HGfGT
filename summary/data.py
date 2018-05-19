@@ -118,6 +118,9 @@ class HeirDataLoader(BaseDataLoader):
             context = title[0:i + window]
             target = title[i + window]
 
+            if len(context) < 1:
+                continue
+
             yield (article, context), target
 
 
