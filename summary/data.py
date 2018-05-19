@@ -61,7 +61,11 @@ class HeirDataLoader(BaseDataLoader):
         for pair in self.pairs:
             expanded_group_iter = self.expand(pair, self.dict["w2i"], self.window)
 
-            article = self.torchify(pair[0], variable=True, revsort=True)
+            article_summaries = self.torchify(pair[0], variable=True, revsort=True)
+
+            # Skip if one of the length of summaries is zero
+            if len([l for l in article_summaries[1] if l < 1]) != 0:
+                continue
 
             for batch in self.getEvery(expanded_group_iter, max_batch_size):
                 batch = batch[::-1]
@@ -71,7 +75,7 @@ class HeirDataLoader(BaseDataLoader):
                 inputs, targets = zip(*batch)
                 _, contexts = zip(*inputs)
 
-                out = (article, self.torchify(contexts, variable=True)), self.torchify(targets)
+                out = (article_summaries, self.torchify(contexts, variable=True)), self.torchify(targets)
                 yield out
 
     def sortInputs(self, input): # Sort in descending order
