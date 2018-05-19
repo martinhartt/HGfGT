@@ -39,5 +39,5 @@ date
 
 curl "https://maker.ifttt.com/trigger/ping/with/key/bZk7rWKnuJhYlSHus2DL5L"
 
-cd $ABS/jobs
-sbatch train
+# cd $ABS/jobs
+# sbatch train
