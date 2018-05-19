@@ -83,6 +83,13 @@ class HeirDataLoader(BaseDataLoader):
                 arr = sorted(arr, key=len)[::-1]
 
             lengths = [len(batch) for batch in arr]
+
+            if (len([l for l in lengths if l < 1]) != 0):
+                print("This is wrong")
+                print(arr)
+                print(lengths)
+                exit(0)
+
             largest_length = max(lengths)
 
             out = torch.zeros(batch_size, largest_length).long()
