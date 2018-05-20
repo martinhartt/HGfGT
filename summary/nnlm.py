@@ -19,8 +19,6 @@ def addOpts(parser):
     parser.add_argument(
         '-window', type=int, default=5, help="Size of NNLM window.")
     parser.add_argument(
-        '-embeddingDim', type=int, default=50, help="Size of NNLM embeddings.")
-    parser.add_argument(
         '-hiddenSize',
         type=int,
         default=100,

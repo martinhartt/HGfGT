@@ -7,20 +7,24 @@ class LanguageModel(nn.Module):
 
     def __init__(self, dict, opt):
         super(LanguageModel, self).__init__()
-        self.embedding_dim = opt.embeddingDim  # D
         self.window = opt.window  # N
         self.hidden_size = opt.hiddenSize  # H
         self.vocab_size = len(dict["i2w"])  # V
 
-        self.encoder_size = opt.bowDim
-        self.encoder = encoder.AttnBowEncoder(self.encoder_size, self.window, self.vocab_size, opt, dict)
+        self.bow_dim = opt.bowDim
+        if opt.glove:
+            self.context_embedding = nn.Embedding.from_pretrained(glove_weights, freeze=True)
+            glove_weights = build_glove(dict["w2i"])
+        else:
+            self.context_embedding = nn.Embedding(self.vocab_size, self.bow_dim)
+            glove_weights = None
 
-        self.context_embedding = nn.Embedding(self.vocab_size,
-                                              self.embedding_dim)
-        self.context_linear = nn.Linear(self.embedding_dim * self.window,
+        self.encoder = encoder.AttnBowEncoder(self.bow_dim, self.window, self.vocab_size, opt, glove_weights)
+
+        self.context_linear = nn.Linear(self.bow_dim * self.window,
                                         self.hidden_size)
         self.context_tanh = nn.Tanh()
-        self.out_linear = nn.Linear(self.hidden_size + self.encoder_size,
+        self.out_linear = nn.Linear(self.hidden_size + self.bow_dim,
                                     self.vocab_size)
         self.soft_max = nn.LogSoftmax()
 
@@ -32,13 +36,13 @@ class LanguageModel(nn.Module):
         title_ctx = self.context_embedding(title_ctx)
 
         # tanh W (E y)
-        title_ctx = title_ctx.view(batch_size, self.embedding_dim * self.window)
+        title_ctx = title_ctx.view(batch_size, self.bow_dim * self.window)
         title_ctx = self.context_linear(title_ctx)
         title_ctx = self.context_tanh(title_ctx)
 
         # Second layer: takes LM and encoder model.
         out = torch.cat((title_ctx, article), 1)
-        out = out.view(batch_size, self.hidden_size + self.encoder_size)
+        out = out.view(batch_size, self.hidden_size + self.bow_dim)
         out = self.out_linear(out)
         out = self.soft_max(out)
         return out

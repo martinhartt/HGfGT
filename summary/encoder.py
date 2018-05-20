@@ -24,7 +24,7 @@ def add_opts(parser):
 class AttnBowEncoder(nn.Module):
     """docstring for AttnBowEncoder."""
 
-    def __init__(self, bow_dim, window, vocab_size, opt, dict):
+    def __init__(self, bow_dim, window, vocab_size, opt, glove_weights=None):
         super(AttnBowEncoder, self).__init__()
 
         self.bow_dim = bow_dim  # D2
@@ -32,7 +32,6 @@ class AttnBowEncoder(nn.Module):
         self.vocab_size = vocab_size  # V
 
         if opt.glove:
-            glove_weights = build_glove(dict["w2i"])
             self.article_embedding = nn.Embedding.from_pretrained(glove_weights, freeze=True)
             self.context_embedding = nn.Embedding.from_pretrained(glove_weights, freeze=True)
         else:

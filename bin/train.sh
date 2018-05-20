@@ -41,7 +41,6 @@ python $ABS/summary/train.py \
   -workingDir  $OUT_DIR \
   -modelFilename  $MDL_DIR/$1 \
   -miniBatchSize  64 \
-  -embeddingDim  64 \
   -bowDim  300 \
   -hiddenSize  64 \
   -epochs  15 \
