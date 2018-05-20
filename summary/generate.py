@@ -59,7 +59,6 @@ def encode(sent, w2i):
 def main():
     state = torch.load(opt.modelFilename)
 
-    print("Heir is {}".format(opt.heir))
     if opt.heir:
         mlp, encoder = state
     else:
@@ -91,6 +90,9 @@ def main():
 
     sent_num = 0
     for line in sent_file:
+        if line.strip() == "":
+            continue
+
         # Add padding
         if opt.heir:
             summaries = extractive(line).split("\t")
