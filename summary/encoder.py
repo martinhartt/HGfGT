@@ -5,8 +5,6 @@ from glove import build_glove
 
 def add_opts(parser):
     parser.add_argument(
-        '-encoderModel', default='bow', help="The encoder model to use.")
-    parser.add_argument(
         '-bowDim', type=int, default=300, help="Article embedding size.")
     parser.add_argument(
         '-attenPool',

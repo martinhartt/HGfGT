@@ -47,7 +47,6 @@ python $ABS/summary/train.py \
   -learningRate 0.01 \
   -window  $WINDOW \
   -printEvery   100 \
-  -encoderModel  "attenbow" \
   -attenPool  5 \
   $HEIR \
   $GLOVE \
