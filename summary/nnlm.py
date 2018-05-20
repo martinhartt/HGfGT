@@ -110,7 +110,7 @@ class NNLM(object):
                 if self.heir:
                     self.save()
                     print("Learning rate is no longer improving - stopping training...")
-                    exit(1)
+                    # exit(1)
                 else:
                     self.opt.learningRate = self.opt.learningRate / 2
 
