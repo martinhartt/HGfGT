@@ -12,7 +12,7 @@ class LanguageModel(nn.Module):
         self.hidden_size = opt.hiddenSize  # H
         self.vocab_size = len(dict["i2w"])  # V
 
-        self.encoder_size = opt.bow_dim
+        self.encoder_size = opt.bowDim
         self.encoder = encoder.AttnBowEncoder(self.encoder_size, self.window, self.vocab_size, opt)
 
         self.context_embedding = nn.Embedding(self.vocab_size,

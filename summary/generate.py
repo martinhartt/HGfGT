@@ -7,7 +7,7 @@ import math
 
 from extractive import extractive
 
-from data import BaseDataLoader, HeirDataLoader
+from data import AbsDataLoader, HeirDataLoader
 
 parser = argparse.ArgumentParser(description='Train a summarization model.')
 
@@ -59,7 +59,6 @@ def encode(sent, w2i):
 def main():
     state = torch.load(opt.modelFilename)
 
-    print("Heir is {}".format(opt.heir))
     if opt.heir:
         mlp, encoder = state
     else:
@@ -91,6 +90,9 @@ def main():
 
     sent_num = 0
     for line in sent_file:
+        if line.strip() == "":
+            continue
+
         # Add padding
         if opt.heir:
             summaries = extractive(line).split("\t")
@@ -123,7 +125,7 @@ def main():
                 encoder_out = encoder(article)
                 model_scores = mlp(encoder_out, (context, [i+1] * K))
             else:
-                input = DataLoader.make_input(article, context, cur_K)
+                input = AbsDataLoader.make_input(article, context, cur_K)
                 model_scores = mlp(*input)
 
             out_scores = model_scores.data.clone().mul(opt.lmWeight)

@@ -1,6 +1,5 @@
 #/bin/bash
 set -e
-set -x
 
 export ABS="$(dirname $(dirname $0))"
 
@@ -10,11 +9,11 @@ export LENGTH=15
 export OUT_DIR=$ABS/working_agiga/processed
 
 
-if [[ $* == *--rush* ]]
+if [[ $* == *--heir* ]]
 then
-  HEIR=0
+  HEIR="-heir 1"
 else
-  HEIR=1
+  HEIR=""
 fi
 
 
@@ -32,7 +31,7 @@ then
       -inputf "$INPUT" \
       -outputf "$OUTPUT" \
       -length $LENGTH \
-      -heir $HEIR \
+      $HEIR \
       -workingDir  $OUT_DIR
   done
 fi
@@ -50,6 +49,6 @@ then
     -inputf "$INPUT" \
     -outputf "$OUTPUT" \
     -length $LENGTH \
-    -heir $HEIR \
+    $HEIR \
     -workingDir  $OUT_DIR
 fi
