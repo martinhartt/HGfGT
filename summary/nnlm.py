@@ -4,6 +4,7 @@ from util import apply_cuda
 import math
 from language_model import LanguageModel
 from heir_attn import HeirAttnDecoder, HeirAttnEncoder
+from glove import build_glove
 
 def addOpts(parser):
     parser.add_argument(
@@ -58,8 +59,10 @@ class NNLM(object):
                 opt.modelFilename, self.mlp.epoch))
         else:
             if opt.heir:
-                self.encoder = apply_cuda(HeirAttnEncoder(len(dict["i2w"]), opt.bowDim, opt.hiddenSize))
-                self.mlp = apply_cuda(HeirAttnDecoder(len(dict["i2w"]), opt.bowDim, opt.hiddenSize))
+                glove_weights = build_glove(dict["w2i"]) if opt.glove else None
+
+                self.encoder = apply_cuda(HeirAttnEncoder(len(dict["i2w"]), opt.bowDim, opt.hiddenSize, opt, glove_weights))
+                self.mlp = apply_cuda(HeirAttnDecoder(len(dict["i2w"]), opt.bowDim, opt.hiddenSize, opt, glove_weights))
             else:
                 self.mlp = apply_cuda(LanguageModel(self.dict, opt))
                 self.encoder = self.mlp.encoder
@@ -71,10 +74,10 @@ class NNLM(object):
 
         if opt.heir:
             self.encoder_optimizer = torch.optim.SGD(
-                self.encoder.parameters(), self.opt.learningRate)
+                filter(lambda p: p.requires_grad, self.encoder.parameters()), self.opt.learningRate)
 
         self.optimizer = torch.optim.SGD(
-            self.mlp.parameters(), self.opt.learningRate)  # Half learning rate
+            filter(lambda p: p.requires_grad, self.mlp.parameters()), self.opt.learningRate)  # Half learning rate
 
     def validation(self, valid_data):
         offset = self.opt.miniBatchSize

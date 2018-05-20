@@ -1,31 +1,43 @@
 import torch
 import torch.nn as nn
+from glove import build_glove
 
 
 def add_opts(parser):
     parser.add_argument(
         '-encoderModel', default='bow', help="The encoder model to use.")
     parser.add_argument(
-        '-bowDim', type=int, default=50, help="Article embedding size.")
+        '-bowDim', type=int, default=300, help="Article embedding size.")
     parser.add_argument(
         '-attenPool',
         type=int,
         default=5,
         help="Attention model pooling size.")
+    parser.add_argument(
+        '-glove',
+        type=bool,
+        default=False,
+        help="Use pretrained GloVe embeddings"
+    )
 
 
 class AttnBowEncoder(nn.Module):
     """docstring for AttnBowEncoder."""
 
-    def __init__(self, bow_dim, window, vocab_size, opt):
+    def __init__(self, bow_dim, window, vocab_size, opt, dict):
         super(AttnBowEncoder, self).__init__()
 
         self.bow_dim = bow_dim  # D2
         self.window = window  # N
         self.vocab_size = vocab_size  # V
 
-        self.article_embedding = nn.Embedding(vocab_size, bow_dim)
-        self.context_embedding = nn.Embedding(vocab_size, bow_dim)
+        if opt.glove:
+            glove_weights = build_glove(dict["w2i"])
+            self.article_embedding = nn.Embedding.from_pretrained(glove_weights, freeze=True)
+            self.context_embedding = nn.Embedding.from_pretrained(glove_weights, freeze=True)
+        else:
+            self.article_embedding = nn.Embedding(vocab_size, bow_dim)
+            self.context_embedding = nn.Embedding(vocab_size, bow_dim)
 
         self.pad = (opt.attenPool - 1) / 2
         self.context_linear = nn.Linear(window * bow_dim, bow_dim)

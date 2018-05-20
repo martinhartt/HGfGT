@@ -6,9 +6,14 @@ import torch.nn.functional as F
 
 class HeirAttnEncoder(nn.Module):
     """docstring for LSTMEncoder."""
-    def __init__(self, vocab_size, bow_dim, hidden_size, K=7):
+    def __init__(self, vocab_size, bow_dim, hidden_size, opt, glove_weights, K=7):
         super(HeirAttnEncoder, self).__init__()
-        self.summary_embedding = nn.Embedding(vocab_size, bow_dim)
+
+        if opt.glove:
+            self.summary_embedding = nn.Embedding.from_pretrained(glove_weights, freeze=True)
+        else:
+            self.summary_embedding = nn.Embedding(vocab_size, bow_dim)
+
         self.summaries_lstm = nn.LSTM(bow_dim, hidden_size, 3)
         self.control_lstm = nn.LSTM(hidden_size, hidden_size, 1)
         self.hidden_size = hidden_size
@@ -37,9 +42,13 @@ class HeirAttnEncoder(nn.Module):
 
 class HeirAttnDecoder(nn.Module):
     """docstring for LSTMDecoder."""
-    def __init__(self, vocab_size, bow_dim, hidden_size, K=7):
+    def __init__(self, vocab_size, bow_dim, hidden_size, opt, glove_weights=None, K=7):
         super(HeirAttnDecoder, self).__init__()
-        self.context_embedding = nn.Embedding(vocab_size, bow_dim)
+
+        if opt.glove:
+            self.context_embedding = nn.Embedding.from_pretrained(glove_weights, freeze=True)
+        else:
+            self.context_embedding = nn.Embedding(vocab_size, bow_dim)
         self.decoder_lstm = nn.LSTM(bow_dim, hidden_size)
         self.out_linear = nn.Linear(hidden_size, vocab_size)
 

@@ -29,13 +29,20 @@ else
   RESTORE=""
 fi
 
+if [[ $* == *--glove* ]]
+then
+  GLOVE="-glove 1"
+else
+  GLOVE=""
+fi
+
 date
 python $ABS/summary/train.py \
   -workingDir  $OUT_DIR \
   -modelFilename  $MDL_DIR/$1 \
   -miniBatchSize  64 \
   -embeddingDim  64 \
-  -bowDim  200 \
+  -bowDim  300 \
   -hiddenSize  64 \
   -epochs  15 \
   -learningRate 0.01 \
@@ -44,6 +51,7 @@ python $ABS/summary/train.py \
   -encoderModel  "attenbow" \
   -attenPool  5 \
   $HEIR \
+  $GLOVE \
   $RESTORE
 date
 
