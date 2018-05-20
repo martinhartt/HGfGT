@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+set -x
+
 export ABS="$(dirname $(dirname $0))"
 export WORK=$ABS/working_agiga
 export WINDOW=5
@@ -12,11 +15,18 @@ export MDL_DIR=$WORK/models
 
 mkdir -p $MDL_DIR
 
-if [[ $* == *--rush* ]]
+if [[ $* == *--heir* ]]
 then
-  HEIR=""
+  HEIR="-heir 1"
 else
-  HEIR="-heir"
+  HEIR=""
+fi
+
+if [[ $* == *--restore* ]]
+then
+  RESTORE="-restore 1"
+else
+  RESTORE=""
 fi
 
 date
@@ -33,7 +43,8 @@ python $ABS/summary/train.py \
   -printEvery   100 \
   -encoderModel  "attenbow" \
   -attenPool  5 \
-  $HEIR
+  $HEIR \
+  $RESTORE
 date
 
 

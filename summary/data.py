@@ -30,10 +30,6 @@ class BaseDataLoader(object):
     def next_batch(self, max_batch_size):
         raise NotImplementedError()
 
-    def expandIter(self, iter, w2i, window):
-        for pair in iter:
-            for expanded in self.expand(pair, w2i, window):
-                yield expanded
 
     def getEvery(self, iter, n):
         i = 0
@@ -143,7 +139,7 @@ class AbsDataLoader(BaseDataLoader):
     """docstring for AbsDataLoader."""
     def next_batch(self, max_batch_size):
         for key, group_iter in groupby(self.pairs, lambda x: len(x[0])):
-            expanded_group_iter = self.expandIter(group_iter, self.dict["w2i"], self.window, self.heir)
+            expanded_group_iter = self.expandIter(group_iter, self.dict["w2i"], self.window)
 
             for batch in self.getEvery(expanded_group_iter, max_batch_size):
                 inputs, targets = zip(*batch)
@@ -151,6 +147,12 @@ class AbsDataLoader(BaseDataLoader):
 
                 input = (self.torchify(articles), self.torchify(contexts))
                 yield input, self.torchify(targets)
+
+
+    def expandIter(self, iter, w2i, window):
+        for pair in iter:
+            for expanded in self.expand(pair, w2i, window):
+                yield expanded
 
     @staticmethod
     def torchify(arr, variable=False):
