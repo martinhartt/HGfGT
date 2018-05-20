@@ -11,7 +11,6 @@ def build_glove(w2i, size=300):
         word = components[0]
         if word in w2i:
             vec = [float(c) for c in components[1:]]
-            print(word, vec)
             weights[w2i[word]] = torch.tensor(vec)
 
     return weights
