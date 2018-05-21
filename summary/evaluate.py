@@ -9,13 +9,14 @@ parser = argparse.ArgumentParser(
     description='Evaluate the results of a model.')
 
 parser.add_argument(
-    '-predictedSentsFile',
+    'inputFile',
     default='',
-    help='File containing the predicted summaries.')
+    help='File containing the generation outputs.')
 parser.add_argument(
-    '-actualSentsFile',
-    default='',
-    help='File containing the actual summaries.')
+    '-csv',
+    default=False,
+    type=bool,
+    help='Should output format be csv?')
 
 opt = parser.parse_args()
 
@@ -36,43 +37,59 @@ def calculateSemanticSimilarity(predictedSents, actualSents):
 
     return scores, numpy.mean(scores), numpy.median(scores)
 
-
-def extractSents(fileName):
-    return unicode(open(fileName).read(), 'utf8').strip().split('\n')
-
-
 def main():
-    print('Calculating Word2Vec similarity...')
-    actualSents = extractSents(opt.actualSentsFile)
-    predictedSents = extractSents(opt.predictedSentsFile)
+    input = open(opt.inputFile).read().split("# Evaluating ")[1:]
 
-    semantic_scores, semantic_mean, semantic_median = calculateSemanticSimilarity(
-        predictedSents, actualSents)
+    if opt.csv:
+        print("Source,#,Rouge 1,Rouge 2,Rouge L,Semantic sim.")
 
-    print('Calculating ROUGE Score...')
-    rouge_scores = calculateRouge(predictedSents, actualSents)
+    for source_output in input:
+        entries = [c for c in source_output.split("\n\n\n") if bool(c.strip())]
+        source = entries[0]
 
-    pad = 10
-    delim = ' | '
+        actualSents = []
+        predictedSents = []
 
-    print(delim.join([
-        str("#").ljust(3),
-        str("Rouge 1").ljust(pad),
-        str("Rouge 2").ljust(pad),
-        str("Rouge L").ljust(pad),
-        str("Semantic sim.").ljust(pad)
-    ]))
+        for entry in entries[1:]:
+            input, actual, output = [c[2:] for c in entry.split("\n") if c.strip() != '']
 
-    print('=' * (3 + (pad + 3) * 4))
+            actualSents.append(unicode(actual, 'utf8'))
+            predictedSents.append(unicode(output, 'utf8'))
 
-    for i in range(len(predictedSents)):
-        print(delim.join([
-            str(i).ljust(3),
-            str(rouge_scores[i]['rouge-1']['f']).ljust(pad)[:pad],
-            str(rouge_scores[i]['rouge-2']['f']).ljust(pad)[:pad],
-            str(rouge_scores[i]['rouge-l']['f']).ljust(pad)[:pad],
-            str(semantic_scores[i]).ljust(pad)[:pad]
-        ]))
+
+        semantic_scores, semantic_mean, semantic_median = calculateSemanticSimilarity(
+            predictedSents, actualSents)
+
+        rouge_scores = calculateRouge(predictedSents, actualSents)
+
+
+        if opt.csv:
+            for i in range(len(predictedSents)):
+                print("{},{},{},{},{},{}".format(source, str(i), str(rouge_scores[i]['rouge-1']['f']), str(rouge_scores[i]['rouge-2']['f']), str(rouge_scores[i]['rouge-l']['f']), str(semantic_scores[i])))
+        else:
+            pad = 10
+            delim = ' | '
+            print("\n\n# {}\n".format(source))
+
+
+            print(delim.join([
+                str("#").ljust(3),
+                str("Rouge 1").ljust(pad),
+                str("Rouge 2").ljust(pad),
+                str("Rouge L").ljust(pad),
+                str("Semantic sim.").ljust(pad)
+            ]))
+
+            print('=' * (3 + (pad + 3) * 4))
+
+            for i in range(len(predictedSents)):
+                print(delim.join([
+                    str(i).ljust(3),
+                    str(rouge_scores[i]['rouge-1']['f']).ljust(pad)[:pad],
+                    str(rouge_scores[i]['rouge-2']['f']).ljust(pad)[:pad],
+                    str(rouge_scores[i]['rouge-l']['f']).ljust(pad)[:pad],
+                    str(semantic_scores[i]).ljust(pad)[:pad]
+                ]))
 
 
 main()
