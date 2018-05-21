@@ -23,14 +23,14 @@ do
 
   if [[ $* == *--filter* ]]
   then
-    python $SCRIPTS/filter.py $WORK/$BASE.data.txt --firstSent 1 > $WORK/$BASE.data.filter.txt
+    python $SCRIPTS/filter.py $WORK/$BASE.data.txt --firstSent 1 --lengthRange 1 > $WORK/$BASE.data.filter.txt
     python $SCRIPTS/pull.py $WORK/$BASE.data.filter.txt $AGIGA_WORK/train.filter.dict
   fi
 
   if [[ $* == *--all* ]]
   then
-    python $SCRIPTS/filter.py $WORK/$BASE.data.txt > $WORK/$BASE.data.filter.txt
-    python $SCRIPTS/pull.py $WORK/$BASE.data.txt $AGIGA_WORK/train.all.dict
+    python $SCRIPTS/filter.py $WORK/$BASE.data.txt > $WORK/$BASE.all.data.txt
+    python $SCRIPTS/pull.py $WORK/$BASE.all.data.txt $AGIGA_WORK/train.all.dict
   fi
 done
 

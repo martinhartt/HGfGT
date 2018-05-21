@@ -20,8 +20,9 @@ parser.add_argument(
     'inputFile',
     default='',
     help='Input file')
-parser.add_argument('--wordOverlap', type=bool, default=False,help='Word overlap')
-parser.add_argument('--firstSent', type=bool, default=False,help='Only use first sentence?')
+parser.add_argument('--wordOverlap', type=bool, default=False, help='Word overlap')
+parser.add_argument('--firstSent', type=bool, default=False, help='Only use first sentence?')
+parser.add_argument('--lengthRange', type=bool, default=False, help='Length range?')
 
 opt = parser.parse_args()
 
@@ -50,8 +51,9 @@ for l in open(opt.inputFile):
     article_words = article.split()
 
     # Reasonable lengths
-    if not (10 < len(article_words) < 100 and 3 < len(title_words) < 50):
-        continue
+    if opt.lengthRange:
+        if not (10 < len(article_words) < 100 and 3 < len(title_words) < 50):
+            continue
 
     # Some word match.
     if opt.wordOverlap:
