@@ -43,9 +43,9 @@ mkdir -p $OUT_DIR
 if [[ $* == *--filter* ]]
 then
   # Basic filtering on train/dev.
-  python $SCRIPTS/filter.py $WORK/${SMALL}train.data.txt > $WORK/${SMALL}train.data.filter.txt
-  python $SCRIPTS/filter.py $WORK/${SMALL}valid.data.txt > $WORK/${SMALL}valid.data.filter.txt
-  python $SCRIPTS/filter.py $WORK/${SMALL}test.data.txt > $WORK/${SMALL}test.data.filter.txt
+  python $SCRIPTS/filter.py $WORK/${SMALL}train.data.txt --firstSent 1 --wordOverlap 1 > $WORK/${SMALL}train.data.filter.txt
+  python $SCRIPTS/filter.py $WORK/${SMALL}valid.data.txt --firstSent 1 --wordOverlap 1 > $WORK/${SMALL}valid.data.filter.txt
+  python $SCRIPTS/filter.py $WORK/${SMALL}test.data.txt --firstSent 1 --wordOverlap 1 > $WORK/${SMALL}test.data.filter.txt
 
   # Compile dictionary.
   python $SCRIPTS/make_dict.py $WORK/${SMALL}train.data.filter.txt  $WORK/${SMALL}train.filter $UNK
@@ -73,9 +73,9 @@ fi
 if [[ $* == *--all* ]]
 then
   # Basic filtering on train/dev.
-  python $SCRIPTS/filter_lengths.py $WORK/${SMALL}train.data.txt > $WORK/${SMALL}train.data.temp.txt
-  python $SCRIPTS/filter_lengths.py $WORK/${SMALL}valid.data.txt > $WORK/${SMALL}valid.data.temp.txt
-  python $SCRIPTS/filter_lengths.py $WORK/${SMALL}test.data.txt > $WORK/${SMALL}test.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/${SMALL}train.data.txt --firstSent 1 > $WORK/${SMALL}train.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/${SMALL}valid.data.txt --firstSent 1 > $WORK/${SMALL}valid.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/${SMALL}test.data.txt --firstSent 1 > $WORK/${SMALL}test.data.temp.txt
 
   # HACK Reduced the dataset size as it is too large
   shuf -n 300000 $WORK/${SMALL}train.data.temp.txt | python $SCRIPTS/extractive.py > $WORK/${SMALL}train.all.data.txt
