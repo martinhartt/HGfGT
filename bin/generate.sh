@@ -12,10 +12,10 @@ export OUT_DIR=$ABS/working_agiga/processed
 if [[ $* == *--heir* ]]
 then
   HEIR="-heir 1"
-  FILTER="all."
+  FILTER=".all"
 else
   HEIR=""
-  FILTER="filter."
+  FILTER=".filter"
 fi
 
 
