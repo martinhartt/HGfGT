@@ -18,10 +18,10 @@ mkdir -p $MDL_DIR
 if [[ $* == *--heir* ]]
 then
   HEIR="-heir 1"
-  TYPE=".all"
+  TYPE="all."
 else
   HEIR=""
-  TYPE=".filter"
+  TYPE="filter."
 fi
 
 if [[ $* == *--restore* ]]
@@ -41,9 +41,9 @@ fi
 date
 python $ABS/summary/train.py \
   -modelFilename  $MDL_DIR/$1 \
-  -trainFile $WORK/train${TYPE}.data.txt \
-  -validFile $WORK/valid${TYPE}.data.txt \
-  -dictionary $OUT_DIR/all.train.dict.torch \
+  -trainFile $WORK/train.${TYPE}data.txt \
+  -validFile $WORK/valid.${TYPE}data.txt \
+  -dictionary $OUT_DIR/${TYPE}train.dict.torch \
   -batchSize  64 \
   -bowDim  300 \
   -hiddenSize  64 \

@@ -28,7 +28,6 @@ summarisers = {
 tokenizer = Tokenizer("english")
 
 def extractive(article, title=None):
-
     raw = article.replace(' <sb>', '').strip()
 
     parser = PlaintextParser.from_string(raw, tokenizer)
