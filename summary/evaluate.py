@@ -13,7 +13,7 @@ parser.add_argument(
     default='',
     help='File containing the generation outputs.')
 parser.add_argument(
-    '-csv',
+    '--csv',
     default=False,
     type=bool,
     help='Should output format be csv?')

@@ -11,7 +11,7 @@ export OUT_DIR=$ABS/working_agiga/processed
 
 if [[ $* == *--heir* ]]
 then
-  HEIR="-heir 1"
+  HEIR="--heir 1"
   FILTER=".all"
 else
   HEIR=""
@@ -29,12 +29,12 @@ then
     echo -e "\n\n"
 
     python $ABS/summary/generate.py \
-      -modelFilename $MODEL \
-      -inputf "$INPUT" \
-      -outputf "$OUTPUT" \
-      -length $LENGTH \
+      --model $MODEL \
+      --inputf "$INPUT" \
+      --outputf "$OUTPUT" \
+      --length $LENGTH \
       $HEIR \
-      -workingDir  $OUT_DIR
+      --workingDir  $OUT_DIR
   done
 fi
 
@@ -47,10 +47,10 @@ then
   echo -e "\n\n"
 
   python $ABS/summary/generate.py \
-    -modelFilename $MODEL \
-    -inputf "$INPUT" \
-    -outputf "$OUTPUT" \
-    -length $LENGTH \
+    --model $MODEL \
+    --inputf "$INPUT" \
+    --outputf "$OUTPUT" \
+    --length $LENGTH \
     $HEIR \
-    -workingDir  $OUT_DIR
+    --workingDir  $OUT_DIR
 fi

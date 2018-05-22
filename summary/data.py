@@ -6,11 +6,9 @@ from util import apply_cuda, encode
 from itertools import groupby
 
 def add_opts(parser):
-    parser.add_argument('-workingDir', default='')
-    parser.add_argument('-cuda', default=False, type=bool, help='Enable cuda?')
-    parser.add_argument('-heir', default=False, type=bool, help='Enable heirarchal model?')
-    parser.add_argument('-small', default=False, type=bool, help='Use small data?')
-    parser.add_argument('-maxSize', default=10 ** 6, type=bool, help='The maximum number of unextended samples per epoch')
+    parser.add_argument('--workingDir', default='')
+    parser.add_argument('--heir', default=False, type=bool, help='Enable heirarchal model?')
+    parser.add_argument('--maxSize', default=10**6, type=bool, help='The maximum number of unextended samples per epoch')
 
 class BaseDataLoader(object):
     def __init__(self, inputFile, dict, window=5, maxSize=10 ** 6):
