@@ -73,14 +73,14 @@ fi
 if [[ $* == *--all* ]]
 then
   # Basic filtering on train/dev.
-  python $SCRIPTS/filter.py $WORK/${SMALL}train.data.txt --firstSent 1 --lengthRange 1 > $WORK/${SMALL}train.data.temp.txt
-  python $SCRIPTS/filter.py $WORK/${SMALL}valid.data.txt --firstSent 1 --lengthRange 1 > $WORK/${SMALL}valid.data.temp.txt
-  python $SCRIPTS/filter.py $WORK/${SMALL}test.data.txt --firstSent 1 --lengthRange 1 > $WORK/${SMALL}test.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/${SMALL}train.data.txt > $WORK/${SMALL}train.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/${SMALL}valid.data.txt > $WORK/${SMALL}valid.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/${SMALL}test.data.txt > $WORK/${SMALL}test.data.temp.txt
 
   # HACK Reduced the dataset size as it is too large
-  shuf -n 300000 $WORK/${SMALL}train.data.temp.txt | python $SCRIPTS/extractive.py > $WORK/${SMALL}train.all.data.txt
-  shuf -n 2000 $WORK/${SMALL}test.data.temp.txt | python $SCRIPTS/extractive.py > $WORK/${SMALL}test.all.data.txt
-  shuf -n 2000 $WORK/${SMALL}valid.data.temp.txt | python $SCRIPTS/extractive.py > $WORK/${SMALL}valid.all.data.txt
+  cat $WORK/${SMALL}train.data.temp.txt | python $SCRIPTS_SUMMARY/extractive.py > $WORK/${SMALL}train.all.data.txt
+  cat $WORK/${SMALL}test.data.temp.txt | python $SCRIPTS_SUMMARY/extractive.py > $WORK/${SMALL}test.all.data.txt
+  cat $WORK/${SMALL}valid.data.temp.txt | python $SCRIPTS_SUMMARY/extractive.py > $WORK/${SMALL}valid.all.data.txt
 
   # Compile dictionary.
   python $SCRIPTS/make_dict.py $WORK/${SMALL}train.all.data.txt  $WORK/${SMALL}train.all $UNK
