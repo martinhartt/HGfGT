@@ -2,7 +2,7 @@
 import torch
 import random
 from torch.autograd import Variable
-from util import apply_cuda
+from util import apply_cuda, encode
 from itertools import groupby
 
 def add_opts(parser):
@@ -10,26 +10,57 @@ def add_opts(parser):
     parser.add_argument('-cuda', default=False, type=bool, help='Enable cuda?')
     parser.add_argument('-heir', default=False, type=bool, help='Enable heirarchal model?')
     parser.add_argument('-small', default=False, type=bool, help='Use small data?')
-    parser.add_argument(
-        '-batchSize', type=int, default=64, help="Size of training minibatch.")
+    parser.add_argument('-maxSize', default=10 ** 6, type=bool, help='The maximum number of unextended samples per epoch')
 
 class BaseDataLoader(object):
-    def __init__(self, title_data, article_data, dict, window=5):
+    def __init__(self, inputFile, dict, window=5, maxSize=10 ** 6):
         super(BaseDataLoader, self).__init__()
-        self.pairs = zip(article_data, title_data)
         self.dict = dict
+        self.inputFile = inputFile
+        self.allPairs = self.loadLazy(inputFile, dict)
+        self.maxSize = maxSize
+        self.pairs = self.nextPairs(maxSize)
         self.window = window
-        self.length_cache = None
 
-        # Shuffle?
-        self.reset()
+    def nextPairs(self, maxSize):
+        i = 0
+
+        newPairs = []
+
+        while i < maxSize:
+            try:
+                newPairs.append(next(self.allPairs))
+                i += 1
+            except Exception as e:
+                self.allPairs = self.loadLazy(self.inputFile, self.dict)
+                break
+
+        return newPairs
 
     def reset(self):
+        self.pairs = self.nextPairs(self.maxSize)
         random.shuffle(self.pairs)
 
     def next_batch(self, max_batch_size):
         raise NotImplementedError()
 
+
+    @staticmethod
+    def loadLazy(inputFile, dict):
+        for line in open(inputFile):
+            components = line.strip().split('\t')
+
+            title = components[0]
+            articles = components[1:]
+
+            title = encode(title, dict["w2i"])
+
+            if len(articles) > 1:
+                articles = [encode(article, dict["w2i"]) for article in articles]
+            elif len(articles) > 0:
+                articles = encode(articles[0], dict["w2i"])
+
+            yield articles, title
 
     def getEvery(self, iter, n):
         i = 0
@@ -185,9 +216,5 @@ class AbsDataLoader(BaseDataLoader):
         return [Variable(tensor.long()) for tensor in [article_tensor, context]]
 
 
-def load(dname, train=True, type="dict", heir=True, small=True):
-    prefix = "/all." if heir else "/filter."
-    prefix += "small_" if small else ""
-    prefix += "train" if train else "valid"
-
-    return torch.load('{}{}.{}.torch'.format(dname, prefix, type))
+def loadDict(filename):
+    return torch.load(filename)
