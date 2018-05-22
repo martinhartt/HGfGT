@@ -56,18 +56,6 @@ then
   # Constructing torch data files.
   python $SCRIPTS/build_dict.py $WORK/${SMALL}train.filter.dict $OUT_DIR/${SMALL}filter.train.dict.torch
 
-  python $SCRIPTS/build.py \
-    -inputFile $WORK/${SMALL}train.data.filter.txt \
-    -inDictionary $OUT_DIR/filter.${SMALL}train.dict.torch \
-    -outDirectory $OUT_DIR \
-    -outPrefix "filter.${SMALL}train"
-
-  python $SCRIPTS/build.py \
-    -inputFile $WORK/${SMALL}valid.data.filter.txt \
-    -inDictionary $OUT_DIR/filter.${SMALL}train.dict.torch \
-    -outDirectory $OUT_DIR \
-    -outPrefix "filter.${SMALL}valid"
-
 fi
 
 if [[ $* == *--all* ]]
@@ -90,17 +78,5 @@ then
 
   # Constructing torch data files.
   python $SCRIPTS/build_dict.py $WORK/${SMALL}train.all.dict $OUT_DIR/all.${SMALL}train.dict.torch
-
-  python $SCRIPTS/build.py \
-    -inputFile $WORK/${SMALL}train.all.data.txt \
-    -inDictionary $OUT_DIR/all.${SMALL}train.dict.torch \
-    -outDirectory $OUT_DIR \
-    -outPrefix "all.${SMALL}train" \
-
-  python $SCRIPTS/build.py \
-    -inputFile $WORK/${SMALL}valid.all.data.txt \
-    -inDictionary $OUT_DIR/all.${SMALL}train.dict.torch \
-    -outDirectory $OUT_DIR \
-    -outPrefix "all.${SMALL}valid" \
 
 fi

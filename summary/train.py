@@ -6,6 +6,10 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Train a summarization model.')
 
+parser.add_argument('-trainFile', default='', help='The input training file.')
+parser.add_argument('-validFile', default='', help='The input validation file.')
+parser.add_argument('-dictionary', default='', help='The input dictionary.')
+
 data.add_opts(parser)
 encoder.add_opts(parser)
 nnlm.addOpts(parser)
@@ -15,30 +19,16 @@ opt = parser.parse_args()
 
 def main():
     print("Loading dictionary...")
-    dict = data.load(opt.workingDir, train=True, type='dict', heir=opt.heir, small=opt.small)
+    print(opt.dictionary)
+    dict = data.loadDict(opt.dictionary)
 
-    print("Loading training data...")
-    train_title = data.load(
-        opt.workingDir, train=True, type="title", heir=opt.heir, small=opt.small)
-
-
-    train_article = data.load(
-        opt.workingDir, train=True, type="article", heir=opt.heir, small=opt.small)
-
-    print("Loading validation data...")
-    valid_title = data.load(
-        opt.workingDir, train=False, type="title", heir=opt.heir, small=opt.small)
-    valid_article = data.load(
-        opt.workingDir, train=False, type="article", heir=opt.heir, small=opt.small)
-
-    # Make main LM
-    print("Constructing train tensors...")
     DataLoader = data.HeirDataLoader if opt.heir else data.AbsDataLoader
 
-    train_data = DataLoader(train_title, train_article, dict, window=opt.window)
+    print("Constructing train tensors...")
+    train_data = DataLoader(opt.trainFile, dict, window=opt.window, maxSize=opt.maxSize)
 
     print("Constructing validation tensors...")
-    valid_data = DataLoader(valid_title, valid_article, dict, window=opt.window)
+    valid_data = DataLoader(opt.validFile, dict, window=opt.window, maxSize=opt.maxSize)
 
     print("Setting up language model and training parameters...")
     mlp = nnlm.NNLM(opt, dict)

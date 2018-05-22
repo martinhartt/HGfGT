@@ -31,7 +31,7 @@ def addOpts(parser):
         default=False,
         help="Should a previous model be restored?")
     parser.add_argument(
-        '-miniBatchSize',
+        '-batchSize',
         type=int,
         default=64,
         help="Size of training minibatch.")
@@ -78,7 +78,7 @@ class NNLM(object):
             filter(lambda p: p.requires_grad, self.mlp.parameters()), self.opt.learningRate)  # Half learning rate
 
     def validation(self, valid_data):
-        offset = self.opt.miniBatchSize
+        offset = self.opt.batchSize
         loss = 0
         total = 0
         valid_data.reset()
@@ -162,7 +162,7 @@ class NNLM(object):
             total = 0
             loss = 0
 
-            for (article, context), targets in data.next_batch(self.opt.miniBatchSize):
+            for (article, context), targets in data.next_batch(self.opt.batchSize):
                 self.optimizer.zero_grad()
                 if self.heir:
                     self.encoder_optimizer.zero_grad()
@@ -188,7 +188,7 @@ class NNLM(object):
                         "[Loss: {} Epoch: {} Position: {} Rate: {}]".format(
                             loss / (batch - last_batch + 1),
                             epoch,
-                            batch * self.opt.miniBatchSize,
+                            batch * self.opt.batchSize,
                             self.opt.learningRate))
                     last_batch = batch
                     loss = 0
