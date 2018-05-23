@@ -8,6 +8,7 @@ parser = argparse.ArgumentParser(description='Train a summarization model.')
 parser.add_argument('--train', default='', help='The input training file.')
 parser.add_argument('--valid', default='', help='The input validation file.')
 parser.add_argument('--dictionary', default='', help='The input dictionary.')
+parser.add_argument('--pooling', default=False, help='Enable pooling?')
 
 parser.add_argument('--bowDim', type=int, default=300, help="Article embedding size.")
 parser.add_argument(
