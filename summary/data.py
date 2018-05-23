@@ -17,10 +17,10 @@ class BaseDataLoader(object):
         self.inputFile = inputFile
         self.allPairs = self.loadLazy(inputFile, dict)
         self.maxSize = maxSize
-        self.pairs = self.nextPairs(maxSize)
+        self.pairs = self.next_pairs(maxSize)
         self.window = window
 
-    def nextPairs(self, maxSize):
+    def next_pairs(self, maxSize):
         i = 0
 
         newPairs = []
@@ -36,7 +36,7 @@ class BaseDataLoader(object):
         return newPairs
 
     def reset(self):
-        self.pairs = self.nextPairs(self.maxSize)
+        self.pairs = self.next_pairs(self.maxSize)
         random.shuffle(self.pairs)
 
     def next_batch(self, max_batch_size):

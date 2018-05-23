@@ -208,6 +208,5 @@ class Trainer(object):
 
         torch.save(state, self.opt.model)
         # Save current epoch for evaluation purposes
-        if self.mlp.epoch is not None:
-            torch.save(state, "{}__{}".format(self.opt.model,
-                                                 self.mlp.epoch))
+        # if self.mlp.epoch is not None:
+        #     torch.save(state, "{}__{}".format(self.opt.model, self.mlp.epoch))

@@ -1,6 +1,5 @@
 import trainer
 import data
-import encoder
 
 import argparse
 
@@ -24,7 +23,6 @@ parser.add_argument(
 )
 
 data.add_opts(parser)
-encoder.add_opts(parser)
 trainer.addOpts(parser)
 
 opt = parser.parse_args()
@@ -44,10 +42,10 @@ def main():
     valid_data = DataLoader(opt.valid, dict, window=opt.window, maxSize=opt.maxSize)
 
     print("Setting up language model and training parameters...")
-    trainer = trainer.Trainer(opt, dict)
+    t = trainer.Trainer(opt, dict)
 
     print("Training...")
-    trainer.train(train_data, valid_data)
+    t.train(train_data, valid_data)
 
 
 main()
