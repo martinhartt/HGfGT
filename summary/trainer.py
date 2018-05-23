@@ -206,6 +206,7 @@ class Trainer(object):
         state = (self.mlp, self.encoder) if self.heir else self.mlp
 
         torch.save(state, self.opt.model)
+        print('Finished saving')
         # Save current epoch for evaluation purposes
         # if self.mlp.epoch is not None:
         #     torch.save(state, "{}__{}".format(self.opt.model, self.mlp.epoch))
