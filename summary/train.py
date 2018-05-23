@@ -6,9 +6,9 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Train a summarization model.')
 
-parser.add_argument('-trainFile', default='', help='The input training file.')
-parser.add_argument('-validFile', default='', help='The input validation file.')
-parser.add_argument('-dictionary', default='', help='The input dictionary.')
+parser.add_argument('--train', default='', help='The input training file.')
+parser.add_argument('--valid', default='', help='The input validation file.')
+parser.add_argument('--dictionary', default='', help='The input dictionary.')
 
 data.add_opts(parser)
 encoder.add_opts(parser)
@@ -25,10 +25,10 @@ def main():
     DataLoader = data.HeirDataLoader if opt.heir else data.AbsDataLoader
 
     print("Constructing train tensors...")
-    train_data = DataLoader(opt.trainFile, dict, window=opt.window, maxSize=opt.maxSize)
+    train_data = DataLoader(opt.train, dict, window=opt.window, maxSize=opt.maxSize)
 
     print("Constructing validation tensors...")
-    valid_data = DataLoader(opt.validFile, dict, window=opt.window, maxSize=opt.maxSize)
+    valid_data = DataLoader(opt.valid, dict, window=opt.window, maxSize=opt.maxSize)
 
     print("Setting up language model and training parameters...")
     mlp = nnlm.NNLM(opt, dict)

@@ -11,32 +11,27 @@ from data import AbsDataLoader, HeirDataLoader
 
 parser = argparse.ArgumentParser(description='Train a summarization model.')
 
-parser.add_argument('-modelFilename', default='', help='Model to test.')
-parser.add_argument('-inputf', default='', help='Input article files. ')
-parser.add_argument('-outputf', default='', help='Actual title files. ')
+parser.add_argument('--model', default='', help='Model to test.')
+parser.add_argument('--inputf', default='', help='Input article files. ')
+parser.add_argument('--outputf', default='', help='Actual title files. ')
 parser.add_argument(
-    '-length', type=int, default=15, help='Maximum length of summary.')
+    '--length', type=int, default=15, help='Maximum length of summary.')
 parser.add_argument(
-    '-allowUNK', type=bool, default=False, help="Allow generating <unk>.")
+    '--allowUNK', type=bool, default=False, help="Allow generating <unk>.")
 parser.add_argument(
-    '-fixedLength',
+    '--fixedLength',
     type=bool,
     default=True,
-    help="Produce exactly -length words.")
+    help="Produce exact no of words.")
 parser.add_argument(
-    '-blockRepeatWords',
+    '--blockRepeatWords',
     type=bool,
     default=False,
     help="Disallow generating a word twice.")
 parser.add_argument(
-    '-lmWeight', type=float, default=1.0, help="Weight for main model.")
+    '--lmWeight', type=float, default=1.0, help="Weight for main model.")
 parser.add_argument(
-    '-beamSize', type=int, default=100, help="Size of the beam.")
-parser.add_argument(
-    '-showCandidates',
-    type=bool,
-    default=False,
-    help="If true, shows next most likely summaries.")
+    '--beamSize', type=int, default=100, help="Size of the beam.")
 
 data.add_opts(parser)
 
@@ -57,7 +52,7 @@ def encode(sent, w2i):
     return [w2i.get(word, w2i["<unk>"]) for word in sent.split()]
 
 def main():
-    state = torch.load(opt.modelFilename)
+    state = torch.load(opt.model)
 
     if opt.heir:
         mlp, encoder = state

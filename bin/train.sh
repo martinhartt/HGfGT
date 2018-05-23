@@ -17,41 +17,41 @@ mkdir -p $MDL_DIR
 
 if [[ $* == *--heir* ]]
 then
-  HEIR="-heir 1"
+  HEIR="--heir 1"
   TYPE="all."
+  LR="0.01"
 else
   HEIR=""
   TYPE="filter."
+  LR="0.1"
 fi
 
 if [[ $* == *--restore* ]]
 then
-  RESTORE="-restore 1"
+  RESTORE="--restore 1"
 else
   RESTORE=""
 fi
 
 if [[ $* == *--glove* ]]
 then
-  GLOVE="-glove 1"
+  GLOVE="--glove 1"
 else
   GLOVE=""
 fi
 
 date
 python $ABS/summary/train.py \
-  -modelFilename  $MDL_DIR/$1 \
-  -trainFile $WORK/train.${TYPE}data.txt \
-  -validFile $WORK/valid.${TYPE}data.txt \
-  -dictionary $OUT_DIR/${TYPE}train.dict.torch \
-  -batchSize  64 \
-  -bowDim  300 \
-  -hiddenSize  64 \
-  -epochs  15 \
-  -learningRate 0.01 \
-  -window  $WINDOW \
-  -printEvery   100 \
-  -attenPool  5 \
+  --model  $MDL_DIR/$1 \
+  --train $WORK/train.${TYPE}data.txt \
+  --valid $WORK/valid.${TYPE}data.txt \
+  --dictionary $OUT_DIR/${TYPE}train.dict.torch \
+  --batchSize  64 \
+  --bowDim  300 \
+  --learningRate $LR \
+  --window  $WINDOW \
+  --printEvery   100 \
+  --attenPool  5 \
   $HEIR \
   $GLOVE \
   $RESTORE

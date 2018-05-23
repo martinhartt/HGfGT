@@ -8,30 +8,30 @@ from glove import build_glove
 
 def addOpts(parser):
     parser.add_argument(
-        '-epochs', type=int, default=15, help="Number of epochs to train.")
+        '--epochs', type=int, default=15, help="Number of epochs to train.")
     parser.add_argument(
-        '-printEvery',
+        '--printEvery',
         type=int,
         default=10000,
         help="How often to print during training.")
     parser.add_argument(
-        '-modelFilename', default='', help="File for saving loading/model.")
+        '--model', default='', help="File for saving loading/model.")
     parser.add_argument(
-        '-window', type=int, default=5, help="Size of NNLM window.")
+        '--window', type=int, default=5, help="Size of NNLM window.")
     parser.add_argument(
-        '-hiddenSize',
+        '--hiddenSize',
         type=int,
         default=100,
         help="Size of NNLM hiddent layer.")
     parser.add_argument(
-        '-learningRate', type=float, default=0.1, help="SGD learning rate.")
+        '--learningRate', type=float, default=0.1, help="SGD learning rate.")
     parser.add_argument(
-        '-restore',
+        '--restore',
         type=bool,
         default=False,
         help="Should a previous model be restored?")
     parser.add_argument(
-        '-batchSize',
+        '--batchSize',
         type=int,
         default=64,
         help="Size of training minibatch.")
@@ -48,13 +48,13 @@ class NNLM(object):
 
         if opt.restore:
             if opt.heir:
-                self.mlp, self.encoder = torch.load(opt.modelFilename)
+                self.mlp, self.encoder = torch.load(opt.model)
             else:
-                self.mlp = torch.load(opt.modelFilename)
+                self.mlp = torch.load(opt.model)
 
             self.mlp.epoch += 1
             print("Restoring MLP {} with epoch {}".format(
-                opt.modelFilename, self.mlp.epoch))
+                opt.model, self.mlp.epoch))
         else:
             if opt.heir:
                 glove_weights = build_glove(dict["w2i"]) if opt.glove else None
@@ -206,8 +206,8 @@ class NNLM(object):
 
         state = (self.mlp, self.encoder) if self.heir else self.mlp
 
-        torch.save(state, self.opt.modelFilename)
+        torch.save(state, self.opt.model)
         # Save current epoch for evaluation purposes
         if self.mlp.epoch is not None:
-            torch.save(state, "{}__{}".format(self.opt.modelFilename,
+            torch.save(state, "{}__{}".format(self.opt.model,
                                                  self.mlp.epoch))
