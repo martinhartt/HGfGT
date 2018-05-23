@@ -113,8 +113,8 @@ def main():
 
         n = opt.length
 
-        hyps = torch.zeros(K, W + n).long().fill_(w2i["<s>"])
-        scores = torch.zeros(K).float()
+        hyps = apply_cuda(torch.zeros(K, W + n).long().fill_(w2i["<s>"]))
+        scores = apply_cuda(torch.zeros(K).float())
 
         for step in range(n):
             new_candidates = []
