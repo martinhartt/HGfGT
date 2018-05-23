@@ -1,4 +1,4 @@
-import nnlm
+import trainer
 import data
 import encoder
 
@@ -10,9 +10,22 @@ parser.add_argument('--train', default='', help='The input training file.')
 parser.add_argument('--valid', default='', help='The input validation file.')
 parser.add_argument('--dictionary', default='', help='The input dictionary.')
 
+parser.add_argument('--bowDim', type=int, default=300, help="Article embedding size.")
+parser.add_argument(
+    '--attenPool',
+    type=int,
+    default=5,
+    help="Attention model pooling size.")
+parser.add_argument(
+    '--glove',
+    type=bool,
+    default=False,
+    help="Use pretrained GloVe embeddings"
+)
+
 data.add_opts(parser)
 encoder.add_opts(parser)
-nnlm.addOpts(parser)
+trainer.addOpts(parser)
 
 opt = parser.parse_args()
 
@@ -31,10 +44,10 @@ def main():
     valid_data = DataLoader(opt.valid, dict, window=opt.window, maxSize=opt.maxSize)
 
     print("Setting up language model and training parameters...")
-    mlp = nnlm.NNLM(opt, dict)
+    trainer = trainer.Trainer(opt, dict)
 
     print("Training...")
-    mlp.train(train_data, valid_data)
+    trainer.train(train_data, valid_data)
 
 
 main()

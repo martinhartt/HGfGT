@@ -17,12 +17,12 @@ def addOpts(parser):
     parser.add_argument(
         '--model', default='', help="File for saving loading/model.")
     parser.add_argument(
-        '--window', type=int, default=5, help="Size of NNLM window.")
+        '--window', type=int, default=5, help="Size of Trainer window.")
     parser.add_argument(
         '--hiddenSize',
         type=int,
         default=100,
-        help="Size of NNLM hiddent layer.")
+        help="Size of Trainer hiddent layer.")
     parser.add_argument(
         '--learningRate', type=float, default=0.1, help="SGD learning rate.")
     parser.add_argument(
@@ -37,11 +37,11 @@ def addOpts(parser):
         help="Size of training minibatch.")
 
 
-class NNLM(object):
-    """docstring for NNLM."""
+class Trainer(object):
+    """docstring for Trainer."""
 
     def __init__(self, opt, dict):
-        super(NNLM, self).__init__()
+        super(Trainer, self).__init__()
         self.opt = opt
         self.dict = dict
         self.heir = opt.heir

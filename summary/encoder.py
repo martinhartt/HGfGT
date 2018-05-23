@@ -3,22 +3,6 @@ import torch.nn as nn
 from glove import build_glove
 
 
-def add_opts(parser):
-    parser.add_argument(
-        '--bowDim', type=int, default=300, help="Article embedding size.")
-    parser.add_argument(
-        '--attenPool',
-        type=int,
-        default=5,
-        help="Attention model pooling size.")
-    parser.add_argument(
-        '--glove',
-        type=bool,
-        default=False,
-        help="Use pretrained GloVe embeddings"
-    )
-
-
 class AttnBowEncoder(nn.Module):
     """docstring for AttnBowEncoder."""
 
