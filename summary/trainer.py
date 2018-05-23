@@ -84,7 +84,6 @@ class Trainer(object):
         valid_data.reset()
 
         for (article, context), targets in valid_data.next_batch(offset):
-            print((article, context), targets)
             if self.heir:
                 encoder_out = self.encoder(article)
                 out = self.mlp(encoder_out, context)
