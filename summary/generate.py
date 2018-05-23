@@ -57,21 +57,17 @@ def decode(sent, i2w):
 
 def set_hard_constraints(out_scores, w2i, finalized):
     INF = float('inf')
-    FINAL_VAL = 1000
 
-    if not finalized:
-        # Apply hard constraints
-        out_scores[:, w2i["<s>"]] = -INF
-        out_scores[:, w2i["<null>"]] = -INF
-        out_scores[:, w2i["<sb>"]] = -INF
+    # Apply hard constraints
+    out_scores[:, w2i["<s>"]] = -INF
+    out_scores[:, w2i["<null>"]] = -INF
+    out_scores[:, w2i["<sb>"]] = -INF
 
-        if not opt.allowUNK:
-            out_scores[:, w2i["<unk>"]] = -INF
+    if not opt.allowUNK:
+        out_scores[:, w2i["<unk>"]] = -INF
 
-        if opt.fixedLength:
-            out_scores[:, w2i["</s>"]] = -INF
-    else:
-        out_scores[:, w2i["</s>"]] += FINAL_VAL
+    if opt.fixedLength:
+        out_scores[:, w2i["</s>"]] = -INF
 
 def main():
     state = torch.load(opt.model)
@@ -138,7 +134,7 @@ def main():
 
             # Apply hard constraints
             finalized = (step == n - 1) and opt.fixedLength
-            set_hard_constraints(out_scores, w2i, finalized)
+            # set_hard_constraints(out_scores, w2i, finalized)
 
             for sample in range(K): # Per certain context
                 if context[sample][-1] == w2i["</s>"]:
@@ -155,14 +151,14 @@ def main():
                     candidate = [combined, scores[sample] + score]
                     new_candidates.append(candidate)
 
-            ordered = sorted(new_candidates, key=lambda cand:-cand[1])
+            ordered = list(reversed(sorted(new_candidates, key=lambda cand:cand[1])))
             h, s = zip(*ordered)
 
             for r in range(K):
                 hyps[r][start:end+1] = h[r]
                 scores[r] = s[r]
 
-        _, top_ixs = torch.topk(scores, 1)
+        s, top_ixs = torch.topk(scores, 1)
 
         final = hyps[int(top_ixs)][W:-1]
 
