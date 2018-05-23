@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import encoder
+from glove import build_glove
 
 class LanguageModel(nn.Module):
     """docstring for LanguageModel."""
@@ -13,8 +14,8 @@ class LanguageModel(nn.Module):
 
         self.bow_dim = opt.bowDim
         if opt.glove:
-            self.context_embedding = nn.Embedding.from_pretrained(glove_weights, freeze=True)
             glove_weights = build_glove(dict["w2i"])
+            self.context_embedding = nn.Embedding.from_pretrained(glove_weights, freeze=True)
         else:
             self.context_embedding = nn.Embedding(self.vocab_size, self.bow_dim)
             glove_weights = None
