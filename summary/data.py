@@ -94,8 +94,6 @@ class HeirDataLoader(BaseDataLoader):
                 continue
 
             for batch in self.getEvery(expanded_group_iter, max_batch_size):
-                batch = batch[::-1]
-
                 batch = [pair for pair in batch if len(pair[0][1]) > 0]
 
                 inputs, targets = zip(*batch)

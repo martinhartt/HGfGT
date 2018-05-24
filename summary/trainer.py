@@ -5,6 +5,8 @@ import math
 from language_model import LanguageModel
 from heir_attn import HeirAttnDecoder, HeirAttnEncoder
 from glove import build_glove
+from torch.autograd import Variable
+import random
 
 def addOpts(parser):
     parser.add_argument(
@@ -30,6 +32,16 @@ def addOpts(parser):
         type=bool,
         default=False,
         help="Should a previous model be restored?")
+    parser.add_argument(
+        '--teacherForcing',
+        type=bool,
+        default=False,
+        help="Enable teacher forcing?")
+    parser.add_argument(
+        '--teacherForcingRatio',
+        type=float,
+        default=0.5,
+        help="Enable teacher forcing?")
     parser.add_argument(
         '--batchSize',
         type=int,
@@ -110,8 +122,8 @@ class Trainer(object):
             if cur_valid_loss > self.last_valid_loss:
                 if self.heir:
                     self.save()
-                    print("Learning rate is no longer improving - stopping training...")
-                    # exit(1)
+                    print("Loss is no longer decreasing for validation - stopping training...")
+                    exit(1)
                 else:
                     self.opt.learningRate = self.opt.learningRate / 2
 
@@ -152,7 +164,7 @@ class Trainer(object):
         for epoch in range(self.mlp.epoch, self.opt.epochs):
             data.reset()
             self.renorm_tables()
-            self.run_valid(valid_data)
+            # self.run_valid(valid_data)
             self.mlp.epoch = epoch
 
             # Loss for the epoch
@@ -167,13 +179,29 @@ class Trainer(object):
                 if self.heir:
                     self.encoder_optimizer.zero_grad()
 
-                if self.heir:
                     encoder_out = self.encoder(article)
-                    out = self.mlp(encoder_out, context)
+
+                    generated = apply_cuda(Variable(torch.zeros(len(targets)).fill_(self.dict["w2i"]["<s>"]).long()))
+
+                    err = 0
+                    for i in range(len(targets)):
+                        target = targets[i].unsqueeze(0)
+
+                        use_teacher_forcing = self.opt.teacherForcing if random.random() < self.opt.teacherForcingRatio else False
+                        if use_teacher_forcing:
+                            assert i+1 == context[1][i]
+                            ctx = context[0][i][:i+1].unsqueeze(0), [context[1][i]]
+                        else:
+                            ctx = generated[:i+1].unsqueeze(0), [i+1]
+
+
+                        out = self.mlp(encoder_out, ctx)
+
+                        err += self.loss(out, target)
                 else:
                     out = self.mlp(article, context)
+                    err = self.loss(out, targets)
 
-                err = self.loss(out, targets)
 
                 err.backward()
                 self.optimizer.step()
