@@ -134,15 +134,15 @@ def main():
 
             # Apply hard constraints
             finalized = (step == n - 1) and opt.fixedLength
-            # set_hard_constraints(out_scores, w2i, finalized)
+            set_hard_constraints(out_scores, w2i, finalized)
 
             for sample in range(K): # Per certain context
-                if context[sample][-1] == w2i["</s>"]:
-                    end = w2i["</s>"]
-                    combined = torch.cat((context[sample], apply_cuda(torch.tensor([end]))))
-                    candidate = [combined, scores[sample]]
-                    new_candidates.append(candidate)
-                    continue
+                # if context[sample][-1] == w2i["</s>"]:
+                #     end = w2i["</s>"]
+                #     combined = torch.cat((context[sample], apply_cuda(torch.tensor([end]))))
+                #     candidate = [combined, scores[sample]]
+                #     new_candidates.append(candidate)
+                #     continue
 
                 top_scores, top_indexes = torch.topk(out_scores[sample], K)
 
