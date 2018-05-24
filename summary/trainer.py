@@ -128,9 +128,10 @@ class Trainer(object):
             # If valid loss does not improve drop learning rate
             if cur_valid_loss > self.last_valid_loss:
                 if self.heir:
-                    self.save()
-                    print("Loss is no longer decreasing for validation - stopping training...")
-                    exit(1)
+                    if self.mlp.epoch > 20:
+                        self.save()
+                        print("Loss is no longer decreasing for validation - stopping training...")
+                        exit(1)
                 else:
                     self.opt.learningRate = self.opt.learningRate / 2
 
