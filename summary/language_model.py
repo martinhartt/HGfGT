@@ -15,7 +15,7 @@ class LanguageModel(nn.Module):
         self.bow_dim = opt.bowDim
         if opt.glove:
             glove_weights = build_glove(dict["w2i"])
-            self.context_embedding = nn.Embedding.from_pretrained(glove_weights, freeze=True)
+            self.context_embedding = nn.Embedding.from_pretrained(glove_weights, freeze=False)
         else:
             self.context_embedding = nn.Embedding(self.vocab_size, self.bow_dim)
             glove_weights = None

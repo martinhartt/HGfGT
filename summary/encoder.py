@@ -15,8 +15,8 @@ class AttnBowEncoder(nn.Module):
         self.pooling = opt.pooling
 
         if opt.glove:
-            self.article_embedding = nn.Embedding.from_pretrained(glove_weights, freeze=True)
-            self.context_embedding = nn.Embedding.from_pretrained(glove_weights, freeze=True)
+            self.article_embedding = nn.Embedding.from_pretrained(glove_weights, freeze=False)
+            self.context_embedding = nn.Embedding.from_pretrained(glove_weights, freeze=False)
         else:
             self.article_embedding = nn.Embedding(vocab_size, bow_dim)
             self.context_embedding = nn.Embedding(vocab_size, bow_dim)
