@@ -55,16 +55,6 @@ for l in gzip.open(sys.argv[1]):
 
     if MODE == TEXT and line == "</P>":
         article += "<sb> "
-        # HACK remove following lines
-        title = re.sub(r'\s\s', ' ', title).strip()
-        article = re.sub(r'\s\s', ' ', article).strip()
-
-        out.write("{}\t{}\n\n".format(title, article))
-
-        title = ""
-        article = ""
-
-        MODE = NONE
 
     if MODE == TEXT and len(line) > 0 and line[0] != "<":
         article += normalize(line)
