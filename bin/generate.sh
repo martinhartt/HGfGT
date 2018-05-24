@@ -1,5 +1,4 @@
- \
---$OUT_DIR/dictionary #/bin/bash
+#/bin/bash
 set -e
 
 export ABS="$(dirname $(dirname $0))"
