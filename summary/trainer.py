@@ -38,16 +38,6 @@ def addOpts(parser):
         default=False,
         help="Should a previous model be restored?")
     parser.add_argument(
-        '--teacherForcing',
-        type=bool,
-        default=False,
-        help="Enable teacher forcing?")
-    parser.add_argument(
-        '--teacherForcingRatio',
-        type=float,
-        default=0.5,
-        help="Enable teacher forcing?")
-    parser.add_argument(
         '--batchSize',
         type=int,
         default=64,
@@ -189,22 +179,13 @@ class Trainer(object):
 
                     encoder_out = self.encoder(article)
 
-                    generated = apply_cuda(Variable(torch.zeros(len(targets)).fill_(self.dict["w2i"]["<s>"]).long()))
-
                     err = 0
                     for i in range(len(targets)):
                         target = targets[i].unsqueeze(0)
-
-                        use_teacher_forcing = self.opt.teacherForcing if random.random() < self.opt.teacherForcingRatio else False
-                        if use_teacher_forcing:
-                            assert i+1 == context[1][i]
-                            ctx = context[0][i][:i+1].unsqueeze(0), [context[1][i]]
-                        else:
-                            ctx = generated[:i+1].unsqueeze(0), [i+1]
-
+                        assert i+1 == context[1][i]
+                        ctx = context[0][i][:i+1].unsqueeze(0), [context[1][i]]
 
                         out = self.mlp(encoder_out, ctx)
-
                         err += self.loss(out, target)
                 else:
                     out = self.mlp(article, context)
