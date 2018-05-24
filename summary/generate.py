@@ -155,9 +155,6 @@ def main():
             h, s = zip(*ordered)
 
             for r in range(K):
-                print(context[0])
-                print(start, end, W, step, r, len(ordered))
-                print(h[r])
                 hyps[r][start:end+1] = h[r]
                 scores[r] = s[r]
 
