@@ -65,11 +65,46 @@ then
   python $SCRIPTS/filter.py $WORK/valid.data.txt > $WORK/valid.data.temp.txt
   python $SCRIPTS/filter.py $WORK/test.data.txt > $WORK/test.data.temp.txt
 
-  # HACK Reduced the dataset size as it is too large
-  cat $WORK/train.data.temp.txt | python $SCRIPTS_SUMMARY/extractive.py > $WORK/train.all.data.txt
-  cat $WORK/test.data.temp.txt | python $SCRIPTS_SUMMARY/extractive.py > $WORK/test.all.data.txt
-  cat $WORK/valid.data.temp.txt | python $SCRIPTS_SUMMARY/extractive.py > $WORK/valid.all.data.txt
+  L=5000
+  split -l $L $WORK/train.data.temp.txt $WORK/train_split_
+  split -l $L $WORK/valid.data.temp.txt $WORK/valid_split_
+  split -l $L $WORK/test.data.temp.txt $WORK/test_split_
 
+  echo "" > $WORK/train.all.data.txt
+  echo "" > $WORK/test.all.data.txt
+  echo "" > $WORK/valid.all.data.txt
+
+  counter=0
+  total=`echo $WORK/valid_split_* | wc -w | xargs`
+  for file in $WORK/valid_split_*
+  do
+    counter=$((counter + 1))
+    date
+    cat $file | python $SCRIPTS_SUMMARY/extractive.py >> $WORK/valid.all.data.txt
+    date
+  done
+
+  counter=0
+  total=`echo $WORK/test_split_* | wc -w | xargs`
+  for file in $WORK/test_split_*
+  do
+    counter=$((counter + 1))
+    date
+    cat $file | python $SCRIPTS_SUMMARY/extractive.py >> $WORK/test.all.data.txt
+    date
+  done
+
+  counter=0
+  total=`echo $WORK/train_split_* | wc -w | xargs`
+  for file in $WORK/train_split_*
+  do
+    counter=$((counter + 1))
+    date
+    cat $file | python $SCRIPTS_SUMMARY/extractive.py >> $WORK/train.all.data.txt
+    date
+  done
+
+  rm $WORK/*_split_*
   rm $WORK/*temp*
 
   # Compile dictionary.
