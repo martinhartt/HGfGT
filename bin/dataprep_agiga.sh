@@ -69,11 +69,11 @@ then
   rm $WORK/valid.data.txt
   rm $WORK/test.data.txt
 
-  head -n 500000 train.data.temp.txt > $WORK/train.data.temp2.txt
-  head -n 500000 valid.data.temp.txt > $WORK/valid.data.temp2.txt
-  head -n 500000 test.data.temp.txt > $WORK/test.data.temp2.txt
+  head -n 1000 train.data.temp.txt > $WORK/train.data.temp2.txt
+  head -n 1000 valid.data.temp.txt > $WORK/valid.data.temp2.txt
+  head -n 1000 test.data.temp.txt > $WORK/test.data.temp2.txt
 
-  L=10000
+  L=100
   split -l $L $WORK/train.data.temp2.txt $WORK/train_split_
   split -l $L $WORK/valid.data.temp2.txt $WORK/valid_split_
   split -l $L $WORK/test.data.temp2.txt $WORK/test_split_
