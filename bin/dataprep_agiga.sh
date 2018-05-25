@@ -61,14 +61,16 @@ fi
 if [[ $* == *--all* ]]
 then
   # Basic filtering on train/dev.
-  python $SCRIPTS/filter.py $WORK/train.data.txt > $WORK/train.data.temp.txt
-  python $SCRIPTS/filter.py $WORK/valid.data.txt > $WORK/valid.data.temp.txt
-  python $SCRIPTS/filter.py $WORK/test.data.txt > $WORK/test.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/train.data.txt --lengthRangeHeir 1 > $WORK/train.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/valid.data.txt --lengthRangeHeir 1 > $WORK/valid.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/test.data.txt --lengthRangeHeir 1 > $WORK/test.data.temp.txt
 
   L=10000
   split -l $L $WORK/train.data.temp.txt $WORK/train_split_
   split -l $L $WORK/valid.data.temp.txt $WORK/valid_split_
   split -l $L $WORK/test.data.temp.txt $WORK/test_split_
+
+  rm $WORK/*temp*
 
   echo "" > $WORK/train.all.data.txt
   echo "" > $WORK/test.all.data.txt
@@ -105,7 +107,6 @@ then
   done
 
   rm $WORK/*_split_*
-  rm $WORK/*temp*
 
   # Compile dictionary.
   python $SCRIPTS/make_dict.py $WORK/train.all.data.txt  $WORK/train.all $UNK
