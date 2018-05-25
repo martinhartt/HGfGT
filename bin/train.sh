@@ -26,6 +26,13 @@ else
   LR="0.1"
 fi
 
+if [[ $* == *--pooling* ]]
+then
+  POOL="--pooling 1"
+else
+  POOL=""
+fi
+
 if [[ $* == *--restore* ]]
 then
   RESTORE="--restore 1"
@@ -54,7 +61,8 @@ python $ABS/summary/train.py \
   --attenPool  5 \
   $HEIR \
   $GLOVE \
-  $RESTORE
+  $RESTORE \
+  $POOL
 date
 
 
