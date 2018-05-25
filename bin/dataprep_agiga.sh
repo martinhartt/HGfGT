@@ -61,57 +61,42 @@ fi
 if [[ $* == *--all* ]]
 then
   # Basic filtering on train/dev.
-  python $SCRIPTS/filter.py $WORK/train.data.txt --lengthRangeHeir 1 > $WORK/train.data.temp.txt
-  python $SCRIPTS/filter.py $WORK/valid.data.txt --lengthRangeHeir 1 > $WORK/valid.data.temp.txt
-  python $SCRIPTS/filter.py $WORK/test.data.txt --lengthRangeHeir 1 > $WORK/test.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/train.data.txt --lengthRangeHeir 1 > $WORK/train.data.temp1.txt
+  python $SCRIPTS/filter.py $WORK/valid.data.txt --lengthRangeHeir 1 > $WORK/valid.data.temp1.txt
+  python $SCRIPTS/filter.py $WORK/test.data.txt --lengthRangeHeir 1 > $WORK/test.data.temp1.txt
 
-  rm $WORK/train.data.txt
-  rm $WORK/valid.data.txt
-  rm $WORK/test.data.txt
+  rm $WORK/*.data.txt
 
-  head -n 1000 train.data.temp.txt > $WORK/train.data.temp2.txt
-  head -n 1000 valid.data.temp.txt > $WORK/valid.data.temp2.txt
-  head -n 1000 test.data.temp.txt > $WORK/test.data.temp2.txt
+  head -n 1000 $WORK/train.data.temp1.txt > $WORK/train.data.temp2.txt
+  head -n 1000 $WORK/valid.data.temp1.txt > $WORK/valid.data.temp2.txt
+  head -n 1000 $WORK/test.data.temp1.txt > $WORK/test.data.temp2.txt
+
+  rm $WORK/*.temp1.txt
 
   L=100
   split -l $L $WORK/train.data.temp2.txt $WORK/train_split_
   split -l $L $WORK/valid.data.temp2.txt $WORK/valid_split_
   split -l $L $WORK/test.data.temp2.txt $WORK/test_split_
 
-  rm $WORK/*temp*
+  rm $WORK/*.temp2.txt
 
   echo "" > $WORK/train.all.data.txt
   echo "" > $WORK/test.all.data.txt
   echo "" > $WORK/valid.all.data.txt
 
-  counter=0
-  total=`echo $WORK/valid_split_* | wc -w | xargs`
-  for file in $WORK/valid_split_*
+  for type in valid test train
   do
-    counter=$((counter + 1))
-    date
-    cat $file | python $SCRIPTS_SUMMARY/extractive.py >> $WORK/valid.all.data.txt
-    date
-  done
-
-  counter=0
-  total=`echo $WORK/test_split_* | wc -w | xargs`
-  for file in $WORK/test_split_*
-  do
-    counter=$((counter + 1))
-    date
-    cat $file | python $SCRIPTS_SUMMARY/extractive.py >> $WORK/test.all.data.txt
-    date
-  done
-
-  counter=0
-  total=`echo $WORK/train_split_* | wc -w | xargs`
-  for file in $WORK/train_split_*
-  do
-    counter=$((counter + 1))
-    date
-    cat $file | python $SCRIPTS_SUMMARY/extractive.py >> $WORK/train.all.data.txt
-    date
+    counter=0
+    total=`echo $WORK/${type}_split_* | wc -w | xargs`
+    for file in $WORK/${type}_split_*
+    do
+      type=$type
+      total=$total
+      counter=$((counter + 1))
+      date
+      cat $file | python $SCRIPTS_SUMMARY/extractive.py >> $WORK/$type.all.data.txt
+      date
+    done
   done
 
   rm $WORK/*_split_*
