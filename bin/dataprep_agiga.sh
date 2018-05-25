@@ -65,7 +65,7 @@ then
   python $SCRIPTS/filter.py $WORK/valid.data.txt > $WORK/valid.data.temp.txt
   python $SCRIPTS/filter.py $WORK/test.data.txt > $WORK/test.data.temp.txt
 
-  L=5000
+  L=10000
   split -l $L $WORK/train.data.temp.txt $WORK/train_split_
   split -l $L $WORK/valid.data.temp.txt $WORK/valid_split_
   split -l $L $WORK/test.data.temp.txt $WORK/test_split_
