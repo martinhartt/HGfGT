@@ -31,9 +31,9 @@ fi
 if [[ $* == *--splits* ]]
 then
   # Compile the data into train/dev/test.
-  cat "$SPLITS/${SMALL}train.splits" | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/train.data.txt"
-  cat "$SPLITS/${SMALL}valid.splits" | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/valid.data.txt"
-  cat "$SPLITS/${SMALL}test.splits"  | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/test.data.txt"
+  shuf "$SPLITS/${SMALL}train.splits" | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/train.data.txt"
+  shuf "$SPLITS/${SMALL}valid.splits" | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/valid.data.txt"
+  shuf "$SPLITS/${SMALL}test.splits"  | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/test.data.txt"
 fi
 
 set -x
@@ -69,9 +69,9 @@ then
   rm $WORK/valid.data.txt
   rm $WORK/test.data.txt
 
-  shuf -n 1000000 train.data.temp.txt > $WORK/train.data.temp2.txt
-  shuf -n 1000000 valid.data.temp.txt > $WORK/valid.data.temp2.txt
-  shuf -n 1000000 test.data.temp.txt > $WORK/test.data.temp2.txt
+  head -n 1000000 train.data.temp.txt > $WORK/train.data.temp2.txt
+  head -n 1000000 valid.data.temp.txt > $WORK/valid.data.temp2.txt
+  head -n 1000000 test.data.temp.txt > $WORK/test.data.temp2.txt
 
   L=10000
   split -l $L $WORK/train.data.temp2.txt $WORK/train_split_
