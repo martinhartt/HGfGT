@@ -65,10 +65,18 @@ then
   python $SCRIPTS/filter.py $WORK/valid.data.txt --lengthRangeHeir 1 > $WORK/valid.data.temp.txt
   python $SCRIPTS/filter.py $WORK/test.data.txt --lengthRangeHeir 1 > $WORK/test.data.temp.txt
 
+  rm $WORK/train.data.txt
+  rm $WORK/valid.data.txt
+  rm $WORK/test.data.txt
+
+  shuf -n 1000000 train.data.temp.txt > $WORK/train.data.temp2.txt
+  shuf -n 1000000 valid.data.temp.txt > $WORK/valid.data.temp2.txt
+  shuf -n 1000000 test.data.temp.txt > $WORK/test.data.temp2.txt
+
   L=10000
-  split -l $L $WORK/train.data.temp.txt $WORK/train_split_
-  split -l $L $WORK/valid.data.temp.txt $WORK/valid_split_
-  split -l $L $WORK/test.data.temp.txt $WORK/test_split_
+  split -l $L $WORK/train.data.temp2.txt $WORK/train_split_
+  split -l $L $WORK/valid.data.temp2.txt $WORK/valid_split_
+  split -l $L $WORK/test.data.temp2.txt $WORK/test_split_
 
   rm $WORK/*temp*
 
