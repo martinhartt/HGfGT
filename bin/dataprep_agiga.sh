@@ -10,7 +10,6 @@ export SCRIPTS_SUMMARY=$ABS/summary
 export SPLITS=$ABS/$AGIGA
 export OUT_DIR=$WORK/processed
 
-
 # Construct the title-article pairs from gigaword
 
 export SMALL=""
@@ -70,19 +69,11 @@ then
 
   rm $WORK/*.data.txt
 
-  cat $WORK/test.data.temp.txt > $WORK/test.all.data.txt # Don't summarise test set
-
-  for TYPE in valid train
-  do
-    echo "" > $WORK/$TYPE.all.data.txt
-    wc -l $WORK/$TYPE.data.temp.txt | xargs echo "Total files to process:"
-    cat $WORK/$TYPE.data.temp.txt | parallel --gnu --progress -j $THREADS python2.7 $SCRIPTS_SUMMARY/extractive.py \{\} $WORK/$TYPE.all.data.txt
-  done
-
   # Compile dictionary.
-  python $SCRIPTS/make_dict.py $WORK/train.all.data.txt  $WORK/train.all $UNK
+  python $SCRIPTS/make_dict.py $WORK/train.data.temp.txt  $WORK/train.all $UNK
 
   # Split into title/article files.
+  cat $WORK/test.data.temp.txt > $WORK/test.all.data.txt # Don't summarise test set
   python $SCRIPTS/pull.py $WORK/test.all.data.txt $WORK/train.all.dict
 
   # Constructing torch data files.
