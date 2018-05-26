@@ -29,9 +29,9 @@
 #! For 6GB per CPU, set "-p skylake"; for 12GB per CPU, set "-p skylake-himem":
 #SBATCH -p skylake-himem
 
+#SBATCH --cpus-per-task=32
 #! sbatch directives end here (put any additional directives above this line)
 
-#SBATCH --cpus-per-task=32
 
 #! Notes:
 #! Charging is determined by core number*walltime.

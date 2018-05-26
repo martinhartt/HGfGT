@@ -1,6 +1,5 @@
 #/bin/bash
 set -e
-set -x
 
 export ABS="$(dirname $(dirname $0))"
 export AGIGA=data/agiga
