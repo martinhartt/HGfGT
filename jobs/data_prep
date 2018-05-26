@@ -17,7 +17,7 @@
 #SBATCH --nodes=1
 #! How many (MPI) tasks will there be in total? (<= nodes*32)
 #! The skylake/skylake-himem nodes have 32 CPUs (cores) each.
-#SBATCH --ntasks=1
+#SBATCH --ntasks=32
 #! How much wallclock time will be required?
 #SBATCH --time=12:00:00
 #! What types of email messages do you wish to receive?
@@ -61,7 +61,7 @@ application="/home/mh905/project/bin/dataprep_agiga.sh"
 
 
 #! Run options for the application:
-options="--filter --all --splits --extract"
+options="--all --splits --extract"
 
 #! Work directory (i.e. where the job will run):
 workdir="$SLURM_SUBMIT_DIR"  # The value of SLURM_SUBMIT_DIR sets workdir to the directory

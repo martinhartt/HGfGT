@@ -1,10 +1,11 @@
 #/bin/bash
 set -e
+set -x
 
 export ABS="$(dirname $(dirname $0))"
 export AGIGA=data/agiga
 export WORK=$ABS/working_agiga
-export THREADS=30
+export THREADS=32
 export SCRIPTS=$ABS/dataset
 export SCRIPTS_SUMMARY=$ABS/summary
 export SPLITS=$ABS/$AGIGA
@@ -70,34 +71,14 @@ then
 
   rm $WORK/*.data.txt
 
-  SPLIT_BY=100000
-  split -l $SPLIT_BY $WORK/train.data.temp.txt $WORK/train_split_
-  split -l $SPLIT_BY $WORK/valid.data.temp.txt $WORK/valid_split_
-  split -l $SPLIT_BY $WORK/test.data.temp.txt $WORK/test_split_
-
-
-  echo "" > $WORK/train.all.data.txt
-  echo "" > $WORK/valid.all.data.txt
   cat $WORK/test.data.temp.txt > $WORK/test.all.data.txt # Don't summarise test set
-
-  rm $WORK/*.temp.txt
 
   for TYPE in valid train
   do
-    COUNTER=0
-    TOTAL=`echo $WORK/${TYPE}_split_* | wc -w | xargs`
-    for FILE in $WORK/${TYPE}_split_*
-    do
-      TYPE=$TYPE
-      TOTAL=$TOTAL
-      COUNTER=$((COUNTER + 1))
-      date
-      cat $FILE | python $SCRIPTS_SUMMARY/extractive.py >> $WORK/$TYPE.all.data.txt
-      date
-    done
+    echo "" > $WORK/$TYPE.all.data.txt
+    wc -l $WORK/$TYPE.data.temp.txt | xargs echo "Total files to process:"
+    cat $WORK/$TYPE.data.temp.txt | parallel --gnu --progress -j $THREADS python2.7 $SCRIPTS_SUMMARY/extractive.py \{\} $WORK/$TYPE.all.data.txt
   done
-
-  rm $WORK/*_split_*
 
   # Compile dictionary.
   python $SCRIPTS/make_dict.py $WORK/train.all.data.txt  $WORK/train.all $UNK

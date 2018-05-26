@@ -48,13 +48,15 @@ def extractive(article, title=None):
 
 
 if __name__ == '__main__':
-    for line in sys.stdin:
-        if line.strip() == "":
-            print("")
+    line = sys.argv[1]
+    if line.strip() == "":
+        print("")
 
-        if len(line.split('\t')) > 2:
-            print("")
+    if len(line.split('\t')) > 2:
+        print("")
 
-        title, article = line.split('\t')
+    title, article = line.split('\t')
 
-        print(extractive(article, title))
+    out = open(sys.argv[2], "a")
+    out.write("{}\n".format(extractive(article, title)))
+    out.close()
