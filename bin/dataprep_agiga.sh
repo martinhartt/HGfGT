@@ -8,7 +8,6 @@ export THREADS=30
 export SCRIPTS=$ABS/dataset
 export SCRIPTS_SUMMARY=$ABS/summary
 export SPLITS=$ABS/$AGIGA
-export UNK=5
 export OUT_DIR=$WORK/processed
 
 
@@ -25,7 +24,6 @@ then
   mkdir -p $WORK/raw
   find $ABS/$AGIGA/**/*.gz | wc -l | xargs echo "Total files to process:"
   find $ABS/$AGIGA/**/*.gz | parallel --gnu --progress -j $THREADS python2.7 $SCRIPTS/process_agiga.py \{\} $WORK
-
 fi
 
 if [[ $* == *--splits* ]]
@@ -42,6 +40,8 @@ mkdir -p $OUT_DIR
 # Share the dictionary.
 if [[ $* == *--filter* ]]
 then
+  export UNK=5
+
   # Basic filtering on train/dev.
   python $SCRIPTS/filter.py $WORK/train.data.txt --firstSent 1 --wordOverlap 1 --lengthRange 1 > $WORK/train.filter.data.txt
   python $SCRIPTS/filter.py $WORK/valid.data.txt --firstSent 1 --wordOverlap 1 --lengthRange 1 > $WORK/valid.filter.data.txt
@@ -60,29 +60,26 @@ fi
 
 if [[ $* == *--all* ]]
 then
+  export UNK=4
+
   # Basic filtering on train/dev.
-  python $SCRIPTS/filter.py $WORK/train.data.txt --lengthRangeHeir 1 > $WORK/train.data.temp1.txt
-  python $SCRIPTS/filter.py $WORK/valid.data.txt --lengthRangeHeir 1 > $WORK/valid.data.temp1.txt
-  python $SCRIPTS/filter.py $WORK/test.data.txt --lengthRangeHeir 1 > $WORK/test.data.temp1.txt
+  python $SCRIPTS/filter.py $WORK/train.data.txt --lengthRangeHeir 1 | head -n 1000 > $WORK/train.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/valid.data.txt --lengthRangeHeir 1 | head -n 1000 > $WORK/valid.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/test.data.txt --lengthRangeHeir 1 | head -n 1000 > $WORK/test.data.temp.txt
 
   rm $WORK/*.data.txt
 
-  head -n 1000 $WORK/train.data.temp1.txt > $WORK/train.data.temp2.txt
-  head -n 1000 $WORK/valid.data.temp1.txt > $WORK/valid.data.temp2.txt
-  head -n 1000 $WORK/test.data.temp1.txt > $WORK/test.data.temp2.txt
-
-  rm $WORK/*.temp1.txt
-
   L=100
-  split -l $L $WORK/train.data.temp2.txt $WORK/train_split_
-  split -l $L $WORK/valid.data.temp2.txt $WORK/valid_split_
-  split -l $L $WORK/test.data.temp2.txt $WORK/test_split_
+  split -l $L $WORK/train.data.temp.txt $WORK/train_split_
+  split -l $L $WORK/valid.data.temp.txt $WORK/valid_split_
+  split -l $L $WORK/test.data.temp.txt $WORK/test_split_
 
-  rm $WORK/*.temp2.txt
 
   echo "" > $WORK/train.all.data.txt
   echo "" > $WORK/valid.all.data.txt
-  cat test.data.temp2.txt > $WORK/test.all.data.txt # Don't summarise test set
+  cat $WORK/test.data.temp.txt > $WORK/test.all.data.txt # Don't summarise test set
+
+  rm $WORK/*.temp.txt
 
   for type in valid train
   do
