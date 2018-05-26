@@ -81,10 +81,10 @@ then
   rm $WORK/*.temp2.txt
 
   echo "" > $WORK/train.all.data.txt
-  echo "" > $WORK/test.all.data.txt
   echo "" > $WORK/valid.all.data.txt
+  cat test.data.temp2.txt > $WORK/test.all.data.txt # Don't summarise test set
 
-  for type in valid test train
+  for type in valid train
   do
     counter=0
     total=`echo $WORK/${type}_split_* | wc -w | xargs`
