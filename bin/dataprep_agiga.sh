@@ -4,7 +4,7 @@ set -e
 export ABS="$(dirname $(dirname $0))"
 export AGIGA=data/agiga
 export WORK=$ABS/working_agiga
-export THREADS=32
+export THREADS=30
 export SCRIPTS=$ABS/dataset
 export SCRIPTS_SUMMARY=$ABS/summary
 export SPLITS=$ABS/$AGIGA
