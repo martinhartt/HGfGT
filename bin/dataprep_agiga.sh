@@ -40,7 +40,7 @@ mkdir -p $OUT_DIR
 # Share the dictionary.
 if [[ $* == *--filter* ]]
 then
-  export UNK=5
+  UNK=5
 
   # Basic filtering on train/dev.
   python $SCRIPTS/filter.py $WORK/train.data.txt --firstSent 1 --wordOverlap 1 --lengthRange 1 > $WORK/train.filter.data.txt
@@ -60,19 +60,20 @@ fi
 
 if [[ $* == *--all* ]]
 then
-  export UNK=4
+  UNK=5
+  LIMIT=1000000
 
   # Basic filtering on train/dev.
-  python $SCRIPTS/filter.py $WORK/train.data.txt --lengthRangeHeir 1 | head -n 1000 > $WORK/train.data.temp.txt
-  python $SCRIPTS/filter.py $WORK/valid.data.txt --lengthRangeHeir 1 | head -n 1000 > $WORK/valid.data.temp.txt
-  python $SCRIPTS/filter.py $WORK/test.data.txt --lengthRangeHeir 1 | head -n 1000 > $WORK/test.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/train.data.txt --lengthRangeHeir 1 | head -n $LIMIT > $WORK/train.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/valid.data.txt --lengthRangeHeir 1 | head -n $LIMIT > $WORK/valid.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/test.data.txt --lengthRangeHeir 1 | head -n $LIMIT > $WORK/test.data.temp.txt
 
   rm $WORK/*.data.txt
 
-  L=100
-  split -l $L $WORK/train.data.temp.txt $WORK/train_split_
-  split -l $L $WORK/valid.data.temp.txt $WORK/valid_split_
-  split -l $L $WORK/test.data.temp.txt $WORK/test_split_
+  SPLIT_BY=100000
+  split -l $SPLIT_BY $WORK/train.data.temp.txt $WORK/train_split_
+  split -l $SPLIT_BY $WORK/valid.data.temp.txt $WORK/valid_split_
+  split -l $SPLIT_BY $WORK/test.data.temp.txt $WORK/test_split_
 
 
   echo "" > $WORK/train.all.data.txt
@@ -81,17 +82,17 @@ then
 
   rm $WORK/*.temp.txt
 
-  for type in valid train
+  for TYPE in valid train
   do
-    counter=0
-    total=`echo $WORK/${type}_split_* | wc -w | xargs`
-    for file in $WORK/${type}_split_*
+    COUNTER=0
+    TOTAL=`echo $WORK/${TYPE}_split_* | wc -w | xargs`
+    for FILE in $WORK/${TYPE}_split_*
     do
-      type=$type
-      total=$total
-      counter=$((counter + 1))
+      TYPE=$TYPE
+      TOTAL=$TOTAL
+      COUNTER=$((COUNTER + 1))
       date
-      cat $file | python $SCRIPTS_SUMMARY/extractive.py >> $WORK/$type.all.data.txt
+      cat $FILE | python $SCRIPTS_SUMMARY/extractive.py >> $WORK/$TYPE.all.data.txt
       date
     done
   done
