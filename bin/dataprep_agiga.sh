@@ -30,7 +30,6 @@ then
   # Compile the data into train/dev/test.
   shuf "$SPLITS/${SMALL}train.splits" | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/train.data.txt"
   shuf "$SPLITS/${SMALL}valid.splits" | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/valid.data.txt"
-  shuf "$SPLITS/${SMALL}test.splits"  | xargs -I % bash -c "cat $WORK/raw/%" > "$WORK/test.data.txt"
 fi
 
 set -x
@@ -44,18 +43,16 @@ then
   # Basic filtering on train/dev.
   python $SCRIPTS/filter.py $WORK/train.data.txt --firstSent 1 --wordOverlap 1 --lengthRange 1 > $WORK/train.filter.data.txt
   python $SCRIPTS/filter.py $WORK/valid.data.txt --firstSent 1 --wordOverlap 1 --lengthRange 1 > $WORK/valid.filter.data.txt
-  python $SCRIPTS/filter.py $WORK/test.data.txt --firstSent 1 --wordOverlap 1 --lengthRange 1 > $WORK/test.filter.data.txt
 
   # Compile dictionary.
   python $SCRIPTS/make_dict.py $WORK/train.filter.data.txt  $WORK/train.filter $UNK
-
-  # Split into title/article files.
-  python $SCRIPTS/pull.py $WORK/test.filter.data.txt $WORK/train.filter.dict
 
   # Constructing torch data files.
   python $SCRIPTS/build_dict.py $WORK/train.filter.dict $OUT_DIR/filter.train.dict.torch
 
 fi
+
+
 
 if [[ $* == *--all* ]]
 then
@@ -65,18 +62,33 @@ then
   # Basic filtering on train/dev.
   python $SCRIPTS/filter.py $WORK/train.data.txt --lengthRangeHeir 1 | head -n $LIMIT > $WORK/train.data.temp.txt
   python $SCRIPTS/filter.py $WORK/valid.data.txt --lengthRangeHeir 1 | head -n $LIMIT > $WORK/valid.data.temp.txt
-  python $SCRIPTS/filter.py $WORK/test.data.txt --lengthRangeHeir 1 | head -n $LIMIT > $WORK/test.data.temp.txt
+  # python $SCRIPTS/filter.py $WORK/test.data.txt --lengthRangeHeir 1 | head -n $LIMIT > $WORK/test.data.temp.txt
 
-  rm $WORK/*.data.txt
+  rm $WORK/train.data.txt $WORK/valid.data.txt
 
   # Compile dictionary.
   python $SCRIPTS/make_dict.py $WORK/train.data.temp.txt  $WORK/train.all $UNK
 
-  # Split into title/article files.
-  cat $WORK/test.data.temp.txt > $WORK/test.all.data.txt # Don't summarise test set
-  python $SCRIPTS/pull.py $WORK/test.all.data.txt $WORK/train.all.dict
-
   # Constructing torch data files.
   python $SCRIPTS/build_dict.py $WORK/train.all.dict $OUT_DIR/all.train.dict.torch
 
+fi
+
+
+if [[ $* == *--test* ]]
+then
+  for SOURCE in AFP APW CNA NYT XIN
+  do
+    echo $SOURCE
+    shuf "$SPLITS/${SMALL}test.splits" | grep $SOURCE
+    shuf "$SPLITS/${SMALL}test.splits" | grep $SOURCE | xargs -I % bash -c "cat $WORK/raw/%" > $WORK/$SOURCE.test.data.txt
+
+    python $SCRIPTS/filter.py $WORK/$SOURCE.test.data.txt --firstSent 1 --lengthRange 1 > $WORK/$SOURCE.test.filter.data.txt
+    python $SCRIPTS/pull.py $WORK/$SOURCE.test.filter.data.txt $WORK/train.filter.dict
+
+    python $SCRIPTS/filter.py $WORK/$SOURCE.test.data.txt --lengthRangeHeir 1 > $WORK/$SOURCE.test.all.data.txt
+    python $SCRIPTS/pull.py $WORK/$SOURCE.test.all.data.txt $WORK/train.all.dict
+
+    rm $WORK/$SOURCE.test.*data.txt
+  done
 fi

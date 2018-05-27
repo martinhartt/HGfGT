@@ -21,11 +21,11 @@ fi
 
 if [[ $* == *--edu* ]]
 then
-  for g in CAE CPE FCE KET PET
+  for SOURCE in CAE CPE FCE KET PET
   do
-    INPUT=$ABS/working_edu/$g.${FILTER}.article.txt
-    OUTPUT=$ABS/working_edu/$g.${FILTER}.title.txt
-    echo "# Evaluating $g"
+    INPUT=$ABS/working_edu/$SOURCE.${FILTER}.article.txt
+    OUTPUT=$ABS/working_edu/$SOURCE.${FILTER}.title.txt
+    echo "# Evaluating EDU $SOURCE"
     echo -e "\n\n"
 
     python $ABS/summary/generate.py \
@@ -41,18 +41,20 @@ fi
 
 if [[ $* == *--agiga* ]]
 then
-  INPUT=$ABS/working_agiga/test.${FILTER}.article.txt
-  OUTPUT=$ABS/working_agiga/test.${FILTER}.title.txt
+  for SOURCE in AFP APW CNA NYT XIN
+  do
+    INPUT=$ABS/working_agiga/$SOURCE.test.${FILTER}.article.txt
+    OUTPUT=$ABS/working_agiga/$SOURCE.test.${FILTER}.title.txt
+    echo "# Evaluating GIGAWORD $SOURCE"
+    echo -e "\n\n"
 
-  echo "# Evaluating Gigaword"
-  echo -e "\n\n"
-
-  python $ABS/summary/generate.py \
-    --model $MODEL \
-    --inputf "$INPUT" \
-    --outputf "$OUTPUT" \
-    --length $LENGTH \
-    $HEIR \
-    --workingDir  $OUT_DIR \
-    --dictionary $OUT_DIR/${FILTER}.train.dict.torch
+    python $ABS/summary/generate.py \
+      --model $MODEL \
+      --inputf "$INPUT" \
+      --outputf "$OUTPUT" \
+      --length $LENGTH \
+      $HEIR \
+      --workingDir  $OUT_DIR \
+      --dictionary $OUT_DIR/${FILTER}.train.dict.torch
+  done
 fi
