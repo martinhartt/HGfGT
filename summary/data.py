@@ -46,6 +46,9 @@ class BaseDataLoader(object):
     @staticmethod
     def loadLazy(inputFile, dict):
         for line in open(inputFile):
+            if line.strip() == "":
+                continue
+
             components = line.strip().split('\t')
 
             title = components[0]
