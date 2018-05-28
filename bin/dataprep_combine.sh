@@ -9,5 +9,5 @@ set -x
 for TYPE in valid train
 do
   cat $WORK/split_*-*.${TYPE}.all.data.txt > $WORK/${TYPE}.all.data.txt
-  rm $WORK/split_*-*.${TYPE}.all.data.txt
+  rm $WORK/split_*-*.${TYPE}.all.data.txt $WORK/$TYPE.data.temp.txt
 done

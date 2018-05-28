@@ -51,6 +51,9 @@ class BaseDataLoader(object):
 
             components = line.strip().split('\t')
 
+            if len(components) not in [2,8]:
+                continue
+
             title = components[0]
             articles = components[1:]
 
