@@ -93,6 +93,9 @@ class HeirDataLoader(BaseDataLoader):
         for pair in self.pairs:
             expanded_group_iter = self.expand(pair, self.dict["w2i"], self.window)
 
+            if any([summary.shape == () for summary in pair[0]]):
+                continue
+
             article_summaries = self.torchify(pair[0], variable=True, revsort=True)
 
             # Skip if one of the length of summaries is zero
