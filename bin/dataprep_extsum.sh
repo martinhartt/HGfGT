@@ -7,7 +7,7 @@ set -e
 set -x
 
 export ID=$SLURM_ARRAY_TASK_ID
-export MAX=$SLURM_ARRAY_TASK_COUNT
+export MAX=32
 
 for TYPE in valid train
 do

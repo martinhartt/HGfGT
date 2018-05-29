@@ -33,7 +33,3 @@ do
     python $SCRIPTS/pull.py $WORK/$BASE.all.data.txt $AGIGA_WORK/train.all.dict
   fi
 done
-
-
-rm $WORK/*data*
-rm -r $WORK/raw
