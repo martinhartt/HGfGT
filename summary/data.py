@@ -8,35 +8,36 @@ from itertools import groupby
 def add_opts(parser):
     parser.add_argument('--workingDir', default='')
     parser.add_argument('--heir', default=False, type=bool, help='Enable heirarchal model?')
-    parser.add_argument('--maxSize', default=10**6, type=bool, help='The maximum number of unextended samples per epoch')
+    parser.add_argument('--maxSize', default=10**3, type=bool, help='The maximum number of unextended samples per epoch')
 
 class BaseDataLoader(object):
-    def __init__(self, inputFile, dict, window=5, maxSize=10 ** 6):
+    def __init__(self, input_file, dict, window=5, max_size=10 ** 3):
         super(BaseDataLoader, self).__init__()
+        print("Using {} pairs per epoch".format(max_size))
         self.dict = dict
-        self.inputFile = inputFile
-        self.allPairs = self.load_lazy(inputFile, dict)
-        self.maxSize = maxSize
-        self.pairs = self.next_pairs(maxSize)
+        self.input_file = input_file
+        self.allPairs = self.load_lazy(input_file, dict)
+        self.max_size = max_size
+        self.pairs = self.next_pairs(max_size)
         self.window = window
 
-    def next_pairs(self, maxSize):
+    def next_pairs(self, max_size):
         i = 0
 
-        newPairs = []
+        new_pairs = []
 
-        while i < maxSize:
+        while i < max_size:
             try:
-                newPairs.append(next(self.allPairs))
+                new_pairs.append(next(self.allPairs))
                 i += 1
             except Exception as e:
-                self.allPairs = self.load_lazy(self.inputFile, self.dict)
+                self.allPairs = self.load_lazy(self.input_file, self.dict)
                 break
 
-        return newPairs
+        return new_pairs
 
     def reset(self):
-        self.pairs = self.next_pairs(self.maxSize)
+        self.pairs = self.next_pairs(self.max_size)
         random.shuffle(self.pairs)
 
     def next_batch(self, max_batch_size):
@@ -44,8 +45,8 @@ class BaseDataLoader(object):
 
 
     @staticmethod
-    def load_lazy(inputFile, dict):
-        for line in open(inputFile):
+    def load_lazy(input_file, dict):
+        for line in open(input_file):
             if line.strip() == "":
                 continue
 
