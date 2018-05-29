@@ -10,7 +10,7 @@ import random
 
 def add_opts(parser):
     parser.add_argument(
-        '--epochs', type=int, default=15, help="Number of epochs to train.")
+        '--epochs', type=int, default=100, help="Number of epochs to train.")
     parser.add_argument(
         '--printEvery',
         type=int,
