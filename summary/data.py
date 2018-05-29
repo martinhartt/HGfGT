@@ -15,7 +15,7 @@ class BaseDataLoader(object):
         super(BaseDataLoader, self).__init__()
         self.dict = dict
         self.inputFile = inputFile
-        self.allPairs = self.loadLazy(inputFile, dict)
+        self.allPairs = self.load_lazy(inputFile, dict)
         self.maxSize = maxSize
         self.pairs = self.next_pairs(maxSize)
         self.window = window
@@ -30,7 +30,7 @@ class BaseDataLoader(object):
                 newPairs.append(next(self.allPairs))
                 i += 1
             except Exception as e:
-                self.allPairs = self.loadLazy(self.inputFile, self.dict)
+                self.allPairs = self.load_lazy(self.inputFile, self.dict)
                 break
 
         return newPairs
@@ -44,7 +44,7 @@ class BaseDataLoader(object):
 
 
     @staticmethod
-    def loadLazy(inputFile, dict):
+    def load_lazy(inputFile, dict):
         for line in open(inputFile):
             if line.strip() == "":
                 continue
@@ -66,7 +66,7 @@ class BaseDataLoader(object):
 
             yield articles, title
 
-    def getEvery(self, iter, n):
+    def get_every(self, iter, n):
         i = 0
         arr = []
         for item in iter:
@@ -102,7 +102,7 @@ class HeirDataLoader(BaseDataLoader):
             if len([l for l in article_summaries[1] if l < 1]) != 0:
                 continue
 
-            for batch in self.getEvery(expanded_group_iter, max_batch_size):
+            for batch in self.get_every(expanded_group_iter, max_batch_size):
                 batch = [pair for pair in batch if len(pair[0][1]) > 0]
 
                 inputs, targets = zip(*batch)
@@ -110,9 +110,6 @@ class HeirDataLoader(BaseDataLoader):
 
                 out = (article_summaries, self.torchify(contexts, variable=True)), self.torchify(targets)
                 yield out
-
-    def sortInputs(self, input): # Sort in descending order
-        return sorted(input, key=lambda a: len(a[0][1]))[::-1]
 
     @staticmethod
     def torchify(arr, variable=False, revsort=False):
@@ -177,7 +174,7 @@ class AbsDataLoader(BaseDataLoader):
         for key, group_iter in groupby(self.pairs, lambda x: len(x[0])):
             expanded_group_iter = self.expandIter(group_iter, self.dict["w2i"], self.window)
 
-            for batch in self.getEvery(expanded_group_iter, max_batch_size):
+            for batch in self.get_every(expanded_group_iter, max_batch_size):
                 inputs, targets = zip(*batch)
                 articles, contexts = zip(*inputs)
 
@@ -221,5 +218,5 @@ class AbsDataLoader(BaseDataLoader):
         return [Variable(tensor.long()) for tensor in [article_tensor, context]]
 
 
-def loadDict(filename):
+def load_dict(filename):
     return torch.load(filename)

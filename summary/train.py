@@ -24,7 +24,7 @@ parser.add_argument(
 )
 
 data.add_opts(parser)
-trainer.addOpts(parser)
+trainer.add_opts(parser)
 
 opt = parser.parse_args()
 
@@ -32,7 +32,7 @@ opt = parser.parse_args()
 def main():
     print("Loading dictionary...")
     print(opt.dictionary)
-    dict = data.loadDict(opt.dictionary)
+    dict = data.load_dict(opt.dictionary)
 
     DataLoader = data.HeirDataLoader if opt.heir else data.AbsDataLoader
 

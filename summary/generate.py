@@ -77,7 +77,7 @@ def main():
     else:
         mlp = state
 
-    dict = data.loadDict(opt.dictionary)
+    dict = data.load_dict(opt.dictionary)
 
     sent_file = open(opt.inputf).read().split("\n")
     length = opt.length

@@ -8,7 +8,7 @@ from glove import build_glove
 from torch.autograd import Variable
 import random
 
-def addOpts(parser):
+def add_opts(parser):
     parser.add_argument(
         '--epochs', type=int, default=15, help="Number of epochs to train.")
     parser.add_argument(
