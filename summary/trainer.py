@@ -38,6 +38,11 @@ def add_opts(parser):
         default=False,
         help="Should a previous model be restored?")
     parser.add_argument(
+        '--useTeacherForcing',
+        type=bool,
+        default=False,
+        help="Use teacher forcing?")
+    parser.add_argument(
         '--batchSize',
         type=int,
         default=64,
@@ -177,16 +182,37 @@ class Trainer(object):
                 if self.heir:
                     self.encoder_optimizer.zero_grad()
 
-                    encoder_out = self.encoder(article)
+                    hidden_state = self.encoder.init_hidden()
+                    summ_hidden_state = self.encoder.init_hidden(n=3, K=self.opt.K)
+                    encoder_out, hidden_state, summ_hidden_state = self.encoder(article, hidden_state, summ_hidden_state)
 
                     err = 0
-                    for i in range(len(targets)):
-                        target = targets[i].unsqueeze(0)
-                        assert i+1 == context[1][i]
-                        ctx = context[0][i][:i+1].unsqueeze(0), [context[1][i]]
 
-                        out = self.mlp(encoder_out, ctx)
-                        err += self.loss(out, target)
+                    teacher_forcing = self.opt.useTeacherForcing if random.random() < 0.5 else False
+                    if teacher_forcing:
+                        for i in range(len(targets)):
+                            target = targets[i].unsqueeze(0)
+                            ctx = context[i].unsqueeze(0)
+
+                            print(ctx)
+
+                            out, hidden_state = self.mlp(encoder_out, ctx, hidden_state)
+                            err += self.loss(out, target)
+                    else:
+                        ctx = torch.tensor(self.dict["w2i"]["<s>"])
+                        for i in range(len(targets)):
+                            target = targets[i].unsqueeze(0)
+                            ctx = ctx.unsqueeze(0).unsqueeze(0)
+
+                            out, hidden_state = self.mlp(encoder_out, ctx, hidden_state)
+                            err += self.loss(out, target)
+
+                            print(ctx)
+
+                            topv, topi = out.topk(1)
+                            ctx = topi.squeeze().detach()
+                            if ctx == self.dict["w2i"]["</s>"]:
+                                break
                 else:
                     out = self.mlp(article, context)
                     err = self.loss(out, targets)

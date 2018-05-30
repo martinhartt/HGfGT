@@ -71,6 +71,7 @@ python $ABS/summary/train.py \
   --window  $WINDOW \
   --printEvery   100 \
   --attenPool  5 \
+  --useTeacherForcing 1 \
   $HEIR \
   $GLOVE \
   $RESTORE \

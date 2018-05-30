@@ -114,7 +114,7 @@ class HeirDataLoader(BaseDataLoader):
                 inputs, targets = zip(*batch)
                 _, contexts = zip(*inputs)
 
-                out = (article_summaries, self.torchify(contexts, variable=True)), self.torchify(targets)
+                out = (article_summaries, self.torchify(contexts)), self.torchify(targets)
                 yield out
 
     @staticmethod
@@ -152,7 +152,7 @@ class HeirDataLoader(BaseDataLoader):
 
         for i in range(len(title) - window):
             # Return the whole context if using heirarchal attention model
-            context = title[0:i + window]
+            context = title[i:i + window]
             target = title[i + window]
 
             if len(context) < 1 or len(article) < 1:
