@@ -22,6 +22,12 @@ parser.add_argument(
     default=False,
     help="Use pretrained GloVe embeddings"
 )
+parser.add_argument(
+    '--noAttn',
+    type=bool,
+    default=False,
+    help="Disable attn for hier"
+)
 
 data.add_opts(parser)
 trainer.add_opts(parser)

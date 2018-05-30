@@ -56,9 +56,9 @@ class HeirAttnDecoder(nn.Module):
         else:
             self.context_embedding = nn.Embedding(vocab_size, bow_dim)
         self.decoder_lstm = nn.LSTM(bow_dim, hidden_size)
-        self.out_linear = nn.Linear(self.softmax_dims, vocab_size)
+        self.out_linear = nn.Linear(self.hidden_size if opt.noAttn else self.softmax_dims, vocab_size)
 
-
+        self.opt = opt
 
     def forward(self, encoder_out, title_ctx):
         padded_titles, title_lengths = title_ctx
@@ -85,25 +85,30 @@ class HeirAttnDecoder(nn.Module):
         hidden vector into two sets: the first 472 dimensions for decoding
         words and the last 40 dimensions for computing the attention weight
         """
-        decode_hij = hij_collapsed[:,:,:self.softmax_dims]
-        attn_hij = hij_collapsed[:,:,-self.attention_dims:]
-        attn_yh = y_h[:,-self.attention_dims:,:]
-        attn_hidden_summaries = hidden_summaries[:,:,-self.attention_dims:]
+        decode_hij = hij_collapsed if self.opt.noAttn else hij_collapsed[:,:,:self.softmax_dims]
 
-        # Summary level attention
-        a = torch.bmm(attn_hidden_summaries, attn_yh)
-        a = F.softmax(a, dim=1)
+        if self.opt.noAttn:
+            c = decode_hij
+        else:
+            attn_hij = hij_collapsed[:,:,-self.attention_dims:]
+            attn_yh = y_h[:,-self.attention_dims:,:]
+            attn_hidden_summaries = hidden_summaries[:,:,-self.attention_dims:]
 
-        # Word level attention
-        b = torch.bmm(attn_hij, attn_yh)
-        b = b.view(batch_size, self.K, max_word_length)
-        b = F.softmax(b, dim=2)
+            # Summary level attention
+            a = torch.bmm(attn_hidden_summaries, attn_yh)
+            a = F.softmax(a, dim=1)
 
-        # c = sum(ai * bij * hij)
-        ab = torch.mul(a, b)
-        ab = ab.view(batch_size, self.K * max_word_length, 1)
+            # Word level attention
+            b = torch.bmm(attn_hij, attn_yh)
+            b = b.view(batch_size, self.K, max_word_length)
+            b = F.softmax(b, dim=2)
 
-        c = torch.mul(ab, decode_hij)
+            # c = sum(ai * bij * hij)
+            ab = torch.mul(a, b)
+            ab = ab.view(batch_size, self.K * max_word_length, 1)
+
+            c = torch.mul(ab, decode_hij)
+
         c = torch.sum(c, 1)
 
         out = self.out_linear(c)

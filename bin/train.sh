@@ -47,6 +47,13 @@ else
   GLOVE=""
 fi
 
+if [[ $* == *--no-attn* ]]
+then
+  NOATTN="--noAttn 1"
+else
+  NOATTN=""
+fi
+
 date
 python $ABS/summary/train.py \
   --model  $MDL_DIR/$1 \
@@ -62,6 +69,7 @@ python $ABS/summary/train.py \
   $HEIR \
   $GLOVE \
   $RESTORE \
+  $NOATTN \
   $POOL
 date
 
