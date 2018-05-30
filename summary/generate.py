@@ -24,7 +24,7 @@ parser.add_argument(
     default=True,
     help="Produce exact no of words.")
 parser.add_argument(
-    '--blockRepeatWords',
+    '--noRepeat',
     type=bool,
     default=False,
     help="Disallow generating a word twice.")
@@ -54,9 +54,9 @@ def encode(sent, w2i):
 def decode(sent, i2w):
     return [i2w.get(ix, "<unk>") for ix in sent.split()]
 
+INF = float('inf')
 
 def set_hard_constraints(out_scores, w2i, finalized):
-    INF = float('inf')
 
     # Apply hard constraints
     out_scores[:, w2i["<s>"]] = -INF
@@ -116,6 +116,8 @@ def main():
         hyps = apply_cuda(torch.zeros(K, W + n).long().fill_(w2i["<s>"]))
         scores = apply_cuda(torch.zeros(K).float())
 
+        seen_words = set()
+
         for step in range(n):
             new_candidates = []
 
@@ -140,8 +142,10 @@ def main():
                 top_scores, top_indexes = torch.topk(out_scores[sample], K)
 
                 for ix, score in zip(top_indexes, top_scores):
+                    repetition = opt.noRepeat and ix in context[sample]
+
                     combined = torch.cat((context[sample], apply_cuda(torch.tensor([ix]))))
-                    candidate = [combined, scores[sample] + score]
+                    candidate = [combined, -INF if repetition else scores[sample] + score]
                     new_candidates.append(candidate)
 
             ordered = list(reversed(sorted(new_candidates, key=lambda cand:cand[1])))

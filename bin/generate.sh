@@ -18,6 +18,12 @@ else
   FILTER="filter"
 fi
 
+if [[ $* == *--no-repeat* ]]
+then
+  NOREPEAT="--noRepeat 1"
+else
+  NOREPEAT=""
+fi
 
 if [[ $* == *--edu* ]]
 then
@@ -35,6 +41,7 @@ then
       --length $LENGTH \
       $HEIR \
       --workingDir  $OUT_DIR \
+      $NOREPEAT \
       --dictionary $OUT_DIR/${FILTER}.train.dict.torch
   done
 fi
@@ -55,6 +62,7 @@ then
       --length $LENGTH \
       $HEIR \
       --workingDir  $OUT_DIR \
+      $NOREPEAT \
       --dictionary $OUT_DIR/${FILTER}.train.dict.torch
   done
 fi
