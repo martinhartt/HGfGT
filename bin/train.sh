@@ -20,6 +20,11 @@ then
   HEIR="--heir 1"
   TYPE="all."
   LR="0.01"
+elif [[ $* == *--mix* ]]
+then
+  HEIR="--heir 1"
+  TYPE="filter."
+  LR="0.01"
 else
   HEIR=""
   TYPE="filter."

@@ -11,7 +11,7 @@ def add_opts(parser):
     parser.add_argument('--maxSize', default=0.3 * (10 ** 5), type=bool, help='The maximum number of unextended samples per epoch')
 
 class BaseDataLoader(object):
-    def __init__(self, input_file, dict, window=5, max_size=0.3 * (10 ** 5)):
+    def __init__(self, input_file, dict, opt, window=5, max_size=0.3 * (10 ** 5)):
         super(BaseDataLoader, self).__init__()
         print("Using {} pairs per epoch".format(max_size))
         self.dict = dict
@@ -20,6 +20,7 @@ class BaseDataLoader(object):
         self.max_size = max_size
         self.pairs = self.next_pairs(max_size)
         self.window = window
+        self.opt = opt
 
     def next_pairs(self, max_size):
         i = 0
@@ -92,6 +93,10 @@ class HeirDataLoader(BaseDataLoader):
 
     def next_batch(self, max_batch_size):
         for pair in self.pairs:
+            # When using the filtered dataset we must copy the lead sentence for summary
+            if not isinstance(pair[0], (list, tuple)):
+                pair = ([pair[0]] * self.opt.K, pair[1])
+
             expanded_group_iter = self.expand(pair, self.dict["w2i"], self.window)
 
             if any([summary.shape == () for summary in pair[0]]):

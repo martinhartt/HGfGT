@@ -6,7 +6,7 @@ import torch.nn.functional as F
 
 class HeirAttnEncoder(nn.Module):
     """docstring for LSTMEncoder."""
-    def __init__(self, vocab_size, bow_dim, hidden_size, opt, glove_weights, K=7):
+    def __init__(self, vocab_size, bow_dim, hidden_size, opt, glove_weights):
         super(HeirAttnEncoder, self).__init__()
 
         if opt.glove:
@@ -18,7 +18,7 @@ class HeirAttnEncoder(nn.Module):
         self.control_lstm = nn.LSTM(hidden_size, hidden_size, 1)
         self.hidden_size = hidden_size
 
-        self.K = K
+        self.K = opt.K
 
     def forward(self, summaries):
         padded_summaries, summary_lengths = summaries
@@ -42,10 +42,10 @@ class HeirAttnEncoder(nn.Module):
 
 class HeirAttnDecoder(nn.Module):
     """docstring for LSTMDecoder."""
-    def __init__(self, vocab_size, bow_dim, hidden_size, opt, glove_weights=None, K=7):
+    def __init__(self, vocab_size, bow_dim, hidden_size, opt, glove_weights=None):
         super(HeirAttnDecoder, self).__init__()
 
-        self.K = K
+        self.K = opt.K
         self.hidden_size = hidden_size
         self.bow_dim = bow_dim
         self.attention_dims = opt.attentionDims

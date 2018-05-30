@@ -17,6 +17,11 @@ parser.add_argument(
     default=5,
     help="Attention model pooling size.")
 parser.add_argument(
+    '--K',
+    type=int,
+    default=7,
+    help="Number of summaries to use.")
+parser.add_argument(
     '--glove',
     type=bool,
     default=False,
@@ -43,10 +48,10 @@ def main():
     DataLoader = data.HeirDataLoader if opt.heir else data.AbsDataLoader
 
     print("Constructing train tensors...")
-    train_data = DataLoader(opt.train, dict, window=opt.window, max_size=opt.maxSize)
+    train_data = DataLoader(opt.train, dict, opt, window=opt.window, max_size=opt.maxSize)
 
     print("Constructing validation tensors...")
-    valid_data = DataLoader(opt.valid, dict, window=opt.window, max_size=opt.maxSize)
+    valid_data = DataLoader(opt.valid, dict, opt, window=opt.window, max_size=opt.maxSize)
 
     print("Setting up language model and training parameters...")
     t = trainer.Trainer(opt, dict)
