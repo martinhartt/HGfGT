@@ -184,7 +184,7 @@ class Trainer(object):
 
                     hidden_state = self.encoder.init_hidden()
                     summ_hidden_state = self.encoder.init_hidden(n=3, K=self.opt.K)
-                    encoder_out, hidden_state, summ_hidden_state = self.encoder(article, hidden_state, summ_hidden_state)
+                    encoder_out, hidden_state, _ = self.encoder(article, hidden_state, summ_hidden_state)
 
                     err = 0
 

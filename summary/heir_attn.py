@@ -76,6 +76,8 @@ class HeirAttnDecoder(nn.Module):
         context = self.context_embedding(context)
         context = self.dropout(context)
 
+        context = context.view(1, batch_size, self.bow_dim)
+
         _, (hidden_context, cell_context) = self.decoder_lstm(context, lstm_hidden)
 
         y_h = hidden_context[-1]

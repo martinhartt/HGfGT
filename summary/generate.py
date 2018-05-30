@@ -95,74 +95,81 @@ def main():
     actual = open(opt.outputf).read().split('\n')
 
     sent_num = 0
-    for line in sent_file:
-        if line.strip() == "":
-            continue
 
-        # Add padding
-        if opt.heir:
-            summaries = extractive(line).split("\t")
-            print("\n> {}...".format(summaries[0]))
-            encoded_summaries = [encode(normalize(summary), w2i) for summary in summaries]
-            article = HeirDataLoader.torchify(encoded_summaries, variable=True, revsort=True)
-        else:
-            print("\n> {}".format(line))
-            true_line = "<s> <s> <s> {} </s> </s> </s>".format(normalize(line))
+    with torch.no_grad():
+        for line in sent_file:
+            if line.strip() == "":
+                continue
 
-            article = torch.tensor(encode(true_line, w2i))
-
-        n = opt.length
-
-        hyps = apply_cuda(torch.zeros(K, W + n).long().fill_(w2i["<s>"]))
-        scores = apply_cuda(torch.zeros(K).float())
-
-        seen_words = set()
-
-        for step in range(n):
-            new_candidates = []
-
-            start = 0 if opt.heir else step
-            end = step+W
-            context = hyps[:, start:end] # context
-
+            # Add padding
             if opt.heir:
-                encoder_out = encoder(article)
-                model_scores = mlp(encoder_out, (context, [step+1] * K))
+                summaries = extractive(line).split("\t")
+                print("\n> {}...".format(summaries[0]))
+                encoded_summaries = [encode(normalize(summary), w2i) for summary in summaries]
+                article = HeirDataLoader.torchify(encoded_summaries, variable=True, revsort=True)
             else:
-                article_t, context_t = AbsDataLoader.make_input(article, context, K)
-                model_scores = mlp(article_t, context_t)
+                print("\n> {}".format(line))
+                true_line = "<s> <s> <s> {} </s> </s> </s>".format(normalize(line))
 
-            out_scores = model_scores.data
+                article = torch.tensor(encode(true_line, w2i))
 
-            # Apply hard constraints
-            finalized = (step == n - 1) and opt.fixedLength
-            set_hard_constraints(out_scores, w2i, finalized)
+            n = opt.length
 
-            for sample in range(K): # Per certain context
-                top_scores, top_indexes = torch.topk(out_scores[sample], K)
+            hyps = apply_cuda(torch.zeros(K, W + n).long().fill_(w2i["<s>"]))
+            scores = apply_cuda(torch.zeros(K).float())
 
-                for ix, score in zip(top_indexes, top_scores):
-                    repetition = opt.noRepeat and ix in context[sample]
+            seen_words = set()
 
-                    combined = torch.cat((context[sample], apply_cuda(torch.tensor([ix]))))
-                    candidate = [combined, -INF if repetition else scores[sample] + score]
-                    new_candidates.append(candidate)
+            for step in range(n):
+                new_candidates = []
 
-            ordered = list(reversed(sorted(new_candidates, key=lambda cand:cand[1])))
-            h, s = zip(*ordered)
+                start = step
+                end = step+W
+                context = hyps[:, start:end] # context
 
-            for r in range(K):
-                hyps[r][start:end+1] = h[r]
-                scores[r] = s[r]
+                if opt.heir:
+                    hidden_state = encoder.init_hidden()
+                    summ_hidden_state = encoder.init_hidden(n=3, K=7)
+                    encoder_out, hidden_state, _ = encoder(article, hidden_state, summ_hidden_state)
 
-        s, top_ixs = torch.topk(scores, 1)
+                    hidden_state = (hidden_state[0].expand(1, K, -1), hidden_state[0].expand(1, K, -1))
 
-        final = hyps[int(top_ixs)][W:-1]
+                    model_scores, _ = mlp(encoder_out, context, hidden_state)
+                else:
+                    article_t, context_t = AbsDataLoader.make_input(article, context, K)
+                    model_scores = mlp(article_t, context_t)
 
-        print("= {}".format(actual[sent_num]))
-        print("< {}".format(" ".join([i2w[int(ix)] for ix in final])))
-        print("")
+                out_scores = model_scores.data
 
-        sent_num += 1
+                # Apply hard constraints
+                finalized = (step == n - 1) and opt.fixedLength
+                set_hard_constraints(out_scores, w2i, finalized)
+
+                for sample in range(K): # Per certain context
+                    top_scores, top_indexes = torch.topk(out_scores[sample], K)
+
+                    for ix, score in zip(top_indexes, top_scores):
+                        repetition = opt.noRepeat and ix in context[sample]
+
+                        combined = torch.cat((context[sample], apply_cuda(torch.tensor([ix]))))
+                        candidate = [combined, -INF if repetition else scores[sample] + score]
+                        new_candidates.append(candidate)
+
+                ordered = list(reversed(sorted(new_candidates, key=lambda cand:cand[1])))
+                h, s = zip(*ordered)
+
+                for r in range(K):
+                    hyps[r][start:end+1] = h[r]
+                    scores[r] = s[r]
+
+            s, top_ixs = torch.topk(scores, 1)
+
+            final = hyps[int(top_ixs)][W:-1]
+
+            print("= {}".format(actual[sent_num]))
+            print("< {}".format(" ".join([i2w[int(ix)] for ix in final])))
+            print("")
+
+            sent_num += 1
 
 main()
