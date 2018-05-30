@@ -194,8 +194,6 @@ class Trainer(object):
                             target = targets[i].unsqueeze(0)
                             ctx = context[i].unsqueeze(0)
 
-                            print(ctx)
-
                             out, hidden_state = self.mlp(encoder_out, ctx, hidden_state)
                             err += self.loss(out, target)
                     else:
@@ -206,8 +204,6 @@ class Trainer(object):
 
                             out, hidden_state = self.mlp(encoder_out, ctx, hidden_state)
                             err += self.loss(out, target)
-
-                            print(ctx)
 
                             topv, topi = out.topk(1)
                             ctx = topi.squeeze().detach()
