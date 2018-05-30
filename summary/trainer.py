@@ -199,7 +199,7 @@ class Trainer(object):
                             out, hidden_state = self.mlp(encoder_out, ctx, hidden_state)
                             err += self.loss(out, target)
                     else:
-                        ctx = torch.tensor(self.dict["w2i"]["<s>"])
+                        ctx = apply_cuda(torch.tensor(self.dict["w2i"]["<s>"]))
                         for i in range(len(targets)):
                             target = targets[i].unsqueeze(0)
                             ctx = ctx.unsqueeze(0).unsqueeze(0)
