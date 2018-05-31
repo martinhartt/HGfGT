@@ -132,7 +132,7 @@ def main():
                     summ_hidden_state = encoder.init_hidden(n=3, K=7)
                     encoder_out, hidden_state, _ = encoder(article, hidden_state, summ_hidden_state)
 
-                    hidden_state = (hidden_state[0].expand(1, K, -1), hidden_state[0].expand(1, K, -1))
+                    hidden_state = (hidden_state[0].expand(1, K, -1).contiguous(), hidden_state[0].expand(1, K, -1).contiguous())
 
                     model_scores, _ = mlp(encoder_out, context, hidden_state)
                 else:
