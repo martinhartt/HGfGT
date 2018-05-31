@@ -84,12 +84,12 @@ class Trainer(object):
 
         if opt.heir:
             c = 0.9
-            self.encoder_optimizer = torch.optim.RMSprop(self.encoder.parameters(), self.opt.learningRate,
+            self.encoder_optimizer = torch.optim.RMSprop(filter(lambda p: p.requires_grad, self.encoder.parameters()), self.opt.learningRate,
                                                                     momentum=c, weight_decay=c)
-            self.optimizer = torch.optim.RMSprop(self.mlp.parameters(), self.opt.learningRate,
+            self.optimizer = torch.optim.RMSprop(filter(lambda p: p.requires_grad, self.mlp.parameters()), self.opt.learningRate,
                                                                     momentum=c, weight_decay=c)
         else:
-            self.optimizer = torch.optim.SGD(self.mlp.parameters(), self.opt.learningRate)  # Half learning rate
+            self.optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, self.mlp.parameters()), self.opt.learningRate)  # Half learning rate
 
     def validation(self, valid_data):
         offset = self.opt.batchSize

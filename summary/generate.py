@@ -107,6 +107,11 @@ def main():
                 print("\n> {}...".format(summaries[0]))
                 encoded_summaries = [encode(normalize(summary), w2i) for summary in summaries]
                 article = HeirDataLoader.torchify(encoded_summaries, variable=True, revsort=True)
+
+                hidden_state = encoder.init_hidden()
+                summ_hidden_state = encoder.init_hidden(n=3, K=7)
+                encoder_out, hidden_state, _ = encoder(article, hidden_state, summ_hidden_state)
+
             else:
                 print("\n> {}".format(line))
                 true_line = "<s> <s> <s> {} </s> </s> </s>".format(normalize(line))
@@ -118,6 +123,15 @@ def main():
             hyps = apply_cuda(torch.zeros(K, W + n).long().fill_(w2i["<s>"]))
             scores = apply_cuda(torch.zeros(K).float())
 
+            if opt.heir:
+                hidden_size = len(hidden_state[0][0][0])
+                hidden = apply_cuda(torch.zeros(K, hidden_size).float())
+                cell = apply_cuda(torch.zeros(K, hidden_size).float())
+
+                for k in range(K):
+                    hidden[k] = hidden_state[0][0]
+                    cell[k] = hidden_state[1][0]
+
             seen_words = set()
 
             for step in range(n):
@@ -128,13 +142,14 @@ def main():
                 context = hyps[:, start:end] # context
 
                 if opt.heir:
-                    hidden_state = encoder.init_hidden()
-                    summ_hidden_state = encoder.init_hidden(n=3, K=7)
-                    encoder_out, hidden_state, _ = encoder(article, hidden_state, summ_hidden_state)
+                    model_scores = torch.zeros(K, len(w2i))
+                    for c in range(K):
+                        ctx = context[c].view(1, -1)
+                        ctx = article[0][0][step].view(1, -1)
+                        model_scores[c], new_hidden = mlp(encoder_out, ctx, (hidden[c].view(1,1,-1), cell[c].view(1,1,-1)))
 
-                    hidden_state = (hidden_state[0].expand(1, K, -1).contiguous(), hidden_state[0].expand(1, K, -1).contiguous())
-
-                    model_scores, _ = mlp(encoder_out, context, hidden_state)
+                        hidden[c] = new_hidden[0]
+                        cell[c] = new_hidden[1]
                 else:
                     article_t, context_t = AbsDataLoader.make_input(article, context, K)
                     model_scores = mlp(article_t, context_t)
@@ -152,15 +167,23 @@ def main():
                         repetition = opt.noRepeat and ix in context[sample]
 
                         combined = torch.cat((context[sample], apply_cuda(torch.tensor([ix]))))
-                        candidate = [combined, -INF if repetition else scores[sample] + score]
+                        if opt.heir:
+                            candidate = [combined, -INF if repetition else scores[sample] + score, hidden[c], cell[c]]
+                        else:
+                            candidate = [combined, -INF if repetition else scores[sample] + score, None, None]
                         new_candidates.append(candidate)
 
                 ordered = list(reversed(sorted(new_candidates, key=lambda cand:cand[1])))
-                h, s = zip(*ordered)
+
+                h, s, hidden_temp, cell_temp = zip(*ordered)
 
                 for r in range(K):
                     hyps[r][start:end+1] = h[r]
                     scores[r] = s[r]
+
+                    if opt.heir:
+                        hidden[r] = hidden_temp[r]
+                        cell[r] = cell_temp[r]
 
             s, top_ixs = torch.topk(scores, 1)
 
