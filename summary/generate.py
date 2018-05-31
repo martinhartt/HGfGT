@@ -168,7 +168,7 @@ def main():
 
                         combined = torch.cat((context[sample], apply_cuda(torch.tensor([ix]))))
                         if opt.heir:
-                            candidate = [combined, -INF if repetition else scores[sample] + score, hidden[c], cell[c]]
+                            candidate = [combined, -INF if repetition else scores[sample] + score, apply_cuda(hidden[c]), apply_cuda(cell[c])]
                         else:
                             candidate = [combined, -INF if repetition else scores[sample] + score, None, None]
                         new_candidates.append(candidate)
