@@ -32,14 +32,17 @@ def extractive(article, title=None):
 
     parser = PlaintextParser.from_string(raw, tokenizer)
 
-    result = ""
+    summs = []
     for name, summariser in summarisers.items():
+        temp = ""
         for sentence in summariser(parser.document, 4):
-            result += " {}".format(sentence)
-            if len(tokenizer.to_words(result)) > 50:
+            temp += " {}".format(sentence)
+            if len(tokenizer.to_words(temp)) > 50:
                 break
 
-        result += "\t"
+        summs.append(temp)
+
+    result = "\t".join(summs)
 
     if title is not None:
         return "{}\t{}".format(title, result.strip())
@@ -51,11 +54,20 @@ if __name__ == '__main__':
     line = sys.argv[1]
     if line.strip() == "":
         print("")
+        exit(0)
 
     if len(line.split('\t')) > 2:
         print("")
+        exit(0)
 
-    title, article = line.split('\t')
+    components = line.split('\t')
+    if len(components) == 2:
+        title, article = components
+    elif len(components) == 1:
+        article = components[0]
+        title = None
+    else:
+        exit()
 
     out = open(sys.argv[2], "a")
     out.write("{}\n".format(extractive(article, title)))
