@@ -163,6 +163,8 @@ class Trainer(object):
 
         self.last_valid_loss = 1e9
 
+        END = apply_cuda(torch.tensor(self.dict["w2i"]["</s>"]))
+
         self.save()
         for epoch in range(self.mlp.epoch, self.opt.epochs):
             data.reset()
@@ -207,9 +209,8 @@ class Trainer(object):
 
                             topv, topi = out.topk(1)
                             ctx = topi.squeeze().detach()
-                            ctx_id = int(ctx.cpu())
 
-                            if ctx_id == self.dict["w2i"]["</s>"]:
+                            if ctx == END:
                                 break
                 else:
                     out = self.mlp(article, context)
