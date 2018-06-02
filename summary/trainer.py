@@ -207,9 +207,6 @@ class Trainer(object):
 
                             topv, topi = out.topk(1)
                             ctx = topi.squeeze().detach()
-
-                            if ctx.item() == self.dict["w2i"]["</s>"]:
-                                break
                 else:
                     out = self.mlp(article, context)
                     err = self.loss(out, targets)
