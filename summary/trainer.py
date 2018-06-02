@@ -206,9 +206,10 @@ class Trainer(object):
                             err += self.loss(out, target)
 
                             topv, topi = out.topk(1)
-                            ctx = int(topi.detach())
+                            ctx = topi.squeeze().detach()
+                            ctx_id = int(ctx)
 
-                            if ctx == self.dict["w2i"]["</s>"]:
+                            if ctx_id == self.dict["w2i"]["</s>"]:
                                 break
                 else:
                     out = self.mlp(article, context)
