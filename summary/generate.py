@@ -132,8 +132,6 @@ def main():
                     hidden[k] = hidden_state[0][0]
                     cell[k] = hidden_state[1][0]
 
-            seen_words = set()
-
             for step in range(n):
                 new_candidates = []
 
@@ -168,7 +166,7 @@ def main():
 
                         combined = torch.cat((context[sample], apply_cuda(torch.tensor([ix]))))
                         if opt.heir:
-                            candidate = [combined, -INF if repetition else scores[sample] + score, apply_cuda(hidden[c]), apply_cuda(cell[c])]
+                            candidate = [combined, -INF if repetition else scores[sample] + score, hidden[c], cell[c]]
                         else:
                             candidate = [combined, -INF if repetition else scores[sample] + score, None, None]
                         new_candidates.append(candidate)
