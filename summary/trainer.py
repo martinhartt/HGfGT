@@ -207,7 +207,7 @@ class Trainer(object):
 
                             topv, topi = out.topk(1)
                             ctx = topi.squeeze().detach()
-                            ctx_id = int(ctx)
+                            ctx_id = int(ctx.cpu())
 
                             if ctx_id == self.dict["w2i"]["</s>"]:
                                 break
