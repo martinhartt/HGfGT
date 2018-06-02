@@ -202,7 +202,6 @@ class Trainer(object):
                             target = targets[i].unsqueeze(0)
                             ctx = ctx.unsqueeze(0).unsqueeze(0)
 
-                            torch.cuda.synchronize()
                             out, hidden_state = self.mlp(encoder_out, ctx, hidden_state)
                             err += self.loss(out, target)
 

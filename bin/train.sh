@@ -59,6 +59,8 @@ else
   NOATTN=""
 fi
 
+export CUDA_LAUNCH_BLOCKING=1 
+
 date
 python $ABS/summary/train.py \
   --model  $MDL_DIR/$1 \
