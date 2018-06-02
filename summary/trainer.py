@@ -206,7 +206,7 @@ class Trainer(object):
                             err += self.loss(out, target)
 
                             topv, topi = out.topk(1)
-                            ctx = topi.squeeze().detach()
+                            ctx = topi.squeeze()
 
                             if ctx.data == apply_cuda(torch.tensor(self.dict["w2i"]["</s>"])):
                                 break
