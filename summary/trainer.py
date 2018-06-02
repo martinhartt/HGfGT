@@ -206,9 +206,9 @@ class Trainer(object):
                             err += self.loss(out, target)
 
                             topv, topi = out.topk(1)
-                            ctx = topi.squeeze()
+                            ctx = int(topi.detach())
 
-                            if ctx.data == apply_cuda(torch.tensor(self.dict["w2i"]["</s>"])):
+                            if ctx == self.dict["w2i"]["</s>"]:
                                 break
                 else:
                     out = self.mlp(article, context)
