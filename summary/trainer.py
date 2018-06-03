@@ -191,13 +191,12 @@ class Trainer(object):
                     err = 0
 
                     teacher_forcing = self.opt.useTeacherForcing if random.random() < 0.5 else False
-                    if True:
+                    if teacher_forcing:
                         for i in range(len(targets)):
                             target = targets[i].unsqueeze(0)
                             ctx = context[i].unsqueeze(0)
 
                             out, hidden_state = self.mlp(encoder_out, ctx, hidden_state)
-                            print(out[0][int(target)], target)
                             err += self.loss(out, target)
                     else:
                         ctx = apply_cuda(torch.tensor(self.dict["w2i"]["<s>"]))
