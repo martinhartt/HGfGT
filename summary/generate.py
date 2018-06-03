@@ -162,7 +162,7 @@ def main():
                     top_scores, top_indexes = torch.topk(out_scores[sample], K)
 
                     for ix, score in zip(top_indexes, top_scores):
-                        repetition = opt.noRepeat and ix in context[sample]
+                        repetition = opt.noRepeat and ix in apply_cuda(context[sample])
 
                         combined = torch.cat((context[sample], apply_cuda(torch.tensor([ix]))))
                         if opt.heir:
