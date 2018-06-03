@@ -37,6 +37,8 @@ def add_opts(parser):
         type=bool,
         default=False,
         help="Should a previous model be restored?")
+    parser.add_argument('--clip', type=float, default=0.25,
+                        help='Gradient clipping')
     parser.add_argument(
         '--useTeacherForcing',
         type=bool,
@@ -214,6 +216,11 @@ class Trainer(object):
 
 
                 err.backward()
+
+                if opt.heir:
+                    torch.nn.utils.clip_grad_norm(filter(lambda p: p.requires_grad, self.mlp.parameters()), self.opt.clip)
+                    torch.nn.utils.clip_grad_norm(filter(lambda p: p.requires_grad, self.encoder.parameters()), self.opt.clip)
+
                 self.optimizer.step()
                 if self.heir:
                     self.encoder_optimizer.step()
