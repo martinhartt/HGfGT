@@ -189,7 +189,7 @@ class Trainer(object):
                     err = 0
 
                     teacher_forcing = self.opt.useTeacherForcing if random.random() < 0.5 else False
-                    if teacher_forcing:
+                    if True:
                         for i in range(len(targets)):
                             target = targets[i].unsqueeze(0)
                             ctx = context[i].unsqueeze(0)
