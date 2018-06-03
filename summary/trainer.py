@@ -65,6 +65,7 @@ class Trainer(object):
                 self.mlp, self.encoder = torch.load(opt.model)
             else:
                 self.mlp = torch.load(opt.model)
+                self.encoder = self.mlp.encoder
 
             self.mlp.epoch += 1
             print("Restoring MLP {} with epoch {}".format(
