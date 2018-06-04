@@ -14,7 +14,7 @@ class HeirAttnEncoder(nn.Module):
         else:
             self.summary_embedding = nn.Embedding(vocab_size, bow_dim)
 
-        self.summaries_lstm = nn.LSTM(bow_dim, hidden_size, 3)
+        self.summaries_lstm = nn.LSTM(bow_dim, hidden_size, opt.summLstmLayers)
         self.control_lstm = nn.LSTM(hidden_size, hidden_size, 1)
         self.hidden_size = hidden_size
 
