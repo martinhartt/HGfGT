@@ -14,6 +14,12 @@ def add_opts(parser):
         type=int,
         default=52,
         help="maxWordLength.")
+    parser.add_argument('--summLstmLayers', default=3, type=int, help='# of layers for a summary')
+    parser.add_argument(
+        '--K',
+        type=int,
+        default=7,
+        help="Number of summaries to use.")
 
 class BaseDataLoader(object):
     def __init__(self, input_file, dict, opt, window=5, max_size=0.3 * (10 ** 5)):

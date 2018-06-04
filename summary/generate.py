@@ -51,8 +51,8 @@ def process_word(input_word):
 def encode(sent, w2i):
     return [w2i.get(word, w2i["<unk>"]) for word in sent.split()]
 
-def decode(sent, i2w):
-    return [i2w.get(ix, "<unk>") for ix in sent.split()]
+def decode(tensor, i2w):
+    return " ".join([i2w.get(int(ix), "<unk>") for ix in tensor])
 
 INF = float('inf')
 
@@ -104,11 +104,14 @@ def main():
             if opt.heir:
                 summaries = extractive(line).split("\t")
                 print("\n> {}...".format(summaries[0]))
-                encoded_summaries = [encode(normalize(summary), w2i) for summary in summaries]
+                encoded_summaries = [encode("<s> {} </s>".format(normalize(summary)), w2i) for summary in summaries]
                 article = HeirDataLoader.torchify(encoded_summaries, variable=True, revsort=True, opt=opt)
 
                 hidden_state = encoder.init_hidden()
-                summ_hidden_state = encoder.init_hidden(n=3, K=7)
+                summ_hidden_state = encoder.init_hidden(n=opt.summLstmLayers, K=opt.K)
+
+                print(hidden_state[0].shape, summ_hidden_state[0].shape)
+                print(article[0].shape)
                 encoder_out, hidden_state, _ = encoder(article, hidden_state, summ_hidden_state)
 
             else:
@@ -161,9 +164,9 @@ def main():
                     top_scores, top_indexes = torch.topk(out_scores[sample], K)
 
                     for ix, score in zip(top_indexes, top_scores):
-                        repetition = opt.noRepeat and apply_cuda(ix) in apply_cuda(context[sample])
+                        repetition = opt.noRepeat and apply_cuda(ix) in apply_cuda(hyps[sample])
 
-                        combined = torch.cat((context[sample], apply_cuda(torch.tensor([ix]))))
+                        combined = torch.cat((hyps[sample][:end], apply_cuda(torch.tensor([ix]))))
                         if opt.heir:
                             candidate = [
                                 combined,
@@ -185,7 +188,7 @@ def main():
                 h, s, hidden_temp, cell_temp = zip(*ordered)
 
                 for r in range(K):
-                    hyps[r][start:end+1] = h[r]
+                    hyps[r][0:end+1] = h[r]
                     scores[r] = s[r]
 
                     if opt.heir:
@@ -197,7 +200,7 @@ def main():
             final = hyps[int(top_ixs)][W:-1]
 
             print("= {}".format(actual[sent_num]))
-            print("< {}".format(" ".join([i2w[int(ix)] for ix in final])))
+            print("< {}".format(decode(final, i2w)))
             print("")
 
             sent_num += 1
