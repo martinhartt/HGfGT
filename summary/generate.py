@@ -166,9 +166,19 @@ def main():
 
                         combined = torch.cat((context[sample], apply_cuda(torch.tensor([ix]))))
                         if opt.heir:
-                            candidate = [combined, -INF if repetition else apply_cuda(scores[sample] + score), hidden[c], cell[c]]
+                            candidate = [
+                                combined,
+                                -INF if repetition else scores[sample] + apply_cuda(score),
+                                hidden[c],
+                                cell[c]
+                            ]
                         else:
-                            candidate = [combined, -INF if repetition else apply_cuda(scores[sample] + score), None, None]
+                            candidate = [
+                                combined,
+                                -INF if repetition else scores[sample] + apply_cuda(score),
+                                None,
+                                None
+                            ]
                         new_candidates.append(candidate)
 
                 ordered = list(reversed(sorted(new_candidates, key=lambda cand:cand[1])))
