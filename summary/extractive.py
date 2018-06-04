@@ -27,6 +27,9 @@ summarisers = {
 
 tokenizer = Tokenizer("english")
 
+def to_words(str):
+    return str.split(" ")
+
 def extractive(article, title=None):
     raw = article.replace(' <sb>', '').strip()
 
@@ -37,13 +40,11 @@ def extractive(article, title=None):
         temp = ""
         for sentence in summariser(parser.document, 4):
             proposed = "{} {}".format(temp, sentence)
-            if len(tokenizer.to_words(proposed)) > 50:
-                if len(tokenizer.to_words(temp)) < 1:
-                    temp += " {}".format(tokenizer.to_words(temp)[:50])
-                else:
-                    break
-
-            temp = proposed
+            if len(to_words(proposed)) > 50:
+                if len(to_words(temp)) < 1:
+                    temp = " ".join(to_words(temp)[:50])
+            else:
+                temp = proposed
 
         summs.append(temp)
 
