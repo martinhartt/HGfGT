@@ -102,7 +102,7 @@ class HeirDataLoader(BaseDataLoader):
             if any([summary.shape == () for summary in pair[0]]):
                 continue
 
-            article_summaries = self.torchify(pair[0], variable=True, revsort=True)
+            article_summaries = self.torchify(pair[0], variable=True, revsort=True, opt=self.opt)
 
             # Skip if one of the length of summaries is zero
             if len([l for l in article_summaries[1] if l < 1]) != 0:
@@ -118,7 +118,7 @@ class HeirDataLoader(BaseDataLoader):
                 yield out
 
     @staticmethod
-    def torchify(arr, variable=False, revsort=False):
+    def torchify(arr, variable=False, revsort=False, opt=None):
         if variable:
             batch_size = len(arr)
 
@@ -127,7 +127,7 @@ class HeirDataLoader(BaseDataLoader):
 
             lengths = [len(batch) for batch in arr]
 
-            largest_length = max(lengths)
+            largest_length = opt.maxWordLength
 
             out = torch.zeros(batch_size, largest_length).long()
 
@@ -163,7 +163,6 @@ class HeirDataLoader(BaseDataLoader):
     @staticmethod
     def make_input(article, context, K):
         a_tensors, a_lengths = article
-        print(a_tensors)
         bucket = article.size(0)
         article_tensor = apply_cuda(article.view(bucket, 1)
             .expand(bucket, K)

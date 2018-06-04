@@ -106,7 +106,7 @@ def main():
                 summaries = extractive(line).split("\t")
                 print("\n> {}...".format(summaries[0]))
                 encoded_summaries = [encode(normalize(summary), w2i) for summary in summaries]
-                article = HeirDataLoader.torchify(encoded_summaries, variable=True, revsort=True)
+                article = HeirDataLoader.torchify(encoded_summaries, variable=True, revsort=True, opt=opt)
 
                 hidden_state = encoder.init_hidden()
                 summ_hidden_state = encoder.init_hidden(n=3, K=7)

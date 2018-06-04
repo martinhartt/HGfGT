@@ -19,6 +19,7 @@ class HeirAttnEncoder(nn.Module):
         self.hidden_size = hidden_size
 
         self.K = opt.K
+        self.opt = opt
 
     def forward(self, summaries, hidden_state, summ_hidden_state):
         padded_summaries, summary_lengths = summaries
@@ -31,6 +32,9 @@ class HeirAttnEncoder(nn.Module):
         summ_hidden_state = (hidden_summaries, hidden_cell)
 
         hij, _ = pad_packed_sequence(sum_hidden_packed, batch_first=True)
+
+        padBy = self.opt.maxWordLength - hij.size(1)
+        hij = F.pad(hij, (0, 0, 0, padBy))
 
         last_hidden = hidden_summaries[-1] # last LSTM layer
 
@@ -64,6 +68,9 @@ class HeirAttnDecoder(nn.Module):
         self.dropout = nn.Dropout(0.1)
         self.out_linear = nn.Linear(self.softmax_dims, vocab_size)
 
+        self.max_word_length = opt.maxWordLength
+        self.attn = nn.Linear(self.K * self.max_word_length, self.K * self.max_word_length)
+
         self.opt = opt
 
     def forward(self, encoder_out, context, lstm_hidden):
@@ -73,7 +80,6 @@ class HeirAttnDecoder(nn.Module):
         # hidden_summaries is the hidden state of every summary
         hij, hidden_summaries = encoder_out
         hij, hidden_summaries = hij.unsqueeze(0).repeat(batch_size, 1, 1, 1), hidden_summaries.unsqueeze(0).repeat(batch_size, 1, 1)
-        max_word_length = hij.shape[2]
 
         context = self.context_embedding(context)
         context = self.dropout(context)
@@ -86,7 +92,7 @@ class HeirAttnDecoder(nn.Module):
 
         y_h = y_h.view(batch_size, self.hidden_size, 1)
 
-        hij_collapsed = hij.view(batch_size, self.K * max_word_length, self.hidden_size)
+        hij_collapsed = hij.view(batch_size, self.K * self.max_word_length, self.hidden_size)
 
         """
         Effective simple attention mechanism [Lopyrev, 2015] which splits the
@@ -99,18 +105,21 @@ class HeirAttnDecoder(nn.Module):
         attn_yh = y_h[:,-self.attention_dims:,:]
         attn_hidden_summaries = hidden_summaries[:,:,-self.attention_dims:]
 
+
         # Summary level attention
         a = torch.bmm(attn_hidden_summaries, attn_yh)
         a = F.softmax(a, dim=1)
 
         # Word level attention
         b = torch.bmm(attn_hij, attn_yh)
-        b = b.view(batch_size, self.K, max_word_length)
+        b = b.view(batch_size, self.K, self.max_word_length)
         b = F.softmax(b, dim=2)
 
         # c = sum(ai * bij * hij)
         ab = torch.mul(a, b)
-        ab = ab.view(batch_size, self.K * max_word_length, 1)
+        ab = ab.view(batch_size, self.K * self.max_word_length)
+        ab = self.attn(ab)
+        ab = ab.view(batch_size, self.K * self.max_word_length, 1)
 
         c = torch.mul(ab, decode_hij)
         c = torch.sum(c, 1)

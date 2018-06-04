@@ -26,6 +26,11 @@ def add_opts(parser):
         default=512,
         help="Size of hidden layer.")
     parser.add_argument(
+        '--maxWordLength',
+        type=int,
+        default=52,
+        help="maxWordLength.")
+    parser.add_argument(
         '--attentionDims',
         type=int,
         default=40,
@@ -108,9 +113,10 @@ class Trainer(object):
             loss += float(err)
             total += int(targets.size(0))
 
-        print("[perp: %f validation: %f total: %d]".format(
+        print("[perp: {} validation: {} total: {}]".format(
             math.exp(loss / total),
             loss / total,
+            total
         ))
         return float(loss) / float(total)
 
@@ -163,9 +169,6 @@ class Trainer(object):
 
             def to_words(tensor):
                 return " ".join([self.dict["i2w"].get(int(t)) for t in tensor])
-
-            print([to_words(a) for a in article[0]])
-            print([len(a) for a in article[0]])
 
             err = 0
 
