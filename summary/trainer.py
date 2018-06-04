@@ -26,11 +26,6 @@ def add_opts(parser):
         default=512,
         help="Size of hidden layer.")
     parser.add_argument(
-        '--maxWordLength',
-        type=int,
-        default=52,
-        help="maxWordLength.")
-    parser.add_argument(
         '--attentionDims',
         type=int,
         default=40,

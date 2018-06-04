@@ -8,7 +8,12 @@ from itertools import groupby
 def add_opts(parser):
     parser.add_argument('--workingDir', default='')
     parser.add_argument('--heir', default=False, type=bool, help='Enable heirarchal model?')
-    parser.add_argument('--maxSize', default=0.5 * (10 ** 5), type=bool, help='The maximum number of unextended samples per epoch')
+    parser.add_argument('--maxSize', default=0.3 * (10 ** 5), type=bool, help='The maximum number of unextended samples per epoch')
+    parser.add_argument(
+        '--maxWordLength',
+        type=int,
+        default=52,
+        help="maxWordLength.")
 
 class BaseDataLoader(object):
     def __init__(self, input_file, dict, opt, window=5, max_size=0.3 * (10 ** 5)):
@@ -16,7 +21,7 @@ class BaseDataLoader(object):
         print("Using {} pairs per epoch".format(max_size))
         self.dict = dict
         self.input_file = input_file
-        self.allPairs = self.load_lazy(input_file, dict)
+        self.all_pairs = self.load_lazy(input_file, dict)
         self.max_size = max_size
         self.pairs = self.next_pairs(max_size)
         self.window = window
@@ -29,10 +34,10 @@ class BaseDataLoader(object):
 
         while i < max_size:
             try:
-                new_pairs.append(next(self.allPairs))
+                new_pairs.append(next(self.all_pairs))
                 i += 1
             except Exception as e:
-                self.allPairs = self.load_lazy(self.input_file, self.dict)
+                self.all_pairs = self.load_lazy(self.input_file, self.dict)
                 break
 
         return new_pairs

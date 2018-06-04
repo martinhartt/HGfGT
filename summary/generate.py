@@ -57,7 +57,6 @@ def decode(sent, i2w):
 INF = float('inf')
 
 def set_hard_constraints(out_scores, w2i, finalized):
-
     # Apply hard constraints
     out_scores[:, w2i["<s>"]] = -INF
     out_scores[:, w2i["<null>"]] = -INF
