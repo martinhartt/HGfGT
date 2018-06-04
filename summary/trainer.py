@@ -101,13 +101,8 @@ class Trainer(object):
         valid_data.reset()
 
         for (article, context), targets in valid_data.next_batch(offset):
-            if self.heir:
-                encoder_out = self.encoder(article)
-                out = self.mlp(encoder_out, context)
-            else:
-                out = self.mlp(article, context)
-
-            err = self.loss(out, targets) * targets.size(0)
+            sample = (article, context), targets
+            err = self.train_sample(sample)
 
             # Augment counters
             loss += float(err)
@@ -121,22 +116,21 @@ class Trainer(object):
 
     def run_valid(self, valid_data):
         # Run validation
-        if valid_data != None:
-            cur_valid_loss = self.validation(valid_data)
-            # If valid loss does not improve drop learning rate
-            if cur_valid_loss > self.last_valid_loss:
-                if self.heir:
-                    if self.mlp.epoch > 20:
-                        self.save()
-                        print("Loss is no longer decreasing for validation - stopping training...")
-                        exit(1)
-                else:
-                    self.opt.learningRate = self.opt.learningRate / 2
+        cur_valid_loss = self.validation(valid_data)
+        # If valid loss does not improve drop learning rate
+        if cur_valid_loss > self.last_valid_loss:
+            if self.heir:
+                if self.mlp.epoch > 20:
+                    self.save()
+                    print("Loss is no longer decreasing for validation - stopping training...")
+                    exit(1)
+            else:
+                self.opt.learningRate = self.opt.learningRate / 2
 
-                    for param_group in self.optimizer.param_groups:
-                        param_group['lr'] = self.opt.learningRate
+                for param_group in self.optimizer.param_groups:
+                    param_group['lr'] = self.opt.learningRate
 
-            self.last_valid_loss = cur_valid_loss
+        self.last_valid_loss = cur_valid_loss
 
     def renorm(self, data, th=1):
         size = data.size(0)
@@ -159,7 +153,46 @@ class Trainer(object):
             if self.encoder.context_embedding != None:
                 self.renorm(self.encoder.context_embedding.weight.data)
 
+    def train_sample(self, sample):
+        (article, context), targets = sample
+        if self.heir:
+            hidden_state = self.encoder.init_hidden()
+            summ_hidden_state = self.encoder.init_hidden(n=self.opt.summLstmLayers, K=self.opt.K)
+            encoder_out, hidden_state, _ = self.encoder(article, hidden_state, summ_hidden_state)
 
+
+            def to_words(tensor):
+                return " ".join([self.dict["i2w"].get(int(t)) for t in tensor])
+
+            print([to_words(a) for a in article[0]])
+            print([len(a) for a in article[0]])
+
+            err = 0
+
+            teacher_forcing = self.opt.useTeacherForcing if random.random() < 0.5 else False
+            if teacher_forcing:
+                for i in range(len(targets)):
+                    target = targets[i].unsqueeze(0)
+                    ctx = context[i].unsqueeze(0)
+
+                    out, hidden_state = self.mlp(encoder_out, ctx, hidden_state)
+                    err += self.loss(out, target)
+            else:
+                ctx = apply_cuda(torch.tensor(self.dict["w2i"]["<s>"]))
+                for i in range(len(targets)):
+                    target = targets[i].unsqueeze(0)
+                    ctx = ctx.unsqueeze(0).unsqueeze(0)
+
+                    out, hidden_state = self.mlp(encoder_out, ctx, hidden_state)
+                    err += self.loss(out, target)
+
+                    topv, topi = out.topk(1)
+                    ctx = topi.squeeze().detach()
+        else:
+            out = self.mlp(article, context)
+            err = self.loss(out, targets)
+
+        return err
 
     def train(self, data, valid_data):
         print("Using cuda? {}".format(torch.cuda.is_available()))
@@ -169,8 +202,8 @@ class Trainer(object):
         self.save()
         for epoch in range(self.mlp.epoch, self.opt.epochs):
             data.reset()
-            self.renorm_tables()
-            # self.run_valid(valid_data)
+            # self.renorm_tables()
+            self.run_valid(valid_data)
             self.mlp.epoch = epoch
 
             # Loss for the epoch
@@ -180,40 +213,12 @@ class Trainer(object):
             total = 0
             loss = 0
 
-            for (article, context), targets in data.next_batch(self.opt.batchSize):
+            for sample in data.next_batch(self.opt.batchSize):
                 self.optimizer.zero_grad()
                 if self.heir:
                     self.encoder_optimizer.zero_grad()
 
-                    hidden_state = self.encoder.init_hidden()
-                    summ_hidden_state = self.encoder.init_hidden(n=self.opt.summLstmLayers, K=self.opt.K)
-                    encoder_out, hidden_state, _ = self.encoder(article, hidden_state, summ_hidden_state)
-
-                    err = 0
-
-                    teacher_forcing = self.opt.useTeacherForcing if random.random() < 0.5 else False
-                    if teacher_forcing:
-                        for i in range(len(targets)):
-                            target = targets[i].unsqueeze(0)
-                            ctx = context[i].unsqueeze(0)
-
-                            out, hidden_state = self.mlp(encoder_out, ctx, hidden_state)
-                            err += self.loss(out, target)
-                    else:
-                        ctx = apply_cuda(torch.tensor(self.dict["w2i"]["<s>"]))
-                        for i in range(len(targets)):
-                            target = targets[i].unsqueeze(0)
-                            ctx = ctx.unsqueeze(0).unsqueeze(0)
-
-                            out, hidden_state = self.mlp(encoder_out, ctx, hidden_state)
-                            err += self.loss(out, target)
-
-                            topv, topi = out.topk(1)
-                            ctx = topi.squeeze().detach()
-                else:
-                    out = self.mlp(article, context)
-                    err = self.loss(out, targets)
-
+                err = self.train_sample(sample)
 
                 err.backward()
 

@@ -36,9 +36,14 @@ def extractive(article, title=None):
     for name, summariser in summarisers.items():
         temp = ""
         for sentence in summariser(parser.document, 4):
-            temp += " {}".format(sentence)
-            if len(tokenizer.to_words(temp)) > 50:
-                break
+            proposed = "{} {}".format(temp, sentence)
+            if len(tokenizer.to_words(proposed)) > 50:
+                if len(tokenizer.to_words(temp)) < 1:
+                    temp += " {}".format(tokenizer.to_words(temp)[:50])
+                else:
+                    break
+
+            temp = proposed
 
         summs.append(temp)
 

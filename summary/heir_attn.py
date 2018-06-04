@@ -69,6 +69,8 @@ class HeirAttnDecoder(nn.Module):
     def forward(self, encoder_out, context, lstm_hidden):
         batch_size = len(context)
 
+        # hij is the hidden state for each word in each summary
+        # hidden_summaries is the hidden state of every summary
         hij, hidden_summaries = encoder_out
         hij, hidden_summaries = hij.unsqueeze(0).repeat(batch_size, 1, 1, 1), hidden_summaries.unsqueeze(0).repeat(batch_size, 1, 1)
         max_word_length = hij.shape[2]

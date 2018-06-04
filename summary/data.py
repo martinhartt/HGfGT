@@ -8,7 +8,7 @@ from itertools import groupby
 def add_opts(parser):
     parser.add_argument('--workingDir', default='')
     parser.add_argument('--heir', default=False, type=bool, help='Enable heirarchal model?')
-    parser.add_argument('--maxSize', default=0.3 * (10 ** 5), type=bool, help='The maximum number of unextended samples per epoch')
+    parser.add_argument('--maxSize', default=0.5 * (10 ** 5), type=bool, help='The maximum number of unextended samples per epoch')
 
 class BaseDataLoader(object):
     def __init__(self, input_file, dict, opt, window=5, max_size=0.3 * (10 ** 5)):
