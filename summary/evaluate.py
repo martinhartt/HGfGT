@@ -3,8 +3,15 @@ import numpy
 import argparse
 import spacy
 from collections import Counter
+from benepar.spacy_plugin import BeneparComponent
+from neuralcoref import Coref
+
+
+coref = Coref()
 
 nlp = spacy.load('en_core_web_lg')
+
+# nlp.add_pipe(BeneparComponent('benepar_en'))
 
 parser = argparse.ArgumentParser(
     description='Evaluate the results of a model.')
@@ -45,6 +52,29 @@ def count_repetitions(sent):
 def calculate_repetitions(predicted_sents):
     return [count_repetitions(sent) for sent in predicted_sents]
 
+def coref_check(predicted_sents):
+    clusters = coref.one_shot_coref(utterances=u"Mary is nice. She loves to bike.")
+    print(clusters)
+
+    mentions = coref.get_mentions()
+    print(mentions)
+
+    utterances = coref.get_utterances()
+    print(utterances)
+
+    resolved_utterance_text = coref.get_resolved_utterances()
+    print(resolved_utterance_text)
+
+def consituency_parse(predicted_sents):
+    for sent in predicted_sents:
+        doc = nlp(sent)
+        sent = list(doc.sents)[0]
+        print(sent._.parse_string)
+        # (S (NP (NP (DT The) (NN time)) (PP (IN for) (NP (NN action)))) (VP (VBZ is) (ADVP (RB now))) (. .))
+        print(sent._.labels)
+        # ('S',)
+        print(list(sent._.children)[0])
+        # The time for action
 
 def main():
     input = open(opt.inputFile).read().split("# Evaluating ")[1:]
@@ -72,6 +102,10 @@ def main():
         rouge_scores = calculate_rouge(predicted_sents, actual_sents)
 
         repetitions = calculate_repetitions(predicted_sents)
+
+        # consituency_parse(predicted_sents)
+        coref_check(predicted_sents)
+        exit()
 
         if opt.csv:
             for i in range(len(predicted_sents)):
