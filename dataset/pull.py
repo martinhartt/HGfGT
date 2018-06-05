@@ -17,9 +17,9 @@ import re
 
 INPUT_FILENAME = sys.argv[1]
 no_dict = len(sys.argv) < 2
-print(no_dict)
-DICT_FILENAME = not no_dict and sys.argv[2]
 
+if not no_dict:
+    DICT_FILENAME = sys.argv[2]
 
 if not no_dict:
     dict = set([l.split()[0] for l in open(DICT_FILENAME)])
