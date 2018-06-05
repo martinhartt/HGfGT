@@ -16,9 +16,13 @@ import sys
 import re
 
 INPUT_FILENAME = sys.argv[1]
-DICT_FILENAME = sys.argv[2]
+no_dict = len(sys.argv) < 2
+print(no_dict)
+DICT_FILENAME = not no_dict and sys.argv[2]
 
-dict = set([l.split()[0] for l in open(DICT_FILENAME)])
+
+if not no_dict:
+    dict = set([l.split()[0] for l in open(DICT_FILENAME)])
 
 article_out = open(re.sub(r"data", r"article", INPUT_FILENAME), "w")
 title_out = open(re.sub(r"data", r"title", INPUT_FILENAME), "w")
@@ -31,10 +35,10 @@ for l in open(INPUT_FILENAME):
 
     article_result = ""
     for article in article_components:
-        article_words = [w if w in dict else "<unk>" for w in article.split()]
+        article_words = [w if no_dict or w in dict else "<unk>" for w in article.split()]
         article_result += " ".join(article_words)
     article_out.write("{}\n".format(article_result))
 
-    title_words = [w if w in dict else "<unk>" for w in title.split()]
+    title_words = [w if no_dict or w in dict else "<unk>" for w in title.split()]
     title_out.write(" ".join(title_words))
     title_out.write("\n")
