@@ -16,12 +16,10 @@ import sys
 import re
 
 INPUT_FILENAME = sys.argv[1]
-no_dict = len(sys.argv) < 2
+no_dict = len(sys.argv) < 3
 
 if not no_dict:
     DICT_FILENAME = sys.argv[2]
-
-if not no_dict:
     dict = set([l.split()[0] for l in open(DICT_FILENAME)])
 
 article_out = open(re.sub(r"data", r"article", INPUT_FILENAME), "w")
