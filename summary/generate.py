@@ -112,7 +112,7 @@ def main():
 
                 print(hidden_state[0].shape, summ_hidden_state[0].shape)
                 print(article[0].shape)
-                encoder_out, _, _ = encoder(article, hidden_state, summ_hidden_state)
+                encoder_out, hidden_state, _ = encoder(article, hidden_state, summ_hidden_state)
 
             else:
                 print("\n> {}".format(line))
