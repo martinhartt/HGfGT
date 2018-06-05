@@ -3,7 +3,6 @@ import numpy
 import argparse
 import spacy
 from collections import Counter
-from benepar.spacy_plugin import BeneparComponent
 from neuralcoref import Coref
 
 
@@ -11,7 +10,6 @@ coref = Coref()
 
 nlp = spacy.load('en_core_web_lg')
 
-# nlp.add_pipe(BeneparComponent('benepar_en'))
 
 parser = argparse.ArgumentParser(
     description='Evaluate the results of a model.')
@@ -53,34 +51,35 @@ def calculate_repetitions(predicted_sents):
     return [count_repetitions(sent) for sent in predicted_sents]
 
 def coref_check(predicted_sents):
-    clusters = coref.one_shot_coref(utterances=u"Mary is nice. She loves to bike.")
-    print(clusters)
+    results = []
 
-    mentions = coref.get_mentions()
-    print(mentions)
-
-    utterances = coref.get_utterances()
-    print(utterances)
-
-    resolved_utterance_text = coref.get_resolved_utterances()
-    print(resolved_utterance_text)
-
-def consituency_parse(predicted_sents):
     for sent in predicted_sents:
-        doc = nlp(sent)
-        sent = list(doc.sents)[0]
-        print(sent._.parse_string)
-        # (S (NP (NP (DT The) (NN time)) (PP (IN for) (NP (NN action)))) (VP (VBZ is) (ADVP (RB now))) (. .))
-        print(sent._.labels)
-        # ('S',)
-        print(list(sent._.children)[0])
-        # The time for action
+        sent = u"{}{}".format(sent[0].upper(), sent[1:])
+        pronouns = [str(token) for token in nlp(sent) if token.pos_ in ["PRON", "DET"]]
+        clusters, _ = coref.one_shot_coref(utterances=sent)
+
+        mentions = [str(u) for u in coref.get_mentions()]
+        pronoun_ids = [mentions.index(p) for p in pronouns if p in mentions]
+
+        unknown = 0
+        for id in pronoun_ids:
+            if id not in clusters:
+                continue
+
+            refs = set(clusters[id]) - set(pronoun_ids)
+            if len(refs) < 1:
+                print(sent, mentions[id])
+                unknown += 1
+
+        results.append(unknown)
+
+    return results
 
 def main():
     input = open(opt.inputFile).read().split("# Evaluating ")[1:]
 
     if opt.csv:
-        print("Source,#,Rouge 1,Rouge 2,Rouge L,Semantic,Reps")
+        print("Source,#,Rouge 1,Rouge 2,Rouge L,Semantic,Reps,Wrong Refs")
 
     for source_output in input:
         entries = [c for c in source_output.split("\n\n\n") if bool(c.strip())]
@@ -102,14 +101,11 @@ def main():
         rouge_scores = calculate_rouge(predicted_sents, actual_sents)
 
         repetitions = calculate_repetitions(predicted_sents)
-
-        # consituency_parse(predicted_sents)
-        coref_check(predicted_sents)
-        exit()
+        wrong_refs = coref_check(predicted_sents)
 
         if opt.csv:
             for i in range(len(predicted_sents)):
-                print("{},{},{},{},{},{},{}".format(source, str(i), str(rouge_scores[i]['rouge-1']['f']), str(rouge_scores[i]['rouge-2']['f']), str(rouge_scores[i]['rouge-l']['f']), str(semantic_scores[i]), str(repetitions[i])))
+                print("{},{},{},{},{},{},{}".format(source, str(i), str(rouge_scores[i]['rouge-1']['f']), str(rouge_scores[i]['rouge-2']['f']), str(rouge_scores[i]['rouge-l']['f']), str(semantic_scores[i]), str(repetitions[i]), str(wrong_refs[i])))
         else:
             pad = 10
             delim = ' | '
@@ -121,7 +117,8 @@ def main():
                 str("Rouge 2").ljust(pad),
                 str("Rouge L").ljust(pad),
                 str("Semantic").ljust(pad),
-                str("Reps").ljust(pad)
+                str("Reps").ljust(pad),
+                str("Wrong refs").ljust(pad)
             ])
             print(header)
 
@@ -134,7 +131,8 @@ def main():
                     str(rouge_scores[i]['rouge-2']['f']).ljust(pad)[:pad],
                     str(rouge_scores[i]['rouge-l']['f']).ljust(pad)[:pad],
                     str(semantic_scores[i]).ljust(pad)[:pad],
-                    str(repetitions[i]).ljust(pad)[:pad]
+                    str(repetitions[i]).ljust(pad)[:pad],
+                    str(wrong_refs[i]).ljust(pad)[:pad]
                 ]))
 
             print(delim.join([
@@ -143,7 +141,8 @@ def main():
                 str(avg([rouge_scores[i]['rouge-2']['f'] for i in range(len(predicted_sents))])).ljust(pad)[:pad],
                 str(avg([rouge_scores[i]['rouge-l']['f'] for i in range(len(predicted_sents))])).ljust(pad)[:pad],
                 str(avg([semantic_scores[i] for i in range(len(predicted_sents))])).ljust(pad)[:pad],
-                str(avg([repetitions[i] for i in range(len(predicted_sents))])).ljust(pad)[:pad]
+                str(avg([repetitions[i] for i in range(len(predicted_sents))])).ljust(pad)[:pad],
+                str(avg([wrong_refs[i] for i in range(len(predicted_sents))])).ljust(pad)[:pad]
             ]))
 
 def avg(list):
