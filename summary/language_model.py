@@ -32,7 +32,7 @@ class LanguageModel(nn.Module):
     def forward(self, article, title_ctx):
         batch_size = article.shape[0]
 
-        article = self.encoder(article, title_ctx)
+        article, attn = self.encoder(article, title_ctx)
 
         title_ctx = self.context_embedding(title_ctx)
 
@@ -46,4 +46,4 @@ class LanguageModel(nn.Module):
         out = out.view(batch_size, self.hidden_size + self.bow_dim)
         out = self.out_linear(out)
         out = self.soft_max(out)
-        return out
+        return out, attn

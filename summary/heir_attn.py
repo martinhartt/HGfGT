@@ -18,6 +18,9 @@ class HeirAttnEncoder(nn.Module):
         self.control_lstm = nn.LSTM(hidden_size, hidden_size, 1)
         self.hidden_size = hidden_size
 
+        if opt.simple:
+            self.simple_lstm = LSTM(bow_dim, hidden_size, 1)
+
         self.K = opt.K
         self.opt = opt
 
@@ -117,9 +120,12 @@ class HeirAttnDecoder(nn.Module):
 
         # c = sum(ai * bij * hij)
         ab = torch.mul(a, b)
-        ab = ab.view(batch_size, self.K * self.max_word_length)
-        ab = self.attn(ab)
-        ab = ab.view(batch_size, self.K * self.max_word_length, 1)
+        if self.opt.extraAttnLinear:
+            ab = ab.view(batch_size, self.K * self.max_word_length)
+            ab = self.attn(ab)
+            ab = ab.view(batch_size, self.K * self.max_word_length, 1)
+        else:
+            ab = ab.view(batch_size, self.K * self.max_word_length, 1)
 
         c = torch.mul(ab, decode_hij)
         c = torch.sum(c, 1)
@@ -127,4 +133,4 @@ class HeirAttnDecoder(nn.Module):
         out = self.out_linear(c)
         out = F.log_softmax(out, dim=1)
 
-        return out, (hidden_context, cell_context)
+        return out, (hidden_context, cell_context), ab

@@ -24,10 +24,22 @@ parser.add_argument(
     help="Use pretrained GloVe embeddings"
 )
 parser.add_argument(
+    '--extraAttnLinear',
+    type=bool,
+    default=False,
+    help="Add extra linear layer for attn?"
+)
+parser.add_argument(
     '--noAttn',
     type=bool,
     default=False,
     help="Disable attn for hier"
+)
+parser.add_argument(
+    '--simple',
+    type=bool,
+    default=False,
+    help="Enable simple mode"
 )
 
 data.add_opts(parser)

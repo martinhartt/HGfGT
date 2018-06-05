@@ -38,6 +38,13 @@ else
   POOL=""
 fi
 
+if [[ $* == *--extra* ]]
+then
+  EXTRA="--extraAttnLinear 1"
+else
+  EXTRA=""
+fi
+
 if [[ $* == *--restore* ]]
 then
   RESTORE="--restore 1"
@@ -76,6 +83,7 @@ python $ABS/summary/train.py \
   $GLOVE \
   $RESTORE \
   $NOATTN \
+  $EXTRA \
   $POOL
 date
 

@@ -146,13 +146,15 @@ def main():
                     for c in range(K):
                         ctx = context[c].view(1, -1)
                         ctx = article[0][0][step].view(1, -1)
-                        model_scores[c], new_hidden = mlp(encoder_out, ctx, (hidden[c].view(1,1,-1), cell[c].view(1,1,-1)))
+                        model_scores[c], new_hidden, attn = mlp(encoder_out, ctx, (hidden[c].view(1,1,-1), cell[c].view(1,1,-1)))
 
                         hidden[c] = new_hidden[0]
                         cell[c] = new_hidden[1]
                 else:
                     article_t, context_t = AbsDataLoader.make_input(article, context, K)
-                    model_scores = mlp(article_t, context_t)
+                    model_scores, attn = mlp(article_t, context_t)
+
+                print(attn)
 
                 out_scores = model_scores.data
 

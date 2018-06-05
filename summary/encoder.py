@@ -57,4 +57,4 @@ class AttnBowEncoder(nn.Module):
         out = torch.sum(m, 2)
         out = self.mout_linear(out)
 
-        return out
+        return out, attention

@@ -173,7 +173,7 @@ class Trainer(object):
                     target = targets[i].unsqueeze(0)
                     ctx = context[i].unsqueeze(0)
 
-                    out, hidden_state = self.mlp(encoder_out, ctx, hidden_state)
+                    out, hidden_state, _ = self.mlp(encoder_out, ctx, hidden_state)
                     err += self.loss(out, target)
             else:
                 ctx = apply_cuda(torch.tensor(self.dict["w2i"]["<s>"]))
@@ -181,13 +181,13 @@ class Trainer(object):
                     target = targets[i].unsqueeze(0)
                     ctx = ctx.unsqueeze(0).unsqueeze(0)
 
-                    out, hidden_state = self.mlp(encoder_out, ctx, hidden_state)
+                    out, hidden_state, _ = self.mlp(encoder_out, ctx, hidden_state)
                     err += self.loss(out, target)
 
                     topv, topi = out.topk(1)
                     ctx = topi.squeeze().detach()
         else:
-            out = self.mlp(article, context)
+            out, attn = self.mlp(article, context)
             err = self.loss(out, targets)
 
         return err

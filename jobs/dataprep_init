@@ -63,7 +63,7 @@ application="/home/mh905/rds/hpc-work/project/bin/dataprep_agiga.sh"
 
 
 #! Run options for the application:
-options="--all --filter --splits --extract --test"
+options="--all --filter --splits --extract"
 
 #! Work directory (i.e. where the job will run):
 workdir="$SLURM_SUBMIT_DIR"  # The value of SLURM_SUBMIT_DIR sets workdir to the directory
