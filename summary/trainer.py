@@ -217,8 +217,8 @@ class Trainer(object):
                 err.backward()
 
                 if self.hier:
-                    torch.nn.utils.clip_grad_norm(filter(lambda p: p.requires_grad, self.mlp.parameters()), self.opt.clip)
-                    torch.nn.utils.clip_grad_norm(filter(lambda p: p.requires_grad, self.encoder.parameters()), self.opt.clip)
+                    torch.nn.utils.clip_grad_norm_(filter(lambda p: p.requires_grad, self.mlp.parameters()), self.opt.clip)
+                    torch.nn.utils.clip_grad_norm_(filter(lambda p: p.requires_grad, self.encoder.parameters()), self.opt.clip)
 
                 self.optimizer.step()
                 if self.hier:
