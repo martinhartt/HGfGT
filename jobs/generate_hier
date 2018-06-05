@@ -10,7 +10,7 @@
 
 #! sbatch directives begin here ###############################
 #! Name of the job:
-#SBATCH -J traingpuheir
+#SBATCH -J rungpu
 #! Which project should be charged (NB Wilkes2 projects end in '-GPU'):
 #SBATCH -A KOCHMAR-SL3-GPU
 #! How many whole nodes should be allocated?
@@ -22,7 +22,7 @@
 #! Note that the job submission script will enforce no more than 3 cpus per GPU.
 #SBATCH --gres=gpu:1
 #! How much wallclock time will be required?
-#SBATCH --time=12:00:00
+#SBATCH --time=03:00:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=FAIL
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -54,10 +54,10 @@ module load rhel7/default-gpu              # REQUIRED - loads the basic environm
 #! Insert additional module load commands after this line if needed:
 
 #! Full path to application executable:
-application="/home/mh905/rds/hpc-work/project/bin/train.sh"
+application="/home/mh905/rds/hpc-work/project/bin/generate.sh"
 
 #! Run options for the application:
-options="heir_glove_new --heir --glove" #"model_$(date +%Y-%m-%d_%H-%M)"
+options="hier_glove --agiga --edu --hier 2> /dev/null"
 
 #! Work directory (i.e. where the job will run):
 workdir="$SLURM_SUBMIT_DIR"  # The value of SLURM_SUBMIT_DIR sets workdir to the directory

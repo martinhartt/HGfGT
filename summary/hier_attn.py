@@ -4,10 +4,10 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 import torch.nn.functional as F
 from util import apply_cuda
 
-class HeirAttnEncoder(nn.Module):
+class HierAttnEncoder(nn.Module):
     """docstring for LSTMEncoder."""
     def __init__(self, vocab_size, bow_dim, hidden_size, opt, glove_weights):
-        super(HeirAttnEncoder, self).__init__()
+        super(HierAttnEncoder, self).__init__()
 
         if opt.glove:
             self.summary_embedding = nn.Embedding.from_pretrained(glove_weights, freeze=False)
@@ -52,10 +52,10 @@ class HeirAttnEncoder(nn.Module):
     def init_hidden(self, n=1, K=1):
         return (apply_cuda(torch.zeros(n, K, self.hidden_size)), apply_cuda(torch.zeros(n, K, self.hidden_size)))
 
-class HeirAttnDecoder(nn.Module):
+class HierAttnDecoder(nn.Module):
     """docstring for LSTMDecoder."""
     def __init__(self, vocab_size, bow_dim, hidden_size, opt, glove_weights=None):
-        super(HeirAttnDecoder, self).__init__()
+        super(HierAttnDecoder, self).__init__()
 
         self.K = opt.K
         self.hidden_size = hidden_size

@@ -53,7 +53,7 @@ def main():
     print(opt.dictionary)
     dict = data.load_dict(opt.dictionary)
 
-    DataLoader = data.HeirDataLoader if opt.heir else data.AbsDataLoader
+    DataLoader = data.HierDataLoader if opt.hier else data.AbsDataLoader
 
     print("Constructing train tensors...")
     train_data = DataLoader(opt.train, dict, opt, window=opt.window, max_size=opt.maxSize)

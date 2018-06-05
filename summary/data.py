@@ -7,7 +7,7 @@ from itertools import groupby
 
 def add_opts(parser):
     parser.add_argument('--workingDir', default='')
-    parser.add_argument('--heir', default=False, type=bool, help='Enable heirarchal model?')
+    parser.add_argument('--hier', default=False, type=bool, help='Enable hierarchal model?')
     parser.add_argument('--maxSize', default=0.3 * (10 ** 5), type=bool, help='The maximum number of unextended samples per epoch')
     parser.add_argument(
         '--maxWordLength',
@@ -99,8 +99,8 @@ class BaseDataLoader(object):
     def expand(pair, w2i, window):
         raise NotImplementedError()
 
-class HeirDataLoader(BaseDataLoader):
-    """docstring for HeirDataLoader."""
+class HierDataLoader(BaseDataLoader):
+    """docstring for HierDataLoader."""
 
     def next_batch(self, max_batch_size):
         for pair in self.pairs:
@@ -162,7 +162,7 @@ class HeirDataLoader(BaseDataLoader):
         article = [[w2i["<s>"]] + [int(x) for x in a] + [w2i["</s>"]] for a in article]
 
         for i in range(len(title) - window):
-            # Return the whole context if using heirarchal attention model
+            # Return the whole context if using hierarchal attention model
             context = title[i:i + window]
             target = title[i + window]
 

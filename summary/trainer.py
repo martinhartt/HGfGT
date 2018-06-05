@@ -3,7 +3,7 @@ import torch.nn as nn
 from util import apply_cuda
 import math
 from language_model import LanguageModel
-from heir_attn import HeirAttnDecoder, HeirAttnEncoder
+from hier_attn import HierAttnDecoder, HierAttnEncoder
 from glove import build_glove
 from torch.autograd import Variable
 import random
@@ -58,10 +58,10 @@ class Trainer(object):
         super(Trainer, self).__init__()
         self.opt = opt
         self.dict = dict
-        self.heir = opt.heir
+        self.hier = opt.hier
 
         if opt.restore:
-            if opt.heir:
+            if opt.hier:
                 self.mlp, self.encoder = torch.load(opt.model)
             else:
                 self.mlp = torch.load(opt.model)
@@ -71,11 +71,11 @@ class Trainer(object):
             print("Restoring MLP {} with epoch {}".format(
                 opt.model, self.mlp.epoch))
         else:
-            if opt.heir:
+            if opt.hier:
                 glove_weights = build_glove(dict["w2i"]) if opt.glove else None
 
-                self.encoder = apply_cuda(HeirAttnEncoder(len(dict["i2w"]), opt.bowDim, opt.hiddenSize, opt, glove_weights))
-                self.mlp = apply_cuda(HeirAttnDecoder(len(dict["i2w"]), opt.bowDim, opt.hiddenSize, opt, glove_weights))
+                self.encoder = apply_cuda(HierAttnEncoder(len(dict["i2w"]), opt.bowDim, opt.hiddenSize, opt, glove_weights))
+                self.mlp = apply_cuda(HierAttnDecoder(len(dict["i2w"]), opt.bowDim, opt.hiddenSize, opt, glove_weights))
             else:
                 self.mlp = apply_cuda(LanguageModel(self.dict, opt))
                 self.encoder = self.mlp.encoder
@@ -85,7 +85,7 @@ class Trainer(object):
         self.loss = apply_cuda(nn.NLLLoss(ignore_index=0))
         self.decoder_embedding = self.mlp.context_embedding
 
-        if opt.heir:
+        if opt.hier:
             c = 0.9
             self.encoder_optimizer = torch.optim.RMSprop(filter(lambda p: p.requires_grad, self.encoder.parameters()), self.opt.learningRate,
                                                                     momentum=c, weight_decay=c)
@@ -120,7 +120,7 @@ class Trainer(object):
         cur_valid_loss = self.validation(valid_data)
         # If valid loss does not improve drop learning rate
         if cur_valid_loss > self.last_valid_loss:
-            if self.heir:
+            if self.hier:
                 if self.mlp.epoch > 20:
                     self.save()
                     print("Loss is no longer decreasing for validation - stopping training...")
@@ -144,7 +144,7 @@ class Trainer(object):
         if self.decoder_embedding != None:
             self.renorm(self.decoder_embedding.weight.data)
 
-        if self.heir:
+        if self.hier:
             if self.encoder.summary_embedding != None:
                 self.renorm(self.encoder.summary_embedding.weight.data)
         else:
@@ -156,7 +156,7 @@ class Trainer(object):
 
     def train_sample(self, sample):
         (article, context), targets = sample
-        if self.heir:
+        if self.hier:
             hidden_state = self.encoder.init_hidden()
             summ_hidden_state = self.encoder.init_hidden(n=self.opt.summLstmLayers, K=self.opt.K)
             encoder_out, hidden_state, _ = self.encoder(article, hidden_state, summ_hidden_state)
@@ -213,19 +213,19 @@ class Trainer(object):
 
             for sample in data.next_batch(self.opt.batchSize):
                 self.optimizer.zero_grad()
-                if self.heir:
+                if self.hier:
                     self.encoder_optimizer.zero_grad()
 
                 err = self.train_sample(sample)
 
                 err.backward()
 
-                if self.heir:
+                if self.hier:
                     torch.nn.utils.clip_grad_norm(filter(lambda p: p.requires_grad, self.mlp.parameters()), self.opt.clip)
                     torch.nn.utils.clip_grad_norm(filter(lambda p: p.requires_grad, self.encoder.parameters()), self.opt.clip)
 
                 self.optimizer.step()
-                if self.heir:
+                if self.hier:
                     self.encoder_optimizer.step()
 
                 loss += float(err)
@@ -251,7 +251,7 @@ class Trainer(object):
     def save(self):
         print('Saving...')
 
-        state = (self.mlp, self.encoder) if self.heir else self.mlp
+        state = (self.mlp, self.encoder) if self.hier else self.mlp
 
         torch.save(state, self.opt.model)
         print('Finished saving')

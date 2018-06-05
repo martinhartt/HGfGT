@@ -60,9 +60,9 @@ then
   LIMIT=1000000
 
   # Basic filtering on train/dev.
-  python $SCRIPTS/filter.py $WORK/train.data.txt --lengthRangeHeir 1 | head -n $LIMIT > $WORK/train.data.temp.txt
-  python $SCRIPTS/filter.py $WORK/valid.data.txt --lengthRangeHeir 1 | head -n $LIMIT > $WORK/valid.data.temp.txt
-  # python $SCRIPTS/filter.py $WORK/test.data.txt --lengthRangeHeir 1 | head -n $LIMIT > $WORK/test.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/train.data.txt --lengthRangeHier 1 | head -n $LIMIT > $WORK/train.data.temp.txt
+  python $SCRIPTS/filter.py $WORK/valid.data.txt --lengthRangeHier 1 | head -n $LIMIT > $WORK/valid.data.temp.txt
+  # python $SCRIPTS/filter.py $WORK/test.data.txt --lengthRangeHier 1 | head -n $LIMIT > $WORK/test.data.temp.txt
 
   rm $WORK/train.data.txt $WORK/valid.data.txt
 
@@ -86,7 +86,7 @@ then
     python $SCRIPTS/filter.py $WORK/$SOURCE.test.data.txt --firstSent 1 --lengthRange 1 > $WORK/$SOURCE.test.filter.data.txt
     python $SCRIPTS/pull.py $WORK/$SOURCE.test.filter.data.txt $WORK/train.filter.dict
 
-    python $SCRIPTS/filter.py $WORK/$SOURCE.test.data.txt --lengthRangeHeir 1 > $WORK/$SOURCE.test.all.data.txt
+    python $SCRIPTS/filter.py $WORK/$SOURCE.test.data.txt --lengthRangeHier 1 > $WORK/$SOURCE.test.all.data.txt
     python $SCRIPTS/pull.py $WORK/$SOURCE.test.all.data.txt $WORK/train.all.dict
 
     rm $WORK/$SOURCE.test.*data.txt

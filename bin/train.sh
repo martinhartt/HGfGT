@@ -15,18 +15,18 @@ export MDL_DIR=$WORK/models
 
 mkdir -p $MDL_DIR
 
-if [[ $* == *--heir* ]]
+if [[ $* == *--hier* ]]
 then
-  HEIR="--heir 1"
+  HIER="--hier 1"
   TYPE="all."
   LR="0.01"
 elif [[ $* == *--mix* ]]
 then
-  HEIR="--heir 1"
+  HIER="--hier 1"
   TYPE="filter."
   LR="0.01"
 else
-  HEIR=""
+  HIER=""
   TYPE="filter."
   LR="0.1"
 fi
@@ -79,7 +79,7 @@ python $ABS/summary/train.py \
   --printEvery   100 \
   --attenPool  5 \
   --useTeacherForcing 1 \
-  $HEIR \
+  $HIER \
   $GLOVE \
   $RESTORE \
   $NOATTN \

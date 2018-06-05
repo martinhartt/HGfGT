@@ -7,7 +7,7 @@ import math
 
 from extractive import extractive
 
-from data import AbsDataLoader, HeirDataLoader
+from data import AbsDataLoader, HierDataLoader
 
 parser = argparse.ArgumentParser(description='Train a summarization model.')
 
@@ -71,7 +71,7 @@ def set_hard_constraints(out_scores, w2i, finalized):
 def main():
     state = torch.load(opt.model)
 
-    if opt.heir:
+    if opt.hier:
         mlp, encoder = state
     else:
         mlp = state
@@ -80,7 +80,7 @@ def main():
 
     sent_file = open(opt.inputf).read().split("\n")
     length = opt.length
-    if not opt.heir:
+    if not opt.hier:
         W = mlp.window
         opt.window = mlp.window
     else:
@@ -101,11 +101,11 @@ def main():
                 continue
 
             # Add padding
-            if opt.heir:
+            if opt.hier:
                 summaries = extractive(line).split("\t")
                 print("\n> {}...".format(summaries[0]))
                 encoded_summaries = [encode("<s> {} </s>".format(normalize(summary)), w2i) for summary in summaries]
-                article = HeirDataLoader.torchify(encoded_summaries, variable=True, revsort=True, opt=opt)
+                article = HierDataLoader.torchify(encoded_summaries, variable=True, revsort=True, opt=opt)
 
                 hidden_state = encoder.init_hidden()
                 summ_hidden_state = encoder.init_hidden(n=opt.summLstmLayers, K=opt.K)
@@ -125,7 +125,7 @@ def main():
             hyps = apply_cuda(torch.zeros(K, W + n).long().fill_(w2i["<s>"]))
             scores = apply_cuda(torch.zeros(K).float())
 
-            if opt.heir:
+            if opt.hier:
                 hidden_size = len(hidden_state[0][0][0])
                 hidden = apply_cuda(torch.zeros(K, hidden_size).float())
                 cell = apply_cuda(torch.zeros(K, hidden_size).float())
@@ -141,7 +141,7 @@ def main():
                 end = step+W
                 context = hyps[:, start:end] # context
 
-                if opt.heir:
+                if opt.hier:
                     model_scores = torch.zeros(K, len(w2i))
                     for c in range(K):
                         ctx = context[c].view(1, -1)
@@ -153,8 +153,6 @@ def main():
                 else:
                     article_t, context_t = AbsDataLoader.make_input(article, context, K)
                     model_scores, attn = mlp(article_t, context_t)
-
-                print(attn)
 
                 out_scores = model_scores.data
 
@@ -169,7 +167,7 @@ def main():
                         repetition = opt.noRepeat and apply_cuda(ix) in apply_cuda(hyps[sample])
 
                         combined = torch.cat((hyps[sample][:end], apply_cuda(torch.tensor([ix]))))
-                        if opt.heir:
+                        if opt.hier:
                             candidate = [
                                 combined,
                                 -INF if repetition else scores[sample] + apply_cuda(score),
@@ -193,7 +191,7 @@ def main():
                     hyps[r][0:end+1] = h[r]
                     scores[r] = s[r]
 
-                    if opt.heir:
+                    if opt.hier:
                         hidden[r] = hidden_temp[r]
                         cell[r] = cell_temp[r]
 

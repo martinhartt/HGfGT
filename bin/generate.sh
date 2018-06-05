@@ -9,12 +9,12 @@ export LENGTH=15
 export OUT_DIR=$ABS/working_agiga/processed
 
 
-if [[ $* == *--heir* ]]
+if [[ $* == *--hier* ]]
 then
-  HEIR="--heir 1"
+  HIER="--hier 1"
   FILTER="all"
 else
-  HEIR=""
+  HIER=""
   FILTER="filter"
 fi
 
@@ -39,7 +39,7 @@ then
       --inputf "$INPUT" \
       --outputf "$OUTPUT" \
       --length $LENGTH \
-      $HEIR \
+      $HIER \
       --workingDir  $OUT_DIR \
       $NOREPEAT \
       --dictionary $OUT_DIR/${FILTER}.train.dict.torch
@@ -60,7 +60,7 @@ then
       --inputf "$INPUT" \
       --outputf "$OUTPUT" \
       --length $LENGTH \
-      $HEIR \
+      $HIER \
       --workingDir  $OUT_DIR \
       $NOREPEAT \
       --dictionary $OUT_DIR/${FILTER}.train.dict.torch
