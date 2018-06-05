@@ -159,11 +159,7 @@ class Trainer(object):
         if self.hier:
             hidden_state = self.encoder.init_hidden()
             summ_hidden_state = self.encoder.init_hidden(n=self.opt.summLstmLayers, K=self.opt.K)
-            encoder_out, hidden_state, _ = self.encoder(article, hidden_state, summ_hidden_state)
-
-
-            def to_words(tensor):
-                return " ".join([self.dict["i2w"].get(int(t)) for t in tensor])
+            encoder_out, _, _ = self.encoder(article, hidden_state, summ_hidden_state)
 
             err = 0
 
