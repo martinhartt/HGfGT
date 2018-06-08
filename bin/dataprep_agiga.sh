@@ -84,10 +84,10 @@ then
     shuf "$SPLITS/${SMALL}test.splits" | grep $SOURCE | xargs -I % bash -c "cat $WORK/raw/%" > $WORK/$SOURCE.test.data.txt
 
     python $SCRIPTS/filter.py $WORK/$SOURCE.test.data.txt --firstSent 1 --lengthRange 1 > $WORK/$SOURCE.test.filter.data.txt
-    python $SCRIPTS/pull.py $WORK/$SOURCE.test.filter.data.txt $WORK/train.filter.dict
+    python $SCRIPTS/pull.py $WORK/$SOURCE.test.filter.data.txt #$WORK/train.filter.dict
 
     python $SCRIPTS/filter.py $WORK/$SOURCE.test.data.txt --lengthRangeHier 1 > $WORK/$SOURCE.test.all.data.txt
-    python $SCRIPTS/pull.py $WORK/$SOURCE.test.all.data.txt $WORK/train.all.dict
+    python $SCRIPTS/pull.py $WORK/$SOURCE.test.all.data.txt #$WORK/train.all.dict
 
     rm $WORK/$SOURCE.test.*data.txt
   done

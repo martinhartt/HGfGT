@@ -68,7 +68,6 @@ def coref_check(predicted_sents):
 
             refs = set(clusters[id]) - set(pronoun_ids)
             if len(refs) < 1:
-                print(sent, mentions[id])
                 unknown += 1
 
         results.append(unknown)
@@ -89,7 +88,11 @@ def main():
         predicted_sents = []
 
         for entry in entries[1:]:
-            input, actual, output = [c[2:] for c in entry.split("\n") if c.strip() != '']
+            try:
+                input, actual, output = [c[2:] for c in entry.split("\n") if c.strip() != '']
+            except Exception as e:
+                print(entry)
+                continue
 
             actual_sents.append(unicode(actual, 'utf8'))
             predicted_sents.append(unicode(output, 'utf8'))
@@ -108,7 +111,7 @@ def main():
                 print("{},{},{},{},{},{},{}".format(source, str(i), str(rouge_scores[i]['rouge-1']['f']), str(rouge_scores[i]['rouge-2']['f']), str(rouge_scores[i]['rouge-l']['f']), str(semantic_scores[i]), str(repetitions[i]), str(wrong_refs[i])))
         else:
             pad = 10
-            delim = ' | '
+            delim = ' & '
             print("\n\n# {}\n".format(source))
 
             header = delim.join([
