@@ -10,6 +10,24 @@ This repository contains the reimplementations of neural headline generation sys
 
 ## Usage
 
+### Clone repository
+
+```bash
+git clone https://github.com/martinhartt/HGfGT
+cd HGfGT
+```
+
+### Prerequisites
+
+Install [Pipenv](https://github.com/pypa/pipenv) and run the following commands after cloning the repository:
+
+```bash
+
+pipenv install
+pipenv shell
+
+```
+
 ### Data preparation
 
 1. Include the raw Gigaword dataset (with uncompressed files) under the path `data/agiga`.
