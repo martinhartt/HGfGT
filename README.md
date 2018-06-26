@@ -3,7 +3,7 @@
 
 This repository contains the reimplementations of neural headline generation systems built as part of my Advanced Computer Science MPhil dissertation at the University of Cambridge. The **baseline** is a PyTorch port of the [Lua implementation](https://github.com/facebookarchive/NAMAS) of the Neural Attention Model for Abstractive Summarization ([Rush et al. 2015](http://static.ijcai.org/proceedings-2017/0574.pdf)). The **extension** is an implementation of the coarse-to-fine heirarchal attention system based on ([Tan et al. 2017](http://static.ijcai.org/proceedings-2017/0574.pdf)).
 
-*NOTE: The extension system is not fully functioning and doesn't converge during training.*
+*NOTE: The extension system isn't fully functioning*
 
 ## Project abstract
 
