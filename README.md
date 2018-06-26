@@ -36,7 +36,7 @@ pipenv shell
 4. If using `--all` flag for extension system, run the `bash bin/dataprep_extsum.sh` in parallel with multiple workers with  the `$SLURM_ARRAY_TASK_ID` environment variable set as the id of the worker (1-32). If multiple workers are not available, it can be run sequentially with the following command (it can take a few days for the Gigaword dataset):
 
 ```bash
-for SLURM_ARRAY_TASK_ID in `seq 1 32`; do bash bin/dataprep_extsum.sh; done
+for i in `seq 1 32`; do export SLURM_ARRAY_TASK_ID=$i; bash bin/dataprep_extsum.sh; done
 ```
 5. If using `--all` flag for extension system, combine the sharded files with the `bash bin/dataprep_combine.sh` command.
 
