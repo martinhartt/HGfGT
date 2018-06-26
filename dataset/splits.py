@@ -1,3 +1,5 @@
+#  Copyright (c) 2018, Martin Hartt
+
 import sys
 import os
 

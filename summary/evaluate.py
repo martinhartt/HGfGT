@@ -1,3 +1,6 @@
+#  Copyright (c) 2018, Martin Hartt
+
+
 from rouge import Rouge
 import numpy
 import argparse

@@ -1,3 +1,5 @@
+// Copyright (c) 2018, Martin Hartt
+
 const { mean } = require('lodash');
 const { readFileSync } = require('fs');
 

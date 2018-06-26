@@ -1,3 +1,6 @@
+#  Copyright (c) 2018, Martin Hartt
+
+
 import torch
 import os
 cur_dir = os.path.dirname(__file__)

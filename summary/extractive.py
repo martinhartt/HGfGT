@@ -1,3 +1,6 @@
+#  Copyright (c) 2018, Martin Hartt
+
+
 from __future__ import absolute_import
 from __future__ import division, print_function, unicode_literals
 
