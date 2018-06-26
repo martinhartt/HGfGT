@@ -25,7 +25,6 @@ Install [Pipenv](https://github.com/pypa/pipenv) and run the following commands 
 
 pipenv install
 pipenv shell
-pipenv install --ignore-pipfile https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.0.0/en_core_web_lg-2.0.0.tar.gz
 
 ```
 
@@ -74,6 +73,8 @@ bin/generate.sh model_name --agiga > output_file
 To evaluate the generated headlines with various metrics, use the following command:
 
 ```bash
+# Download SpaCy model
+pipenv install --ignore-pipfile https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.0.0/en_core_web_lg-2.0.0.tar.gz
 python summary/evaluate.py output_file
 ```
 
