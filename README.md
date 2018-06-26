@@ -47,7 +47,7 @@ for SLURM_ARRAY_TASK_ID in `seq 1 32`; do bash bin/dataprep_extsum.sh; done
 To train the dataset run the following command:
 
 ```bash
-bin/train.sh <model_name>
+bin/train.sh model_name
 ```
 
 #### Flags
@@ -61,7 +61,7 @@ bin/train.sh <model_name>
 To generate headlines from an input file:
 
 ```bash
-bin/generate.sh <model_name> --agiga > <output_file>
+bin/generate.sh model_name --agiga > output_file
 ```
 
 #### Flags
@@ -75,7 +75,7 @@ bin/generate.sh <model_name> --agiga > <output_file>
 To evaluate the generated headlines with various metrics, use the following command:
 
 ```bash
-python summary/evaluate.py <output_file>
+python summary/evaluate.py output_file
 ```
 
 #### Flags
