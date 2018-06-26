@@ -12,7 +12,6 @@ rouge = "*"
 sumy = "*"
 yapf = "*"
 tqdm = "*"
-"4547064" = {file = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.0.0/en_core_web_lg-2.0.0.tar.gz"}
 cython = "*"
 benepar = "*"
 tensorflow = "*"
