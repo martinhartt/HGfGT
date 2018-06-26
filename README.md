@@ -32,7 +32,7 @@ pipenv shell
 
 1. Include the raw Gigaword dataset (with uncompressed files) under the path `data/agiga`.
 2. Create train/test/validation splits with `bash bin/create_splits.sh data/agiga`
-3. Preprocess the files using the command `bash bin/dataprep_agiga.sh --extract --splits --filter --all` (use `--filter` flag for baseline and `--all` for extension)
+3. Preprocess the files using the command `bash bin/dataprep_agiga.sh --extract --splits --filter --all --test` (use `--filter` flag for baseline and `--all` for extension)
 4. If using `--all` flag for extension system, run the `bash bin/dataprep_extsum.sh` in parallel with multiple workers with  the `$SLURM_ARRAY_TASK_ID` environment variable set as the id of the worker (1-32). If multiple workers are not available, it can be run sequentially with the following command (it can take a few days for the Gigaword dataset):
 
 ```bash
