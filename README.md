@@ -17,7 +17,7 @@ git clone https://github.com/martinhartt/HGfGT
 cd HGfGT
 ```
 
-### Prerequisites
+### Dependencies
 
 Install [Pipenv](https://github.com/pypa/pipenv) and run the following commands after cloning the repository:
 
